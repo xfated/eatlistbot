@@ -13,10 +13,14 @@ var bot *tgbotapi.BotAPI
 
 func init_bot() {
 	var err error
+	// Init bot
 	bot, err = tgbotapi.NewBotAPI(TELEGRAM_BOT_TOKEN)
 	if err != nil {
 		log.Panic(err)
 	}
+
+	// Set webhook
+	_, err = bot.SetWebhook(tgbotapi.NewWebhook("https://toeatlist-bot.herokuapp.com/" + bot.Token))
 }
 
 func main() {
