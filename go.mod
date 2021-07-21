@@ -1,4 +1,4 @@
-module github.com/xfated
+module github.com/xfated/eatlistbot
 
 go 1.16
 
