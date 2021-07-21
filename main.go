@@ -2,17 +2,21 @@
 package p
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-var TELEGRAM_BOT_TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
-var bot *tgbotapi.BotAPI
+var (
+	TELEGRAM_BOT_TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
+	baseURL            = "https://toeatlist-bot.herokuapp.com/"
+	bot                *tgbotapi.BotAPI
+)
 
-func init_bot() {
+func initTelegram() {
 	var err error
 	// Init bot
 	bot, err = tgbotapi.NewBotAPI(TELEGRAM_BOT_TOKEN)
@@ -21,14 +25,19 @@ func init_bot() {
 	}
 
 	// Set webhook
-	_, err = bot.SetWebhook(tgbotapi.NewWebhook("https://toeatlist-bot.herokuapp.com/" + bot.Token))
+	_, err = bot.SetWebhook(tgbotapi.NewWebhook(baseURL + bot.Token))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Problem setting Webhook", err.Error())
 	}
 }
 
+func fetchUpdates(bot *tgbotapi.BotAPI) tgbotapi.UpdatesChannel {
+	updates := bot.ListenForWebhook("/" + bot.Token)
+	return updates
+}
+
 func main() {
-	init_bot()
+	initTelegram()
 
 	bot.Debug = true
 
@@ -36,11 +45,9 @@ func main() {
 
 	port := os.Getenv("PORT")
 
-	updates := bot.ListenForWebhook("/" + bot.Token)
+	updates := fetchUpdates(bot)
 
-	http.ListenAndServe(":"+port, nil)
+	fmt.Println(updates)
 
-	for update := range updates {
-		log.Printf("%+v\n", update)
-	}
+	go http.ListenAndServe(":"+port, nil)
 }
