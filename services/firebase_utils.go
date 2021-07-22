@@ -67,7 +67,7 @@ func SetUserState(update tgbotapi.Update, state State) {
 	ctx := context.Background()
 	chatRef := client.NewRef(strconv.FormatInt(update.Message.Chat.ID, 10))
 	if err := chatRef.Child(strconv.Itoa(update.Message.From.ID)).Set(ctx,
-		strconv.Itoa(state),
+		strconv.Itoa(int(state)),
 	); err != nil {
 		log.Fatalln("Error setting state")
 	}

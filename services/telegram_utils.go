@@ -4,8 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/xfated/eatlistbot/firebase"
-
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
@@ -64,7 +62,7 @@ func SendMessage(msg tgbotapi.MessageConfig) {
 func SendStartInstructions(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Haha you sent start")
 	bot.Send(msg)
-	firebase.SetUserState(update, Idle)
+	SetUserState(update, Idle)
 }
 
 func SendUnknownCommand(update tgbotapi.Update) {
