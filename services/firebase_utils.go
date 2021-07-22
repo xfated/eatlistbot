@@ -1,14 +1,16 @@
-package firebase
+package services
 
 import (
 	"context"
 	"log"
 	"os"
+	"strconv"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/db"
 
 	"google.golang.org/api/option"
+	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
 var (
@@ -58,5 +60,15 @@ func SaveData() {
 	err := levelTwoRef.Set(ctx, "my first test")
 	if err != nil {
 		log.Fatalln("Error setting value:", err)
+	}
+}
+
+func SetUserState(update tgbotapi.Update, state State) {
+	ctx := context.Background()
+	chatRef := client.NewRef(strconv.FormatInt(update.Message.Chat.ID, 10))
+	if err := chatRef.Child(strconv.Itoa(update.Message.From.ID)).Set(ctx,
+		strconv.Itoa(state),
+	); err != nil {
+		log.Fatalln("Error setting state")
 	}
 }

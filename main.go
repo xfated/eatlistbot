@@ -8,8 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xfated/eatlistbot/firebase"
-	"github.com/xfated/eatlistbot/telegram"
+	"github.com/xfated/eatlistbot/services"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
@@ -29,13 +28,15 @@ func webhookHandler(c *gin.Context) {
 		return
 	}
 
+	if update.Message == nil {
+		return
+	}
+
 	// to monitor changes run: heroku logs --tail
 	log.Printf("From: %+v Text: %+v\n", update.Message.From, update.Message.Text)
-	log.Printf("Message: %+v", update.Message)
-	// Reply message (just for lels)
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-	msg.ReplyToMessageID = update.Message.MessageID
-	telegram.SendMessage(msg)
+	switch update.Message.Text {
+	case "/start":
+	}
 }
 
 func main() {
@@ -50,11 +51,11 @@ func main() {
 	router.Use(gin.Logger())
 
 	// telegram
-	telegram.InitTelegram()
-	router.POST("/"+telegram.TELEGRAM_BOT_TOKEN, webhookHandler)
+	services.InitTelegram()
+	router.POST("/"+services.TELEGRAM_BOT_TOKEN, webhookHandler)
 
 	// firebase
-	firebase.InitFirebase()
+	services.InitFirebase()
 
 	err := router.Run(":" + port)
 	if err != nil {
