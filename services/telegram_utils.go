@@ -39,9 +39,16 @@ func SendStartInstructions(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Haha you sent start")
 	bot.Send(msg)
 	SetUserState(update, Idle)
+
+	// Debug
+	LogMessage(update)
 }
 
 func SendUnknownCommand(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Unknown command, please use /start for commands")
 	bot.Send(msg)
+}
+
+func LogMessage(update tgbotapi.Update) {
+	log.Printf("Message: %+v", update.Message)
 }
