@@ -27,6 +27,8 @@ func InitTelegram() {
 	if err != nil {
 		log.Fatalln("Problem setting Webhook", err.Error())
 	}
+
+	log.Println("Loaded telegram bot")
 }
 
 func SendMessage(msg tgbotapi.MessageConfig) {
