@@ -1,8 +1,10 @@
 package services
 
 import (
+	"errors"
 	"log"
 	"os"
+	"strconv"
 
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
@@ -51,4 +53,18 @@ func SendUnknownCommand(update tgbotapi.Update) {
 
 func LogMessage(update tgbotapi.Update) {
 	log.Printf("Message: %+v", update.Message)
+}
+
+func GetChatUserID(update tgbotapi.Update) (chatID, userID string, err error) {
+	if update.Message == nil {
+		chatID = ""
+		userID = ""
+		err = errors.New("invalid message")
+		return
+	}
+
+	chatID = strconv.FormatInt(update.Message.Chat.ID, 10)
+	userID = strconv.Itoa(update.Message.From.ID)
+	err = nil
+	return
 }

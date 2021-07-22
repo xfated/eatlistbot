@@ -65,11 +65,27 @@ func SaveData() {
 
 func SetUserState(update tgbotapi.Update, state State) {
 	ctx := context.Background()
-	log.Printf("Chat ID: %+v", update.Message.Chat.ID)
-	chatRef := client.NewRef(strconv.FormatInt(update.Message.Chat.ID, 10))
-	if err := chatRef.Child(strconv.Itoa(update.Message.From.ID)).Set(ctx,
+	chatID, userID, err := GetChatUserID(update)
+	if err != nil {
+		log.Fatalf("Error getting chat and user data: %+v", err)
+	}
+	chatRef := client.NewRef(chatID)
+	if err := chatRef.Child(userID).Set(ctx,
 		strconv.Itoa(int(state)),
 	); err != nil {
 		log.Fatalln("Error setting state")
+	}
+}
+
+func GetUserState(update tgbotapi.Update) {
+	ctx := context.Background()
+	chatID, userID, err := GetChatUserID(update)
+	if err != nil {
+		log.Fatalf("Error getting chat and user data: %+v", err)
+	}
+	chatRef := client.NewRef(chatID)
+	var state State
+	if err := chatRef.Child(userID).Get(ctx, &state); err != nil {
+		log.Fatalf("Error getting user state: %+v", err)
 	}
 }
