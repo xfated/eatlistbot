@@ -47,7 +47,7 @@ func InitFirebase() {
 	}
 	log.Println(data)
 
-	SaveData()
+	// SaveData()
 	log.Println("Loaded firebase")
 }
 

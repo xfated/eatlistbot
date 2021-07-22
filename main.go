@@ -50,8 +50,8 @@ func main() {
 	router.Use(gin.Logger())
 
 	// telegram
-	// telegram.InitTelegram()
-	// router.POST("/"+telegram.TELEGRAM_BOT_TOKEN, webhookHandler)
+	telegram.InitTelegram()
+	router.POST("/"+telegram.TELEGRAM_BOT_TOKEN, webhookHandler)
 
 	// firebase
 	firebase.InitFirebase()
