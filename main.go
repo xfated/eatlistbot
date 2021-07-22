@@ -36,6 +36,7 @@ func webhookHandler(c *gin.Context) {
 	log.Printf("From: %+v Text: %+v\n", update.Message.From, update.Message.Text)
 	switch update.Message.Text {
 	case "/start":
+		services.SendStartInstructions(update)
 	}
 }
 
