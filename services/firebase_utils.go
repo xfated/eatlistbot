@@ -65,6 +65,7 @@ func SaveData() {
 
 func SetUserState(update tgbotapi.Update, state State) {
 	ctx := context.Background()
+	log.Printf("Chat ID: %+v", strconv.FormatInt(update.Message.Chat.ID, 10))
 	chatRef := client.NewRef(strconv.FormatInt(update.Message.Chat.ID, 10))
 	if err := chatRef.Child(strconv.Itoa(update.Message.From.ID)).Set(ctx,
 		strconv.Itoa(int(state)),
