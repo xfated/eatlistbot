@@ -19,7 +19,7 @@ func InitTelegram() {
 	// Init bot
 	bot, err = tgbotapi.NewBotAPI(TELEGRAM_BOT_TOKEN)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalln(err)
 	}
 
 	// Set webhook
