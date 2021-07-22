@@ -8,30 +8,10 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xfated/eatlistbot/firebase"
+	"github.com/xfated/eatlistbot/telegram"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
-
-var (
-	TELEGRAM_BOT_TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
-	baseURL            = "https://toeatlist-bot.herokuapp.com/"
-	bot                *tgbotapi.BotAPI
-)
-
-func initTelegram() {
-	var err error
-
-	// Init bot
-	bot, err = tgbotapi.NewBotAPI(TELEGRAM_BOT_TOKEN)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	// Set webhook
-	_, err = bot.SetWebhook(tgbotapi.NewWebhook(baseURL + bot.Token))
-	if err != nil {
-		log.Fatalln("Problem setting Webhook", err.Error())
-	}
-}
 
 func webhookHandler(c *gin.Context) {
 	defer c.Request.Body.Close()
@@ -55,7 +35,7 @@ func webhookHandler(c *gin.Context) {
 	// Reply message (just for lels)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 	msg.ReplyToMessageID = update.Message.MessageID
-	bot.Send(msg)
+	telegram.SendMessage(msg)
 }
 
 func main() {
@@ -70,8 +50,11 @@ func main() {
 	router.Use(gin.Logger())
 
 	// telegram
-	initTelegram()
-	router.POST("/"+bot.Token, webhookHandler)
+	// telegram.InitTelegram()
+	// router.POST("/"+telegram.TELEGRAM_BOT_TOKEN, webhookHandler)
+
+	// firebase
+	firebase.InitFirebase()
 
 	err := router.Run(":" + port)
 	if err != nil {
