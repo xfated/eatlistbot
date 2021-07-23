@@ -47,6 +47,8 @@ func webhookHandler(c *gin.Context) {
 		services.AddRestaurantTags(update)
 	case "/addRestaurant":
 		services.AddRestaurant(update)
+	case "/deleteRestaurant":
+		services.DeleteRestaurant(update, "addName")
 	}
 }
 

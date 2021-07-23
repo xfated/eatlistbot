@@ -242,16 +242,19 @@ func AddRestaurant(update tgbotapi.Update) error {
 	return nil
 }
 
-// func DeleteRestaurant(update tgbotapi.Update) error {
-// 	ctx := context.Background()
-// 	chatID, _, err := GetChatUserID(update)
-// 	if err != nil {
-// 		return []string{}, err
-// 	}
-// 	chatRef := client.NewRef("restaurants").Child(chatID)
-
-// 	return nil
-// }
+func DeleteRestaurant(update tgbotapi.Update, restaurantName string) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		return err
+	}
+	chatRef := client.NewRef("restaurants").Child(chatID)
+	if err := chatRef.Child(restaurantName).Delete(ctx); err != nil {
+		log.Printf("Error deletting restaurant: %+v", err)
+		return err
+	}
+	return nil
+}
 
 /* Read / Delete / Update tags */
 func GetTags(update tgbotapi.Update) ([]string, error) {
