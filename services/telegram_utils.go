@@ -21,13 +21,13 @@ func InitTelegram() {
 	// Init bot
 	bot, err = tgbotapi.NewBotAPI(TELEGRAM_BOT_TOKEN)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	// Set webhook
 	_, err = bot.SetWebhook(tgbotapi.NewWebhook(baseURL + bot.Token))
 	if err != nil {
-		log.Fatalln("Problem setting Webhook", err.Error())
+		log.Println("Problem setting Webhook", err.Error())
 	}
 
 	log.Println("Loaded telegram bot")
@@ -68,3 +68,19 @@ func GetChatUserID(update tgbotapi.Update) (chatID, userID string, err error) {
 	err = nil
 	return
 }
+
+func GetMessage(update tgbotapi.Update) (message string, messageID int, err error) {
+	if update.Message == nil {
+		message = ""
+		messageID = 0
+		err = errors.New("invalid message")
+		return
+	}
+
+	message = update.Message.Text
+	messageID = update.Message.MessageID
+	err = nil
+	return
+}
+
+/* Confirm details and add to list */

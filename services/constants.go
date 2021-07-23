@@ -13,6 +13,14 @@ const (
 	Finished
 )
 
+type RestaurantDetails struct {
+	Name    string            `json:"name"`
+	Address string            `json:"address"`
+	URL     string            `json:"url"`
+	Images  map[string]string `json:"images"`
+	Tags    map[string]string `json:"tags"`
+}
+
 func getNextState(cur State) State {
 	switch cur {
 	case Idle, Finished:

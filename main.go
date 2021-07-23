@@ -37,6 +37,16 @@ func webhookHandler(c *gin.Context) {
 	switch update.Message.Text {
 	case "/start":
 		services.SendStartInstructions(update)
+	case "/addName":
+		services.InitRestaurant(update)
+	case "/addAddress":
+		services.SetRestaurantAddress(update)
+	case "/addURL":
+		services.SetRestaurantURL(update)
+	case "/addTags":
+		services.AddRestaurantTags(update)
+	case "/addRestaurant":
+		services.AddRestaurant(update)
 	}
 }
 
@@ -44,7 +54,7 @@ func main() {
 	port := os.Getenv("PORT")
 
 	if port == "" {
-		log.Fatal("$PORT must be set")
+		log.Print("$PORT must be set")
 	}
 
 	// gin router
