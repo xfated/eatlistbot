@@ -228,13 +228,13 @@ func AddRestaurant(update tgbotapi.Update) error {
 
 	/* Add restaurant to restaurant collection */
 	chatRef := client.NewRef("restaurants").Child(chatID)
-	if _, err := chatRef.Push(ctx, restaurantData); err != nil {
+	if err := chatRef.Child(restaurantData.Name).Set(ctx, restaurantData); err != nil {
 		log.Printf("Error adding restaurant: %+v", err)
 		return err
 	}
 
 	/* Add tags to tag collection */
-	for tag, _ := range restaurantData.Tags {
+	for tag := range restaurantData.Tags {
 		if err := updateTags(update, tag); err != nil {
 			return err
 		}
@@ -242,12 +242,23 @@ func AddRestaurant(update tgbotapi.Update) error {
 	return nil
 }
 
-/* Read / Update tags */
-func GetTags(update tgbotapi.Update) error {
+// func DeleteRestaurant(update tgbotapi.Update) error {
+// 	ctx := context.Background()
+// 	chatID, _, err := GetChatUserID(update)
+// 	if err != nil {
+// 		return []string{}, err
+// 	}
+// 	chatRef := client.NewRef("restaurants").Child(chatID)
+
+// 	return nil
+// }
+
+/* Read / Delete / Update tags */
+func GetTags(update tgbotapi.Update) ([]string, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
-		return err
+		return []string{}, err
 	}
 	chatRef := client.NewRef("tags").Child(chatID)
 
@@ -255,12 +266,35 @@ func GetTags(update tgbotapi.Update) error {
 	var tags map[string]bool
 	if err := chatRef.Get(ctx, &tags); err != nil {
 		log.Printf("Error getting tags")
+		return []string{}, err
+	}
+
+	/* Get slice of tags */
+	tagSlice := make([]string, 0)
+	for tag, _ := range tags {
+		tagSlice = append(tagSlice, tag)
+	}
+	return tagSlice, nil
+}
+
+func DeleteTag(update tgbotapi.Update, tag string) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		return err
+	}
+
+	/* Delete tag record */
+	chatRef := client.NewRef("tags").Child(chatID)
+	if err := chatRef.Child(tag).Delete(ctx); err != nil {
+		log.Printf("Error deleting tag: %+v", err)
 		return err
 	}
 	return nil
 }
 
 func updateTags(update tgbotapi.Update, tag string) error {
+	/* If same tag won't update. Implicitly prevent double records */
 	ctx := context.Background()
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
