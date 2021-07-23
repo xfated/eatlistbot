@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -50,7 +49,6 @@ func SetUserState(update tgbotapi.Update, state State) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf(fmt.Sprintf("Error getting chat and user data: %+v", err))
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
@@ -67,13 +65,11 @@ func GetUserState(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
 	var state State
 	if err := userRef.Child(chatID).Get(ctx, &state); err != nil {
-		log.Printf("Error getting user state: %+v", err)
 		return err
 	}
 	return err
@@ -84,14 +80,13 @@ func InitRestaurant(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
 
 	/* Set temp under userRef */
 	name, _, err := GetMessage(update)
 	if err != nil {
-		log.Printf("Error getting message: %+v", err)
+		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
 	if err := userRef.Child("restToAdd").Set(ctx, map[string]string{
@@ -108,14 +103,13 @@ func SetRestaurantAddress(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
 
 	/* Set temp under userRef */
 	address, _, err := GetMessage(update)
 	if err != nil {
-		log.Printf("Error getting message: %+v", err)
+		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
 	if err := userRef.Child("restToAdd").Update(ctx, map[string]interface{}{
@@ -133,14 +127,13 @@ func SetRestaurantURL(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
 
 	/* Set temp under userRef */
 	url, _, err := GetMessage(update)
 	if err != nil {
-		log.Printf("Error getting message: %+v", err)
+		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
 	if err := userRef.Child("restToAdd").Update(ctx, map[string]interface{}{
@@ -158,7 +151,6 @@ func AddRestaurantImage(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
 
@@ -166,10 +158,12 @@ func AddRestaurantImage(update tgbotapi.Update) error {
 	// TODO: FIND OUT HOW TO GET IMAGE URL
 	imageUrl, _, err := GetMessage(update)
 	if err != nil {
-		log.Printf("Error getting message: %+v", err)
+		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if _, err := userRef.Child("restToAdd").Child("images").Push(ctx, imageUrl); err != nil {
+	if err := userRef.Child("restToAdd").Child("images").Update(ctx, map[string]interface{}{
+		imageUrl: true,
+	}); err != nil {
 		log.Printf("Error saving image: %+v", err)
 		return err
 	}
@@ -182,17 +176,18 @@ func AddRestaurantTags(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
 
 	/* Set temp under userRef */
 	tag, _, err := GetMessage(update)
 	if err != nil {
-		log.Printf("Error getting message: %+v", err)
+		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if _, err := userRef.Child("restToAdd").Child("tags").Push(ctx, tag); err != nil {
+	if err := userRef.Child("restToAdd").Child("tags").Update(ctx, map[string]interface{}{
+		tag: true,
+	}); err != nil {
 		log.Printf("Error saving image: %+v", err)
 		return err
 	}
@@ -203,11 +198,10 @@ func AddRestaurantTags(update tgbotapi.Update) error {
 /* Get list of restaurants */
 
 /* Add / Delete restaurant */
-func getTempRestaurant(update tgbotapi.Update) (RestaurantDetails, error) {
+func GetTempRestaurant(update tgbotapi.Update) (RestaurantDetails, error) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return RestaurantDetails{}, err
 	}
 
@@ -221,25 +215,64 @@ func getTempRestaurant(update tgbotapi.Update) (RestaurantDetails, error) {
 }
 
 func AddRestaurant(update tgbotapi.Update) error {
-	restaurantData, err := getTempRestaurant(update)
+	restaurantData, err := GetTempRestaurant(update)
 	if err != nil {
-		log.Printf("Error reading temp restaurant data: %+v", err)
 		return err
 	}
 
 	ctx := context.Background()
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat and user data: %+v", err)
 		return err
 	}
+
+	/* Add restaurant to restaurant collection */
 	chatRef := client.NewRef("restaurants").Child(chatID)
 	if _, err := chatRef.Push(ctx, restaurantData); err != nil {
 		log.Printf("Error adding restaurant: %+v", err)
 		return err
 	}
 
+	/* Add tags to tag collection */
+	for tag, _ := range restaurantData.Tags {
+		if err := updateTags(update, tag); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 /* Read / Update tags */
+func GetTags(update tgbotapi.Update) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		return err
+	}
+	chatRef := client.NewRef("tags").Child(chatID)
+
+	/* Retrieve tags */
+	var tags map[string]bool
+	if err := chatRef.Get(ctx, &tags); err != nil {
+		log.Printf("Error getting tags")
+		return err
+	}
+	return nil
+}
+
+func updateTags(update tgbotapi.Update, tag string) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		return err
+	}
+	chatRef := client.NewRef("tags").Child(chatID)
+	if err := chatRef.Update(ctx, map[string]interface{}{
+		tag: true,
+	}); err != nil {
+		log.Printf("Error updating tags: %+v", err)
+		return err
+	}
+
+	return nil
+}
