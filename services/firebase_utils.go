@@ -41,36 +41,18 @@ func InitFirebase() {
 		log.Fatalln("Error initializing database client:", err)
 	}
 
-	// As an admin, the app has access to read and write all data, regradless of Security Rules
-	ref := client.NewRef("restricted_access/secret_document")
-	var data map[string]interface{}
-	if err := ref.Get(ctx, &data); err != nil {
-		log.Fatalln("Error reading from database:", err)
-	}
-	log.Println(data)
-
-	// SaveData()
 	log.Println("Loaded firebase")
 }
 
-func SaveData() {
-	ctx := context.Background()
-	ref := client.NewRef("levelOne")
-	levelTwoRef := ref.Child("levelTwo")
-	err := levelTwoRef.Set(ctx, "my first test")
-	if err != nil {
-		log.Fatalln("Error setting value:", err)
-	}
-}
-
+/* User State */
 func SetUserState(update tgbotapi.Update, state State) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
 		log.Fatalf("Error getting chat and user data: %+v", err)
 	}
-	chatRef := client.NewRef(chatID)
-	if err := chatRef.Child(userID).Set(ctx,
+	userRef := client.NewRef("users").Child(userID)
+	if err := userRef.Child(chatID).Set(ctx,
 		strconv.Itoa(int(state)),
 	); err != nil {
 		log.Fatalln("Error setting state")
@@ -83,9 +65,17 @@ func GetUserState(update tgbotapi.Update) {
 	if err != nil {
 		log.Fatalf("Error getting chat and user data: %+v", err)
 	}
-	chatRef := client.NewRef(chatID)
+	userRef := client.NewRef("users").Child(userID)
 	var state State
-	if err := chatRef.Child(userID).Get(ctx, &state); err != nil {
+	if err := userRef.Child(chatID).Get(ctx, &state); err != nil {
 		log.Fatalf("Error getting user state: %+v", err)
 	}
 }
+
+/* Address */
+
+/* URL */
+
+/* Images */
+
+/* Tags */
