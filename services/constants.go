@@ -14,11 +14,11 @@ const (
 )
 
 type RestaurantDetails struct {
-	Name    string            `json:"name"`
-	Address string            `json:"address"`
-	URL     string            `json:"url"`
-	Images  map[string]string `json:"images"`
-	Tags    map[string]string `json:"tags"`
+	Name    string          `json:"name"`
+	Address string          `json:"address"`
+	URL     string          `json:"url"`
+	Images  map[string]bool `json:"images"`
+	Tags    map[string]bool `json:"tags"`
 }
 
 func getNextState(cur State) State {
