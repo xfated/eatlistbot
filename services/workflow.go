@@ -13,11 +13,19 @@ func HandleUserInput(update tgbotapi.Update) {
 		log.Printf("error getting user state: %+v", err)
 		return
 	}
+
+	/* Check for main commands */
+	message, _, err := getMessage(update)
+	if err == nil {
+		switch message {
+		case "/start":
+			sendStartInstructions(update)
+		}
+	}
+
 	/* Idle state */
 	if userState == Idle {
 		switch update.Message.Text {
-		case "/start":
-			sendStartInstructions(update)
 		case "/addPlace":
 			if err := setUserState(update, SetName); err != nil {
 				log.Printf("error setting state: %+v", err)
