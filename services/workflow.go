@@ -189,6 +189,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				sendMessage(update, "Sorry an error occured!")
 			}
 		}
+
 		/* Create and send keyboard for targeted response */
 		// Create buttons
 		addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")

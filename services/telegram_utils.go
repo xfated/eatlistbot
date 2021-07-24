@@ -85,6 +85,7 @@ func setReplyMarkupKeyboard(update tgbotapi.Update, keyboard tgbotapi.ReplyKeybo
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	msg.BaseChat.ReplyMarkup = keyboard
 	msg.ReplyToMessageID = update.Message.MessageID
+	log.Printf("Set keyboard: %+v", keyboard)
 	bot.Send(msg)
 }
 
