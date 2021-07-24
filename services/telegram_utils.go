@@ -11,7 +11,7 @@ import (
 
 var (
 	TELEGRAM_BOT_TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
-	baseURL            = "https://toeatlist-bot.herokuapp.com/"
+	baseURL            = "https://togolist-bot.herokuapp.com/"
 	bot                *tgbotapi.BotAPI
 )
 
