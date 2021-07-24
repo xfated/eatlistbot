@@ -61,7 +61,7 @@ func webhookHandler(c *gin.Context) {
 
 		photoIDs, err := services.GetPhotoIDs(update)
 		if err != nil {
-			log.Printf("error: %+v", photoIDs)
+			log.Printf("error sending photo: %+v", photoIDs)
 			return
 		}
 		log.Printf("photoIDs: %+v", photoIDs)
