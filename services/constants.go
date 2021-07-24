@@ -12,8 +12,6 @@ const (
 	SetURL
 	SetImages
 	SetTags
-	Preview
-	FinishAdding
 
 	Finished
 )

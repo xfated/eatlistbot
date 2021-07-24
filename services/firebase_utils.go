@@ -68,11 +68,16 @@ func getUserState(update tgbotapi.Update) (State, error) {
 		return 0, err
 	}
 	userRef := client.NewRef("users").Child(userID)
-	var state State
-	if err := userRef.Child(chatID).Get(ctx, &state); err != nil {
+	var stateString string
+	if err := userRef.Child(chatID).Get(ctx, &stateString); err != nil {
 		return 0, err
 	}
-	return state, err
+
+	stateInt, err := strconv.Atoi(stateString)
+	if err != nil {
+		return 0, err
+	}
+	return State(stateInt), err
 }
 
 /* Name (Also init place) */
