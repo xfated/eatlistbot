@@ -56,7 +56,6 @@ func HandleUserInput(update tgbotapi.Update) {
 				sendMessage(update, "Sorry an error occured!")
 			}
 			sendMessage(update, "Start adding the details for the place")
-			return
 		case ReadyForNextAction:
 			message, _, err := getMessage(update)
 			if err != nil {
