@@ -88,6 +88,15 @@ func sendTextReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard t
 	bot.Send(msg)
 }
 
+func sendTextRemoveMarkupKeyboard(update tgbotapi.Update, text string) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	removeKeyboard := tgbotapi.NewRemoveKeyboard(true)
+	removeKeyboard.Selective = true
+	msg.BaseChat.ReplyMarkup = removeKeyboard
+	msg.ReplyToMessageID = update.Message.MessageID
+	bot.Send(msg)
+}
+
 /* Getting */
 func getChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
 	if update.Message == nil {
