@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xfated/eatlistbot/services"
+	"github.com/xfated/golistbot/services"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 

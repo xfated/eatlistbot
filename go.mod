@@ -1,4 +1,4 @@
-module github.com/xfated/eatlistbot
+module github.com/xfated/golistbot
 
 // +heroku goVersion go1.16
 go 1.16
