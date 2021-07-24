@@ -20,6 +20,10 @@ func HandleUserInput(update tgbotapi.Update) {
 		switch message {
 		case "/start":
 			sendStartInstructions(update)
+			if err := setUserState(update, Idle); err != nil {
+				log.Printf("error setting state: %+v", err)
+				sendMessage(update, "Sorry an error occured!")
+			}
 		}
 	}
 
