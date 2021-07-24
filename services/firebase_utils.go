@@ -246,7 +246,7 @@ func AddPlaceTag(update tgbotapi.Update, place_name, tag string) error {
 	return nil
 }
 
-func DeletePlaceTags(update tgbotapi.Update, place_name, tag string) error {
+func DeletePlaceTag(update tgbotapi.Update, place_name, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
