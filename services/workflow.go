@@ -68,28 +68,28 @@ func HandleUserInput(update tgbotapi.Update) {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				sendMessage(update, "Send an address to be added")
+				removeMarkupKeyboard(update, "Send an address to be added")
 			case "/addURL":
 				// Prep for next state
 				if err := setUserState(update, SetURL); err != nil {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				sendMessage(update, "Send a URL to be added")
+				removeMarkupKeyboard(update, "Send a URL to be added")
 			case "/addImage":
 				// Prep for next state
 				if err := setUserState(update, SetImages); err != nil {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				sendMessage(update, "Send an image to be added")
+				removeMarkupKeyboard(update, "Send an image to be added")
 			case "/addTag":
 				// Prep for next state
 				if err := setUserState(update, SetTags); err != nil {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				sendMessage(update, "Send a tag to be added")
+				removeMarkupKeyboard(update, "Send a tag to be added")
 			case "/preview":
 				// Get data and send
 				placeData, err := getTempPlace(update)
@@ -119,7 +119,7 @@ func HandleUserInput(update tgbotapi.Update) {
 					tagText := strings.Join(tags, ", ")
 					placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
 				}
-				sendMessage(update, placeText)
+				removeMarkupKeyboard(update, placeText)
 			case "/submit":
 				// Submit
 				name, err := addPlaceFromTemp(update)
@@ -132,17 +132,15 @@ func HandleUserInput(update tgbotapi.Update) {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				sendMessage(update, fmt.Sprintf("%s was added for this chat!", name))
+				removeMarkupKeyboard(update, fmt.Sprintf("%s was added for this chat!", name))
 			case "/cancel":
 				// Prep for next state
 				if err := setUserState(update, Idle); err != nil {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				sendMessage(update, "addPlace process cancelled")
+				removeMarkupKeyboard(update, "addPlace process cancelled")
 			}
-			// Don't show for next action
-			removeMarkupKeyboard(update)
 			return
 		case SetAddress:
 			// Message should contain address
@@ -212,7 +210,7 @@ func HandleUserInput(update tgbotapi.Update) {
 		replyKeyboard.ResizeKeyboard = true
 		replyKeyboard.OneTimeKeyboard = true
 		replyKeyboard.Selective = true
-		setReplyMarkupKeyboard(update, replyKeyboard)
+		setReplyMarkupKeyboard(update, "Select your next action", replyKeyboard)
 		return
 	}
 
