@@ -64,7 +64,33 @@ func SendUnknownCommand(update tgbotapi.Update) {
 	bot.Send(msg)
 }
 
-func GetChatUserID(update tgbotapi.Update) (chatID, userID string, err error) {
+func SendPhoto(update tgbotapi.Update, photoID string) error {
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error getting chat & user id: %+v", err)
+		return err
+	}
+
+	tgbotapi.NewPhotoShare(chatID, photoID)
+	return nil
+}
+
+/* Getting */
+func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
+	if update.Message == nil {
+		chatID = 0
+		userID = 0
+		err = errors.New("invalid message")
+		return
+	}
+
+	chatID = update.Message.Chat.ID
+	userID = update.Message.From.ID
+	err = nil
+	return
+}
+
+func GetChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
 	if update.Message == nil {
 		chatID = ""
 		userID = ""

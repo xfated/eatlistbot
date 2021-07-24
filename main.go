@@ -65,6 +65,9 @@ func webhookHandler(c *gin.Context) {
 			return
 		}
 		log.Printf("photoIDs: %+v", photoIDs)
+		for _, id := range photoIDs {
+			services.SendPhoto(update, id)
+		}
 	}
 }
 

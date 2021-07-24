@@ -47,7 +47,7 @@ func InitFirebase() {
 /* User State */
 func SetUserState(update tgbotapi.Update, state State) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func SetUserState(update tgbotapi.Update, state State) error {
 
 func GetUserState(update tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func GetUserState(update tgbotapi.Update) error {
 /* Name (Also init place) */
 func InitPlace(update tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func InitPlace(update tgbotapi.Update) error {
 /* Address */
 func SetTempPlaceAddress(update tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func SetTempPlaceAddress(update tgbotapi.Update) error {
 
 func UpdatePlaceAddress(update tgbotapi.Update, place_name, address string) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func UpdatePlaceAddress(update tgbotapi.Update, place_name, address string) erro
 /* URL */
 func SetTempPlaceURL(update tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func SetTempPlaceURL(update tgbotapi.Update) error {
 
 func UpdatePlaceURL(update tgbotapi.Update, place_name, url string) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func UpdatePlaceURL(update tgbotapi.Update, place_name, url string) error {
 /* Images */
 func AddTempPlaceImage(update tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func AddTempPlaceImage(update tgbotapi.Update) error {
 /* Tags */
 func AddTempPlaceTag(update tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func AddTempPlaceTag(update tgbotapi.Update) error {
 
 func AddPlaceTag(update tgbotapi.Update, place_name, tag string) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func AddPlaceTag(update tgbotapi.Update, place_name, tag string) error {
 
 func DeletePlaceTag(update tgbotapi.Update, place_name, tag string) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func DeletePlaceTag(update tgbotapi.Update, place_name, tag string) error {
 /* Get list of places */
 func GetPlaces(update tgbotapi.Update) (map[string]PlaceDetails, error) {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return map[string]PlaceDetails{}, err
 	}
@@ -282,7 +282,7 @@ func GetPlaces(update tgbotapi.Update) (map[string]PlaceDetails, error) {
 /* Add / Delete places */
 func GetTempPlace(update tgbotapi.Update) (PlaceDetails, error) {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserID(update)
+	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return PlaceDetails{}, err
 	}
@@ -298,7 +298,7 @@ func GetTempPlace(update tgbotapi.Update) (PlaceDetails, error) {
 
 func AddPlace(update tgbotapi.Update, placeData PlaceDetails) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -334,7 +334,7 @@ func AddPlaceFromTemp(update tgbotapi.Update) error {
 
 func DeletePlace(update tgbotapi.Update, placeName string) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -349,7 +349,7 @@ func DeletePlace(update tgbotapi.Update, placeName string) error {
 /* Read / Delete / Update tags */
 func GetTags(update tgbotapi.Update) ([]string, error) {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return []string{}, err
 	}
@@ -372,7 +372,7 @@ func GetTags(update tgbotapi.Update) ([]string, error) {
 
 func DeleteTag(update tgbotapi.Update, tag string) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
@@ -389,7 +389,7 @@ func DeleteTag(update tgbotapi.Update, tag string) error {
 func updateTags(update tgbotapi.Update, tag string) error {
 	/* If same tag won't update. Implicitly prevent double records */
 	ctx := context.Background()
-	chatID, _, err := GetChatUserID(update)
+	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
