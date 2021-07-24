@@ -25,6 +25,7 @@ func HandleUserInput(update tgbotapi.Update) {
 			}
 			sendMessage(update, "Please enter the name of the place to begin")
 		}
+		return
 	}
 
 	/* Adding new place */
@@ -40,6 +41,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				sendMessage(update, "Sorry an error occured!")
 			}
+			sendMessage(update, "Start adding the details for the place")
 		case ReadyForNextAction:
 			message, _, err := getMessage(update)
 			if err != nil {
@@ -94,6 +96,13 @@ func HandleUserInput(update tgbotapi.Update) {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
+			case "/cancel":
+				// Prep for next state
+				if err := setUserState(update, Idle); err != nil {
+					log.Printf("error setting state: %+v", err)
+					sendMessage(update, "Sorry an error occured!")
+				}
+				sendMessage(update, "addPlace process cancelled")
 			}
 		case SetAddress:
 			// Message should contain address
@@ -141,32 +150,33 @@ func HandleUserInput(update tgbotapi.Update) {
 			}
 		}
 		// TODO: add telegram fixed response
+		return
 	}
 
 	switch update.Message.Text {
 	case "/start":
 		sendStartInstructions(update)
-	case "/addName":
-		initPlace(update)
-	case "/addAddress":
-		setTempPlaceAddress(update)
-	case "/addURL":
-		setTempPlaceURL(update)
-	case "/addTags":
-		addTempPlaceTag(update)
-	case "/addPlace":
-		addPlaceFromTemp(update)
-	case "/deletePlace":
-		deletePlace(update, "addName")
-	case "/updatePlaceAddress":
-		updatePlaceAddress(update, "addName", "new address")
-	case "/addMoreTags":
-		addPlaceTag(update, "addName", "more tags")
-	case "/deleteTag":
-		deletePlaceTag(update, "addName", "more tags")
-	default:
-		LogUpdate(update)
-		LogMessage(update)
+		// case "/addName":
+		// 	initPlace(update)
+		// case "/addAddress":
+		// 	setTempPlaceAddress(update)
+		// case "/addURL":
+		// 	setTempPlaceURL(update)
+		// case "/addTags":
+		// 	addTempPlaceTag(update)
+		// case "/addPlace":
+		// 	addPlaceFromTemp(update)
+		// case "/deletePlace":
+		// 	deletePlace(update, "addName")
+		// case "/updatePlaceAddress":
+		// 	updatePlaceAddress(update, "addName", "new address")
+		// case "/addMoreTags":
+		// 	addPlaceTag(update, "addName", "more tags")
+		// case "/deleteTag":
+		// 	deletePlaceTag(update, "addName", "more tags")
+		// default:
+		// 	LogUpdate(update)
+		// 	LogMessage(update)
 
 		// photoIDs, err := services.GetPhotoIDs(update)
 		// if err != nil {
@@ -177,8 +187,8 @@ func HandleUserInput(update tgbotapi.Update) {
 		// 	services.SendPhoto(update, id)
 		// }
 
-		if err := sendMessage(update, "received"); err != nil {
-			log.Printf("error sending message: %+v", err)
-		}
+		// if err := sendMessage(update, "received"); err != nil {
+		// 	log.Printf("error sending message: %+v", err)
+		// }
 	}
 }
