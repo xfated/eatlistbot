@@ -191,7 +191,7 @@ func addTempPlaceImage(update tgbotapi.Update) error {
 
 	/* Set temp under userRef */
 	imageIDs, err := getPhotoIDs(update)
-	log.Printf("%+v:", imageIDs)
+	log.Printf("imaage ids: %+v:", imageIDs)
 	if len(imageIDs) == 0 {
 		return errors.New("no image id found")
 	}
