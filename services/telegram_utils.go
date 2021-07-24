@@ -72,6 +72,7 @@ func SendPhoto(update tgbotapi.Update, photoID string) error {
 	}
 
 	tgbotapi.NewPhotoShare(chatID, photoID)
+	log.Printf("shared photo: %v", photoID)
 	return nil
 }
 
