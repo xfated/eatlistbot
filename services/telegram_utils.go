@@ -73,13 +73,13 @@ func SendUnknownCommand(update tgbotapi.Update) {
 }
 
 func SendPhoto(update tgbotapi.Update, photoID string) error {
-	// chatID, _, err := GetChatUserID(update)
-	// if err != nil {
-	// 	log.Printf("Error getting chat & user id: %+v", err)
-	// 	return err
-	// }
-	var chatID int64 = -572862838
-	tgbotapi.NewPhotoShare(chatID, photoID)
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error getting chat & user id: %+v", err)
+		return err
+	}
+	photoConfig := tgbotapi.NewPhotoShare(chatID, photoID)
+	bot.Send(photoConfig)
 	log.Printf("shared photo: %v to chatID: %v", photoID, chatID)
 	return nil
 }
