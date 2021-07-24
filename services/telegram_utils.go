@@ -105,6 +105,7 @@ func GetPhotoIDs(update tgbotapi.Update) ([]string, error) {
 	for _, photo := range *update.Message.Photo {
 		photoIDs = append(photoIDs, photo.FileID)
 	}
+	log.Printf("Photo: %+v", update.Message.Photo)
 	return photoIDs, nil
 }
 
