@@ -47,13 +47,13 @@ func LogUpdate(update tgbotapi.Update) {
 
 /* Sending */
 func SendMessage(update tgbotapi.Update, text string) error {
-	// chatID, _, err := GetChatUserID(update)
-	// if err != nil {
-	// 	log.Printf("Error getting chat & user id: %+v", err)
-	// 	return err
-	// }
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error getting chat & user id: %+v", err)
+		return err
+	}
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	msg := tgbotapi.NewMessage(chatID, text)
 	bot.Send(msg)
 	return nil
 }
