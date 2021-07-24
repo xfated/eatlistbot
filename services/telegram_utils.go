@@ -46,8 +46,16 @@ func LogUpdate(update tgbotapi.Update) {
 }
 
 /* Sending */
-func SendMessage(msg tgbotapi.MessageConfig) {
-	bot.Send(msg)
+func SendMessage(update tgbotapi.Update, msg string) error {
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error getting chat & user id: %+v", err)
+		return err
+	}
+
+	msgConfig := tgbotapi.NewMessage(chatID, msg)
+	bot.Send(msgConfig)
+	return nil
 }
 
 func SendStartInstructions(update tgbotapi.Update) {
@@ -70,8 +78,7 @@ func SendPhoto(update tgbotapi.Update, photoID string) error {
 	// 	log.Printf("Error getting chat & user id: %+v", err)
 	// 	return err
 	// }
-	var chatID int64
-	chatID = -572862838
+	var chatID int64 = -572862838
 	tgbotapi.NewPhotoShare(chatID, photoID)
 	log.Printf("shared photo: %v to chatID: %v", photoID, chatID)
 	return nil
