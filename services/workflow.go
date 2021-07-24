@@ -203,7 +203,7 @@ func HandleUserInput(update tgbotapi.Update) {
 		row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
 
 		replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
-		replyKeyboard.ResizeKeyboard = true
+		// replyKeyboard.ResizeKeyboard = true
 		replyKeyboard.OneTimeKeyboard = true
 		replyKeyboard.Selective = true
 		sendTextReplyMarkupKeyboard(update, "Select your next action", replyKeyboard)
