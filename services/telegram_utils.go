@@ -49,7 +49,6 @@ func LogUpdate(update tgbotapi.Update) {
 func sendMessage(update tgbotapi.Update, text string) error {
 	chatID, _, err := getChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat & user id: %+v", err)
 		return err
 	}
 
@@ -75,12 +74,10 @@ func sendUnknownCommand(update tgbotapi.Update) {
 func sendPhoto(update tgbotapi.Update, photoID string) error {
 	chatID, _, err := getChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat & user id: %+v", err)
 		return err
 	}
 	photoConfig := tgbotapi.NewPhotoShare(chatID, photoID)
 	bot.Send(photoConfig)
-	log.Printf("shared photo: %v to chatID: %v", photoID, chatID)
 	return nil
 }
 
@@ -140,6 +137,5 @@ func getPhotoIDs(update tgbotapi.Update) ([]string, error) {
 	for _, photo := range *update.Message.Photo {
 		photoIDs = append(photoIDs, photo.FileID)
 	}
-	log.Printf("Photo: %+v", update.Message.Photo)
 	return photoIDs, nil
 }

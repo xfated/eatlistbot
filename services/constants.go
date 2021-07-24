@@ -5,11 +5,16 @@ type State int
 
 const (
 	Idle State = iota
+
+	ReadyForNextAction
 	SetName
 	SetAddress
 	SetURL
 	SetImages
 	SetTags
+	Preview
+	FinishAdding
+
 	Finished
 )
 
@@ -21,18 +26,7 @@ type PlaceDetails struct {
 	Tags    map[string]bool `json:"tags"`
 }
 
-func GetNextState(cur State) State {
-	switch cur {
-	case Idle, Finished:
-		return cur
-	case SetName, SetAddress, SetURL, SetImages, SetTags:
-		return cur + 1
-	default:
-		return cur
-	}
-}
-
-func IsAddingNewRestaurant(state State) bool {
+func IsAddingNewPlace(state State) bool {
 	switch state {
 	case SetName,
 		SetAddress,
