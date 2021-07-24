@@ -81,15 +81,15 @@ func sendPhoto(update tgbotapi.Update, photoID string) error {
 	return nil
 }
 
-func sendTextReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+func setReplyMarkupKeyboard(update tgbotapi.Update, keyboard tgbotapi.ReplyKeyboardMarkup) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	msg.BaseChat.ReplyMarkup = keyboard
 	msg.ReplyToMessageID = update.Message.MessageID
 	bot.Send(msg)
 }
 
-func sendTextRemoveMarkupKeyboard(update tgbotapi.Update, text string) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+func removeMarkupKeyboard(update tgbotapi.Update) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	removeKeyboard := tgbotapi.NewRemoveKeyboard(true)
 	removeKeyboard.Selective = true
 	msg.BaseChat.ReplyMarkup = removeKeyboard
