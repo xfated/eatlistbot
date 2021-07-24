@@ -26,11 +26,12 @@ type PlaceDetails struct {
 
 func IsAddingNewPlace(state State) bool {
 	switch state {
-	case SetName,
+	case ReadyForNextAction,
+		SetName,
 		SetAddress,
+		SetURL,
 		SetImages,
-		SetTags,
-		SetURL:
+		SetTags:
 		return true
 	default:
 		return false
