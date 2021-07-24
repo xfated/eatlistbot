@@ -32,7 +32,7 @@ func HandleUserInput(update tgbotapi.Update) {
 	/* Idle state */
 	if userState == Idle {
 		switch update.Message.Text {
-		case "/addPlace":
+		case "/addplace":
 			if err := setUserState(update, SetName); err != nil {
 				log.Printf("error setting state: %+v", err)
 				sendMessage(update, "Sorry an error occured!")
@@ -186,7 +186,23 @@ func HandleUserInput(update tgbotapi.Update) {
 				sendMessage(update, "Sorry an error occured!")
 			}
 		}
-		// TODO: add telegram fixed response
+		// Create buttons
+		addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
+		addURLButton := tgbotapi.NewKeyboardButton("/addURL")
+		addImageButton := tgbotapi.NewKeyboardButton("/addImage")
+		addTagButton := tgbotapi.NewKeyboardButton("/addTag")
+		previewButton := tgbotapi.NewKeyboardButton("/preview")
+		submitButton := tgbotapi.NewKeyboardButton("/submit")
+		cancelButton := tgbotapi.NewKeyboardButton("/cancel")
+		// Create rows
+		row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton)
+		row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton)
+		row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
+
+		replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
+		replyKeyboard.OneTimeKeyboard = true
+		replyKeyboard.Selective = true
+		sendReplyMarkupKeyboard(update, replyKeyboard)
 		return
 	}
 

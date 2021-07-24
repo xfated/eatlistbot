@@ -81,6 +81,14 @@ func sendPhoto(update tgbotapi.Update, photoID string) error {
 	return nil
 }
 
+func sendReplyMarkupKeyboard(update tgbotapi.Update, keyboard tgbotapi.ReplyKeyboardMarkup) {
+	var msg tgbotapi.BaseChat
+	msg.ChatID = update.Message.Chat.ID
+	msg.ReplyMarkup = keyboard
+	msg.ReplyToMessageID = update.Message.MessageID
+	bot.Send(msg)
+}
+
 /* Getting */
 func getChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
 	if update.Message == nil {
