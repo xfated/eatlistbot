@@ -40,15 +40,17 @@ func webhookHandler(c *gin.Context) {
 	case "/addName":
 		services.InitPlace(update)
 	case "/addAddress":
-		services.SetPlaceAddress(update)
+		services.SetTempPlaceAddress(update)
 	case "/addURL":
-		services.SetPlaceURL(update)
+		services.SetTempPlaceURL(update)
 	case "/addTags":
-		services.AddPlaceTags(update)
+		services.AddTempPlaceTag(update)
 	case "/addRestaurant":
 		services.AddPlaceFromTemp(update)
 	case "/deleteRestaurant":
 		services.DeletePlace(update, "addName")
+	default:
+		services.P
 	}
 }
 

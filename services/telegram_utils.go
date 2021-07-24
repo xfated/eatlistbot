@@ -15,6 +15,7 @@ var (
 	bot                *tgbotapi.BotAPI
 )
 
+/* Init */
 func InitTelegram() {
 	var err error
 
@@ -33,6 +34,18 @@ func InitTelegram() {
 	log.Println("Loaded telegram bot")
 }
 
+/* General Logging */
+func LogMessage(update tgbotapi.Update) {
+	if update.Message != nil {
+		log.Printf("Message: %+v", update.Message)
+	}
+}
+
+func LogUpdate(update tgbotapi.Update) {
+	log.Printf("Update: %+v", update)
+}
+
+/* Sending */
 func SendMessage(msg tgbotapi.MessageConfig) {
 	bot.Send(msg)
 }
@@ -49,10 +62,6 @@ func SendStartInstructions(update tgbotapi.Update) {
 func SendUnknownCommand(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Unknown command, please use /start for commands")
 	bot.Send(msg)
-}
-
-func LogMessage(update tgbotapi.Update) {
-	log.Printf("Message: %+v", update.Message)
 }
 
 func GetChatUserID(update tgbotapi.Update) (chatID, userID string, err error) {
