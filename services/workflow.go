@@ -8,12 +8,6 @@ import (
 )
 
 func HandleUserInput(update tgbotapi.Update) {
-	userState, err := getUserState(update)
-	if err != nil {
-		log.Printf("error getting user state: %+v", err)
-		return
-	}
-
 	/* Check for main commands */
 	message, _, err := getMessage(update)
 	if err == nil {
@@ -25,6 +19,13 @@ func HandleUserInput(update tgbotapi.Update) {
 				sendMessage(update, "Sorry an error occured!")
 			}
 		}
+	}
+
+	/* Get user state for Targeted handling */
+	userState, err := getUserState(update)
+	if err != nil {
+		log.Printf("error getting user state: %+v", err)
+		return
 	}
 
 	/* Idle state */
