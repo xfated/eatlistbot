@@ -92,4 +92,20 @@ func GetMessage(update tgbotapi.Update) (message string, messageID int, err erro
 	return
 }
 
+func GetPhotoIDs(update tgbotapi.Update) ([]string, error) {
+	if update.Message == nil {
+		return []string{}, errors.New("invalid message")
+	}
+
+	if update.Message.Photo == nil {
+		return []string{}, errors.New("no photo")
+	}
+
+	photoIDs := make([]string, 0)
+	for _, photo := range *update.Message.Photo {
+		photoIDs = append(photoIDs, photo.FileID)
+	}
+	return photoIDs, nil
+}
+
 /* Confirm details and add to list */
