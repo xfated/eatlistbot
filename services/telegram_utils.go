@@ -85,7 +85,10 @@ func setReplyMarkupKeyboard(update tgbotapi.Update, keyboard tgbotapi.ReplyKeybo
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	msg.BaseChat.ReplyMarkup = keyboard
 	msg.ReplyToMessageID = update.Message.MessageID
-	bot.Send(msg)
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Printf("Error setting markup keyboard: %+v", err)
+	}
 }
 
 func removeMarkupKeyboard(update tgbotapi.Update) {
@@ -94,7 +97,10 @@ func removeMarkupKeyboard(update tgbotapi.Update) {
 	removeKeyboard.Selective = true
 	msg.BaseChat.ReplyMarkup = removeKeyboard
 	msg.ReplyToMessageID = update.Message.MessageID
-	bot.Send(msg)
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Printf("Error removing markup kerboard: %+v", err)
+	}
 }
 
 /* Getting */
