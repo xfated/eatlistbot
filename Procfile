@@ -1,2 +1,2 @@
 go build cmd/main.go
-web: bin/eatlistbot
+web: bin/golistbot
