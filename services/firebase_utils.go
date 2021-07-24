@@ -190,6 +190,7 @@ func addTempPlaceImage(update tgbotapi.Update) error {
 
 	/* Set temp under userRef */
 	imageIDs, err := getPhotoIDs(update)
+	log.Printf("%+v:", imageIDs)
 	imageID := imageIDs[3] // Take largest file size
 	if err != nil {
 		return err

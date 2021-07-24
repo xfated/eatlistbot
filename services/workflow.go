@@ -45,7 +45,7 @@ func HandleUserInput(update tgbotapi.Update) {
 	/* Adding new place */
 	if IsAddingNewPlace(userState) {
 		/* Create and send template reply keyboard */
-		sendTemplateReplies := func() {
+		sendTemplateReplies := func(text string) {
 			// Create buttons
 			addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
 			addURLButton := tgbotapi.NewKeyboardButton("/addURL")
@@ -63,7 +63,7 @@ func HandleUserInput(update tgbotapi.Update) {
 			replyKeyboard.ResizeKeyboard = true
 			replyKeyboard.OneTimeKeyboard = true
 			replyKeyboard.Selective = true
-			setReplyMarkupKeyboard(update, "Select your next action", replyKeyboard)
+			setReplyMarkupKeyboard(update, text, replyKeyboard)
 		}
 
 		switch userState {
@@ -142,7 +142,7 @@ func HandleUserInput(update tgbotapi.Update) {
 					placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
 				}
 				sendMessage(update, placeText)
-				sendTemplateReplies()
+				sendTemplateReplies("Select your next action")
 			case "/submit":
 				// Submit
 				name, err := addPlaceFromTemp(update)
@@ -169,7 +169,7 @@ func HandleUserInput(update tgbotapi.Update) {
 			// Message should contain address
 			if err := setTempPlaceAddress(update); err != nil {
 				log.Printf("Error adding address: %+v", err)
-				sendMessage(update, "Message should be a text")
+				sendTemplateReplies("Message should be a text")
 			}
 			sendMessage(update, fmt.Sprintf("Address set to %s", update.Message.Text))
 			// Prep for next state
@@ -193,7 +193,7 @@ func HandleUserInput(update tgbotapi.Update) {
 			// should be an image input
 			if err := addTempPlaceImage(update); err != nil {
 				log.Printf("Error adding image: %+v", err)
-				sendMessage(update, "error occured. did you send an image?")
+				sendTemplateReplies("error occured. did you send an image?")
 			}
 			sendMessage(update, "Image added")
 			// Prep for next state
@@ -205,7 +205,7 @@ func HandleUserInput(update tgbotapi.Update) {
 			// Message should contain text
 			if err := addTempPlaceTag(update); err != nil {
 				log.Printf("Error adding tag: %+v", err)
-				sendMessage(update, "Message should be a text")
+				sendTemplateReplies("Message should be a text")
 			}
 			sendMessage(update, fmt.Sprintf("Tag %s added", update.Message.Text))
 			// Prep for next state
@@ -216,7 +216,7 @@ func HandleUserInput(update tgbotapi.Update) {
 		}
 
 		/* Create and send keyboard for targeted response */
-		sendTemplateReplies()
+		sendTemplateReplies("Select your next action")
 		return
 	}
 
