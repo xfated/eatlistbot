@@ -52,9 +52,9 @@ func setUserState(update tgbotapi.Update, state State) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child(chatID).Set(ctx,
-		strconv.Itoa(int(state)),
-	); err != nil {
+	if err := userRef.Child(chatID).Update(ctx, map[string]interface{}{
+		"state": strconv.Itoa(int(state)),
+	}); err != nil {
 		log.Println("Error setting state")
 		return err
 	}
@@ -69,7 +69,7 @@ func getUserState(update tgbotapi.Update) (State, error) {
 	}
 	userRef := client.NewRef("users").Child(userID)
 	var stateString string
-	if err := userRef.Child(chatID).Get(ctx, &stateString); err != nil {
+	if err := userRef.Child(chatID).Child("state").Get(ctx, &stateString); err != nil {
 		return 0, err
 	}
 
