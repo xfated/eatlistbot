@@ -44,6 +44,28 @@ func HandleUserInput(update tgbotapi.Update) {
 
 	/* Adding new place */
 	if IsAddingNewPlace(userState) {
+		/* Create and send template reply keyboard */
+		sendTemplateReplies := func() {
+			// Create buttons
+			addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
+			addURLButton := tgbotapi.NewKeyboardButton("/addURL")
+			addImageButton := tgbotapi.NewKeyboardButton("/addImage")
+			addTagButton := tgbotapi.NewKeyboardButton("/addTag")
+			previewButton := tgbotapi.NewKeyboardButton("/preview")
+			submitButton := tgbotapi.NewKeyboardButton("/submit")
+			cancelButton := tgbotapi.NewKeyboardButton("/cancel")
+			// Create rows
+			row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton)
+			row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton)
+			row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
+
+			replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
+			replyKeyboard.ResizeKeyboard = true
+			replyKeyboard.OneTimeKeyboard = true
+			replyKeyboard.Selective = true
+			setReplyMarkupKeyboard(update, "Select your next action", replyKeyboard)
+		}
+
 		switch userState {
 		case SetName:
 			// Message should contain name of place
@@ -69,7 +91,6 @@ func HandleUserInput(update tgbotapi.Update) {
 					sendMessage(update, "Sorry an error occured!")
 				}
 				removeMarkupKeyboard(update, "Send an address to be added")
-				return
 			case "/addURL":
 				// Prep for next state
 				if err := setUserState(update, SetURL); err != nil {
@@ -77,7 +98,6 @@ func HandleUserInput(update tgbotapi.Update) {
 					sendMessage(update, "Sorry an error occured!")
 				}
 				removeMarkupKeyboard(update, "Send a URL to be added")
-				return
 			case "/addImage":
 				// Prep for next state
 				if err := setUserState(update, SetImages); err != nil {
@@ -85,7 +105,6 @@ func HandleUserInput(update tgbotapi.Update) {
 					sendMessage(update, "Sorry an error occured!")
 				}
 				removeMarkupKeyboard(update, "Send an image to be added")
-				return
 			case "/addTag":
 				// Prep for next state
 				if err := setUserState(update, SetTags); err != nil {
@@ -93,7 +112,6 @@ func HandleUserInput(update tgbotapi.Update) {
 					sendMessage(update, "Sorry an error occured!")
 				}
 				removeMarkupKeyboard(update, "Send a tag to be added")
-				return
 			case "/preview":
 				// Get data and send
 				placeData, err := getTempPlace(update)
@@ -124,6 +142,7 @@ func HandleUserInput(update tgbotapi.Update) {
 					placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
 				}
 				sendMessage(update, placeText)
+				sendTemplateReplies()
 			case "/submit":
 				// Submit
 				name, err := addPlaceFromTemp(update)
@@ -137,16 +156,15 @@ func HandleUserInput(update tgbotapi.Update) {
 					sendMessage(update, "Sorry an error occured!")
 				}
 				removeMarkupKeyboard(update, fmt.Sprintf("%s was added for this chat!", name))
-				return
 			case "/cancel":
 				// Prep for next state
 				if err := setUserState(update, Idle); err != nil {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				removeMarkupKeyboard(update, "addPlace process cancelled")
-				return
+				removeMarkupKeyboard(update, "/addplace process cancelled")
 			}
+			return
 		case SetAddress:
 			// Message should contain address
 			if err := setTempPlaceAddress(update); err != nil {
@@ -198,24 +216,7 @@ func HandleUserInput(update tgbotapi.Update) {
 		}
 
 		/* Create and send keyboard for targeted response */
-		// Create buttons
-		addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
-		addURLButton := tgbotapi.NewKeyboardButton("/addURL")
-		addImageButton := tgbotapi.NewKeyboardButton("/addImage")
-		addTagButton := tgbotapi.NewKeyboardButton("/addTag")
-		previewButton := tgbotapi.NewKeyboardButton("/preview")
-		submitButton := tgbotapi.NewKeyboardButton("/submit")
-		cancelButton := tgbotapi.NewKeyboardButton("/cancel")
-		// Create rows
-		row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton)
-		row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton)
-		row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
-
-		replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
-		replyKeyboard.ResizeKeyboard = true
-		replyKeyboard.OneTimeKeyboard = true
-		replyKeyboard.Selective = true
-		setReplyMarkupKeyboard(update, "Select your next action", replyKeyboard)
+		sendTemplateReplies()
 		return
 	}
 
