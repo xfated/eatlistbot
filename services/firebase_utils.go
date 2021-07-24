@@ -342,17 +342,17 @@ func addPlace(update tgbotapi.Update, placeData PlaceDetails) error {
 	return nil
 }
 
-func addPlaceFromTemp(update tgbotapi.Update) error {
+func addPlaceFromTemp(update tgbotapi.Update) (string, error) {
 	// get from user details
 	placeData, err := getTempPlace(update)
 	if err != nil {
-		return err
+		return "", err
 	}
 	// Add data to place
 	if err := addPlace(update, placeData); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return placeData.Name, nil
 }
 
 func deletePlace(update tgbotapi.Update, placeName string) error {

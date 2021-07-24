@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
@@ -95,15 +96,38 @@ func HandleUserInput(update tgbotapi.Update) {
 				if err != nil {
 					log.Printf("error getting temp place: %+v", err)
 				}
-				placeText := fmt.Sprintf("%+v", placeData)
+				placeText := ""
+				if placeData.Name != "" {
+					placeText = placeText + fmt.Sprintf("Name: %s\n", placeData.Name)
+				}
+				if placeData.Address != "" {
+					placeText = placeText + fmt.Sprintf("Address: %s\n", placeData.Address)
+				}
+				if placeData.URL != "" {
+					placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
+				}
+				if placeData.Images != nil {
+					placeText = placeText + fmt.Sprintf("Num images: %v\n", len(placeData.Images))
+				}
+				if placeData.Tags != nil {
+					tags := make([]string, len(placeData.Tags))
+					i := 0
+					for tag := range placeData.Tags {
+						tags[i] = tag
+						i++
+					}
+					tagText := strings.Join(tags, ", ")
+					placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
+				}
 				sendMessage(update, placeText)
 			case "/submit":
 				// Submit
-				if err := addPlaceFromTemp(update); err != nil {
+				name, err := addPlaceFromTemp(update)
+				if err != nil {
 					log.Printf("error adding place from temp: %+v", err)
 					sendMessage(update, "An error occured :( please try again")
 				}
-				sendMessage(update, "place was added for this chat!")
+				sendMessage(update, fmt.Sprintf("%s was added for this chat!", name))
 				// Prep for next state
 				if err := setUserState(update, Idle); err != nil {
 					log.Printf("error setting state: %+v", err)
@@ -152,8 +176,8 @@ func HandleUserInput(update tgbotapi.Update) {
 			}
 		case SetTags:
 			// Message should contain text
-			if err := setTempPlaceURL(update); err != nil {
-				log.Printf("Error adding url: %+v", err)
+			if err := addTempPlaceTag(update); err != nil {
+				log.Printf("Error adding tag: %+v", err)
 				sendMessage(update, "Message should be a text")
 			}
 			// Prep for next state
