@@ -132,7 +132,6 @@ func HandleUserInput(update tgbotapi.Update) {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				// removeMarkupKeyboard(update)
 				sendMessage(update, fmt.Sprintf("%s was added for this chat!", name))
 			case "/cancel":
 				// Prep for next state
@@ -140,9 +139,10 @@ func HandleUserInput(update tgbotapi.Update) {
 					log.Printf("error setting state: %+v", err)
 					sendMessage(update, "Sorry an error occured!")
 				}
-				// removeMarkupKeyboard(update)
 				sendMessage(update, "addPlace process cancelled")
 			}
+			// Don't show for next action
+			removeMarkupKeyboard(update)
 			return
 		case SetAddress:
 			// Message should contain address
@@ -150,6 +150,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("Error adding address: %+v", err)
 				sendMessage(update, "Message should be a text")
 			}
+			sendMessage(update, fmt.Sprintf("Address set to %s", update.Message.Text))
 			// Prep for next state
 			if err := setUserState(update, ReadyForNextAction); err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -161,6 +162,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("Error adding url: %+v", err)
 				sendMessage(update, "Message should be a text")
 			}
+			sendMessage(update, fmt.Sprintf("URL set to %s", update.Message.Text))
 			// Prep for next state
 			if err := setUserState(update, ReadyForNextAction); err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -172,6 +174,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("Error adding image: %+v", err)
 				sendMessage(update, "error occured. did you send an image?")
 			}
+			sendMessage(update, "Image added")
 			// Prep for next state
 			if err := setUserState(update, ReadyForNextAction); err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -183,6 +186,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("Error adding tag: %+v", err)
 				sendMessage(update, "Message should be a text")
 			}
+			sendMessage(update, fmt.Sprintf("Tag %s added", update.Message.Text))
 			// Prep for next state
 			if err := setUserState(update, ReadyForNextAction); err != nil {
 				log.Printf("error setting state: %+v", err)
