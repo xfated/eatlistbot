@@ -75,8 +75,8 @@ func GetUserState(update tgbotapi.Update) error {
 	return err
 }
 
-/* Name (Also init restaurant) */
-func InitRestaurant(update tgbotapi.Update) error {
+/* Name (Also init place) */
+func InitPlace(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
@@ -89,7 +89,7 @@ func InitRestaurant(update tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if err := userRef.Child("restToAdd").Set(ctx, map[string]string{
+	if err := userRef.Child("placeToAdd").Set(ctx, map[string]string{
 		"name": name,
 	}); err != nil {
 		log.Printf("Error setting name: %+v", err)
@@ -99,7 +99,7 @@ func InitRestaurant(update tgbotapi.Update) error {
 }
 
 /* Address */
-func SetRestaurantAddress(update tgbotapi.Update) error {
+func SetPlaceAddress(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
@@ -112,7 +112,7 @@ func SetRestaurantAddress(update tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if err := userRef.Child("restToAdd").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("placeToAdd").Update(ctx, map[string]interface{}{
 		"address": address,
 	}); err != nil {
 		log.Printf("Error saving address: %+v", err)
@@ -123,7 +123,7 @@ func SetRestaurantAddress(update tgbotapi.Update) error {
 }
 
 /* URL */
-func SetRestaurantURL(update tgbotapi.Update) error {
+func SetPlaceURL(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
@@ -136,7 +136,7 @@ func SetRestaurantURL(update tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if err := userRef.Child("restToAdd").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("placeToAdd").Update(ctx, map[string]interface{}{
 		"url": url,
 	}); err != nil {
 		log.Printf("Error saving url: %+v", err)
@@ -147,7 +147,7 @@ func SetRestaurantURL(update tgbotapi.Update) error {
 }
 
 /* Images */
-func AddRestaurantImage(update tgbotapi.Update) error {
+func AddPlaceImage(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
@@ -161,7 +161,7 @@ func AddRestaurantImage(update tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if err := userRef.Child("restToAdd").Child("images").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("placeToAdd").Child("images").Update(ctx, map[string]interface{}{
 		imageUrl: true,
 	}); err != nil {
 		log.Printf("Error saving image: %+v", err)
@@ -172,7 +172,7 @@ func AddRestaurantImage(update tgbotapi.Update) error {
 }
 
 /* Tags */
-func AddRestaurantTags(update tgbotapi.Update) error {
+func AddPlaceTags(update tgbotapi.Update) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
@@ -185,7 +185,7 @@ func AddRestaurantTags(update tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if err := userRef.Child("restToAdd").Child("tags").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("placeToAdd").Child("tags").Update(ctx, map[string]interface{}{
 		tag: true,
 	}); err != nil {
 		log.Printf("Error saving image: %+v", err)
@@ -195,46 +195,57 @@ func AddRestaurantTags(update tgbotapi.Update) error {
 	return nil
 }
 
-/* Get list of restaurants */
+/* Get list of places */
+func GetPlaces(update tgbotapi.Update) (map[string]PlaceDetails, error) {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		return map[string]PlaceDetails{}, err
+	}
 
-/* Add / Delete restaurant */
-func GetTempRestaurant(update tgbotapi.Update) (RestaurantDetails, error) {
+	/* Get places */
+	var Places map[string]PlaceDetails
+	userRef := client.NewRef("place").Child(chatID)
+	if err := userRef.Get(ctx, &Places); err != nil {
+		log.Printf("Error reading temp place data: %+v", err)
+		return map[string]PlaceDetails{}, err
+	}
+	return Places, nil
+}
+
+/* Add / Delete places */
+func GetTempPlace(update tgbotapi.Update) (PlaceDetails, error) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserID(update)
 	if err != nil {
-		return RestaurantDetails{}, err
+		return PlaceDetails{}, err
 	}
 
-	var RestaurantData RestaurantDetails
+	var PlaceData PlaceDetails
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
-	if err := userRef.Child("restToAdd").Get(ctx, &RestaurantData); err != nil {
-		log.Printf("Error reading temp restaurant data: %+v", err)
-		return RestaurantDetails{}, err
+	if err := userRef.Child("placeToAdd").Get(ctx, &PlaceData); err != nil {
+		log.Printf("Error reading temp place data: %+v", err)
+		return PlaceDetails{}, err
 	}
-	return RestaurantData, nil
+	return PlaceData, nil
 }
 
-func AddRestaurant(update tgbotapi.Update) error {
-	restaurantData, err := GetTempRestaurant(update)
-	if err != nil {
-		return err
-	}
-
+func AddPlace(update tgbotapi.Update, placeData PlaceDetails) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return err
 	}
 
-	/* Add restaurant to restaurant collection */
-	chatRef := client.NewRef("restaurants").Child(chatID)
-	if err := chatRef.Child(restaurantData.Name).Set(ctx, restaurantData); err != nil {
-		log.Printf("Error adding restaurant: %+v", err)
+	/* Add place to place collection */
+	chatRef := client.NewRef("places").Child(chatID)
+	if err := chatRef.Child(placeData.Name).Set(ctx, placeData); err != nil {
+		log.Printf("Error adding place: %+v", err)
 		return err
 	}
 
 	/* Add tags to tag collection */
-	for tag := range restaurantData.Tags {
+	for tag := range placeData.Tags {
 		if err := updateTags(update, tag); err != nil {
 			return err
 		}
@@ -242,15 +253,28 @@ func AddRestaurant(update tgbotapi.Update) error {
 	return nil
 }
 
-func DeleteRestaurant(update tgbotapi.Update, restaurantName string) error {
+func AddPlaceFromTemp(update tgbotapi.Update) error {
+	// Get from user details
+	placeData, err := GetTempPlace(update)
+	if err != nil {
+		return err
+	}
+	// Add data to place
+	if err := AddPlace(update, placeData); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeletePlace(update tgbotapi.Update, placeName string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return err
 	}
-	chatRef := client.NewRef("restaurants").Child(chatID)
-	if err := chatRef.Child(restaurantName).Delete(ctx); err != nil {
-		log.Printf("Error deletting restaurant: %+v", err)
+	chatRef := client.NewRef("placess").Child(chatID)
+	if err := chatRef.Child(placeName).Delete(ctx); err != nil {
+		log.Printf("Error deletting place: %+v", err)
 		return err
 	}
 	return nil

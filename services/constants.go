@@ -13,7 +13,7 @@ const (
 	Finished
 )
 
-type RestaurantDetails struct {
+type PlaceDetails struct {
 	Name    string          `json:"name"`
 	Address string          `json:"address"`
 	URL     string          `json:"url"`
