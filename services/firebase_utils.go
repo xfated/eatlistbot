@@ -272,9 +272,9 @@ func DeletePlace(update tgbotapi.Update, placeName string) error {
 	if err != nil {
 		return err
 	}
-	chatRef := client.NewRef("placess").Child(chatID)
+	chatRef := client.NewRef("places").Child(chatID)
 	if err := chatRef.Child(placeName).Delete(ctx); err != nil {
-		log.Printf("Error deletting place: %+v", err)
+		log.Printf("Error deleting place: %+v", err)
 		return err
 	}
 	return nil
