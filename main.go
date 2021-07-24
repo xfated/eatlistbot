@@ -57,6 +57,7 @@ func webhookHandler(c *gin.Context) {
 		services.DeletePlaceTag(update, "addName", "more tags")
 	default:
 		services.LogUpdate(update)
+		services.LogMessage(update)
 	}
 }
 

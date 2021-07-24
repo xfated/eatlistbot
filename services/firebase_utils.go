@@ -254,7 +254,7 @@ func DeletePlaceTag(update tgbotapi.Update, place_name, tag string) error {
 	}
 
 	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(place_name).Child("tags").Delete(ctx); err != nil {
+	if err := placeRef.Child(place_name).Child("tags").Child(tag).Delete(ctx); err != nil {
 		log.Printf("Error deleting tag: %+v", err)
 		return err
 	}
