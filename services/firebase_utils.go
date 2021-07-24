@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -191,9 +190,8 @@ func addTempPlaceImage(update tgbotapi.Update) error {
 
 	/* Set temp under userRef */
 	imageIDs, err := getPhotoIDs(update)
-	log.Printf("imaage ids: %+v:", imageIDs)
-	if len(imageIDs) == 0 {
-		return errors.New("no image id found")
+	if err != nil {
+		return err
 	}
 	imageID := imageIDs[3] // Take largest file size
 	if err != nil {
