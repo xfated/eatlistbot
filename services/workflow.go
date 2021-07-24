@@ -14,7 +14,8 @@ func HandleUserInput(update tgbotapi.Update) {
 	if err == nil {
 		switch message {
 		case "/start":
-			sendStartInstructions(update)
+			// sendStartInstructions(update)
+			removeMarkupKeyboard(update, "Haha you sent start")
 			if err := setUserState(update, Idle); err != nil {
 				log.Printf("error setting state: %+v", err)
 				sendMessage(update, "Sorry an error occured!")
@@ -33,6 +34,7 @@ func HandleUserInput(update tgbotapi.Update) {
 	if userState == Idle {
 		switch update.Message.Text {
 		case "/addplace":
+		case "/addplace@toGoListBot":
 			if err := setUserState(update, SetName); err != nil {
 				log.Printf("error setting state: %+v", err)
 				sendMessage(update, "Sorry an error occured!")
@@ -209,8 +211,9 @@ func HandleUserInput(update tgbotapi.Update) {
 			if err := addTempPlaceTag(update); err != nil {
 				log.Printf("Error adding tag: %+v", err)
 				sendMessage(update, "Tag should be a text")
+			} else {
+				sendMessage(update, fmt.Sprintf("Tag %s added", update.Message.Text))
 			}
-			sendMessage(update, fmt.Sprintf("Tag %s added", update.Message.Text))
 			// Prep for next state
 			if err := setUserState(update, ReadyForNextAction); err != nil {
 				log.Printf("error setting state: %+v", err)
