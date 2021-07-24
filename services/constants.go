@@ -21,7 +21,7 @@ type PlaceDetails struct {
 	Tags    map[string]bool `json:"tags"`
 }
 
-func getNextState(cur State) State {
+func GetNextState(cur State) State {
 	switch cur {
 	case Idle, Finished:
 		return cur
@@ -29,5 +29,18 @@ func getNextState(cur State) State {
 		return cur + 1
 	default:
 		return cur
+	}
+}
+
+func IsAddingNewRestaurant(state State) bool {
+	switch state {
+	case SetName,
+		SetAddress,
+		SetImages,
+		SetTags,
+		SetURL:
+		return true
+	default:
+		return false
 	}
 }

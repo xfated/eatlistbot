@@ -46,8 +46,8 @@ func LogUpdate(update tgbotapi.Update) {
 }
 
 /* Sending */
-func SendMessage(update tgbotapi.Update, text string) error {
-	chatID, _, err := GetChatUserID(update)
+func sendMessage(update tgbotapi.Update, text string) error {
+	chatID, _, err := getChatUserID(update)
 	if err != nil {
 		log.Printf("Error getting chat & user id: %+v", err)
 		return err
@@ -58,22 +58,22 @@ func SendMessage(update tgbotapi.Update, text string) error {
 	return nil
 }
 
-func SendStartInstructions(update tgbotapi.Update) {
+func sendStartInstructions(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Haha you sent start")
 	bot.Send(msg)
-	SetUserState(update, Idle)
+	setUserState(update, Idle)
 
 	// Debug
 	LogMessage(update)
 }
 
-func SendUnknownCommand(update tgbotapi.Update) {
+func sendUnknownCommand(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Unknown command, please use /start for commands")
 	bot.Send(msg)
 }
 
-func SendPhoto(update tgbotapi.Update, photoID string) error {
-	chatID, _, err := GetChatUserID(update)
+func sendPhoto(update tgbotapi.Update, photoID string) error {
+	chatID, _, err := getChatUserID(update)
 	if err != nil {
 		log.Printf("Error getting chat & user id: %+v", err)
 		return err
@@ -85,7 +85,7 @@ func SendPhoto(update tgbotapi.Update, photoID string) error {
 }
 
 /* Getting */
-func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
+func getChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
 	if update.Message == nil {
 		chatID = 0
 		userID = 0
@@ -99,7 +99,7 @@ func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error)
 	return
 }
 
-func GetChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
+func getChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
 	if update.Message == nil {
 		chatID = ""
 		userID = ""
@@ -113,7 +113,7 @@ func GetChatUserIDString(update tgbotapi.Update) (chatID, userID string, err err
 	return
 }
 
-func GetMessage(update tgbotapi.Update) (message string, messageID int, err error) {
+func getMessage(update tgbotapi.Update) (message string, messageID int, err error) {
 	if update.Message == nil {
 		message = ""
 		messageID = 0
@@ -127,7 +127,7 @@ func GetMessage(update tgbotapi.Update) (message string, messageID int, err erro
 	return
 }
 
-func GetPhotoIDs(update tgbotapi.Update) ([]string, error) {
+func getPhotoIDs(update tgbotapi.Update) ([]string, error) {
 	if update.Message == nil {
 		return []string{}, errors.New("invalid message")
 	}
@@ -143,5 +143,3 @@ func GetPhotoIDs(update tgbotapi.Update) ([]string, error) {
 	log.Printf("Photo: %+v", update.Message.Photo)
 	return photoIDs, nil
 }
-
-/* Confirm details and add to list */
