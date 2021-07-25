@@ -121,11 +121,21 @@ func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails, 
 func SetReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
-		log.Printf("Error getting chat user ID: %+v", err)
+		log.Printf("Error GetChatUserID: %+v", err)
 	}
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
-	msg.ReplyToMessageID = update.Message.MessageID
+
+	messageTarget := 0
+	if update.Message != nil {
+		messageTarget = update.Message.MessageID
+	} else {
+		messageTarget, err = GetMessageTarget(update)
+		if err != nil {
+			log.Printf("Error GetMessageTarget: %+v", err)
+		}
+	}
+	msg.ReplyToMessageID = messageTarget
 	_, err = bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)

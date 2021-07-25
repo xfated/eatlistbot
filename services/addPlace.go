@@ -116,6 +116,11 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+			_, messageID, err := utils.GetMessage(update)
+			if err != nil {
+				log.Printf("error GetMessage: %+v", err)
+			}
+			utils.SetMessageTarget(update, messageID)
 			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of places)\n"+
 				"Type new or pick from existing\nPress done once done!")
 			sendExistingTagsResponse(update, "Existing tags:")
