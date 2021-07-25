@@ -353,7 +353,6 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 		i++
 	}
 
-	log.Printf("placesList: %+v", placesList)
 	/* filter if tags are present */
 	if len(filterTags) > 0 {
 		filteredPlaces := make([]constants.PlaceDetails, 0)
@@ -378,8 +377,8 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 	rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
 
 	// DEBUG
-	log.Printf("filterTags: %+v", filterTags)
-	log.Printf("placesList: %+v", placesList)
+	// log.Printf("filterTags: %+v", filterTags)
+	// log.Printf("placesList: %+v", placesList)
 
 	return placesList, nil
 }

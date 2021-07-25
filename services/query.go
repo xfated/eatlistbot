@@ -273,6 +273,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			for _, placeData := range places[:queryNum] {
+				log.Printf("senting details for: %+v", placeData)
 				utils.SendPlaceDetails(update, placeData, sendImage == "/yes")
 			}
 		}
