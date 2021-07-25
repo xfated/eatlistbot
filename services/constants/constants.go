@@ -14,6 +14,7 @@ const (
 	SetURL
 	SetImages
 	SetTags
+	ConfirmAddPlaceSubmit
 	/* ######## */
 
 	/* #### Query #### */
@@ -61,7 +62,8 @@ func IsAddingNewPlace(state State) bool {
 		SetNotes,
 		SetURL,
 		SetImages,
-		SetTags:
+		SetTags,
+		ConfirmAddPlaceSubmit:
 		return true
 	default:
 		return false

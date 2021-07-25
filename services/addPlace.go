@@ -61,6 +61,18 @@ func sendExistingTagsResponse(update tgbotapi.Update, text string) {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
+
+func sendConfirmSubmitResponse(update tgbotapi.Update, text string) {
+	// Create buttons
+	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
+	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
+	// Create rows
+	row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+}
+
 func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.SetName:
@@ -133,18 +145,15 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SendPlaceDetails(update, placeData, true)
 			sendTemplateReplies(update, "Select your next action")
 		case "/submit":
-			// Submit
-			name, err := utils.AddPlaceFromTemp(update)
+			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
-				log.Printf("error adding place from temp: %+v", err)
-				utils.SendMessage(update, "An error occured :( please try again")
+				log.Printf("error GetMessage: %+v", err)
 			}
-			// Prep for next state
-			if err := utils.SetUserState(update, constants.Idle); err != nil {
+			if err := utils.SetUserState(update, constants.ConfirmAddPlaceSubmit); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
-			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s was added for this chat!", name))
+			utils.SetMessageTarget(update, messageID)
 		case "/cancel":
 			// Prep for next state
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
@@ -251,6 +260,38 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				}
 				return
 				// Don't continue to next action if adding tag through inline
+			}
+		}
+	case constants.ConfirmAddPlaceSubmit:
+		// Expect user to select from inline query (yes or no to submit)
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
+
+		confirm, err := utils.GetCallbackQueryMessage(update)
+		if err != nil {
+			log.Printf("error getting message from callback: %+v", err)
+		}
+		if confirm == "yes" {
+			// Submit
+			name, err := utils.AddPlaceFromTemp(update)
+			if err != nil {
+				log.Printf("error adding place from temp: %+v", err)
+				utils.SendMessage(update, "An error occured :( please try again")
+			}
+			// Prep for next state
+			if err := utils.SetUserState(update, constants.Idle); err != nil {
+				log.Printf("error SetUserState: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s was added for this chat!", name))
+			return
+		} else if confirm == "no" {
+			if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
+				log.Printf("error SetUserState: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		}
 	}
