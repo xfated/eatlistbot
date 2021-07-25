@@ -117,19 +117,27 @@ func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails) 
 }
 
 func SetReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error getting chat user ID: %+v", err)
+	}
+	msg := tgbotapi.NewMessage(chatID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
 	msg.ReplyToMessageID = update.Message.MessageID
-	_, err := bot.Send(msg)
+	_, err = bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
 	}
 }
 
 func SendInlineKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.InlineKeyboardMarkup) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error getting chat user ID: %+v", err)
+	}
+	msg := tgbotapi.NewMessage(chatID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
-	_, err := bot.Send(msg)
+	_, err = bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
 	}
