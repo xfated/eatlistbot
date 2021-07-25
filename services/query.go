@@ -77,9 +77,10 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	}
 
 	/* Send current tags */
-	curTags := strings.Join(queryTags, ", ")
-	utils.SendMessage(update, fmt.Sprintf("Current tags: %s", curTags))
-
+	if len(queryTags) > 0 {
+		curTags := strings.Join(queryTags, ", ")
+		utils.SendMessage(update, fmt.Sprintf("Current tags: %s", curTags))
+	}
 	/* Set each tag as its own inline row */
 	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, len(queryTags)+1)
 	for i, tag := range queryTags {
@@ -135,12 +136,16 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		}
 		switch message {
 		case "/withTag":
+			// withTag inline (tags, /done), GoTo QuerySetTags
+			// Send message "Don't add any to consider all places"
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with!")
+			utils.SendMessage(update, "(Don't add any to consider all places)")
 			if err := utils.SetUserState(update, constants.QueryOneSetTags); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		case "/withName":
+			// withName inline (names)
 			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -149,10 +154,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		default:
 			sendQueryOneTagOrNameResponse(update, "Please select one of the provided resposnes")
 		}
-		// withTag inline (tags, /done), GoTo QuerySetTags
-		// Send message "Don't add any to consider all places"
-
-		// withName inline (names)
 
 	/* Ask for tags to search with */
 	case constants.QueryOneSetTags:
