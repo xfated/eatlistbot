@@ -397,7 +397,7 @@ func SetChatTarget(update tgbotapi.Update, chatID int64) error {
 
 func GetChatTarget(update tgbotapi.Update) (int64, error) {
 	ctx := context.Background()
-	chatID, userID, err := GetChatUserIDString(update)
+	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return 0, err
 	}
@@ -405,7 +405,7 @@ func GetChatTarget(update tgbotapi.Update) (int64, error) {
 	/* Get target */
 	var target int64
 	chatTargetRef := client.NewRef("users").Child(userID).Child("target").Child("chat")
-	if err := chatTargetRef.Child(chatID).Get(ctx, &target); err != nil {
+	if err := chatTargetRef.Get(ctx, &target); err != nil {
 		return 0, err
 	}
 	return target, nil
@@ -445,7 +445,7 @@ func GetPlace(update tgbotapi.Update, name string) (constants.PlaceDetails, erro
 
 func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
 	ctx := context.Background()
-	// Get target chat, where addAddress was initiated
+	// Get target chat, where addplace was initiated
 	chatID, err := GetChatTarget(update)
 	chatIDString := strconv.FormatInt(chatID, 10)
 	// chatID, _, err := GetChatUserIDString(update)
