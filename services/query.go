@@ -13,31 +13,25 @@ import (
 
 func sendQuerySelectType(update tgbotapi.Update, text string) {
 	// Create buttons
-	getOneButton := tgbotapi.NewKeyboardButton("/getOne")
-	getFewButton := tgbotapi.NewKeyboardButton("/getFew")
-	getAllButton := tgbotapi.NewKeyboardButton("/getAll")
+	getOneButton := tgbotapi.NewInlineKeyboardButtonData("/getOne", "/getOne")
+	getFewButton := tgbotapi.NewInlineKeyboardButtonData("/getFew", "/getFew")
+	getAllButton := tgbotapi.NewInlineKeyboardButtonData("/getAll", "/getAll")
 	// Create rows
-	row := tgbotapi.NewKeyboardButtonRow(getOneButton, getFewButton, getAllButton)
+	row := tgbotapi.NewInlineKeyboardRow(getOneButton, getFewButton, getAllButton)
 
-	replyKeyboard := tgbotapi.NewReplyKeyboard(row)
-	replyKeyboard.ResizeKeyboard = true
-	replyKeyboard.OneTimeKeyboard = true
-	replyKeyboard.Selective = true
-	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 func sendQueryOneTagOrNameResponse(update tgbotapi.Update, text string) {
 	// Create buttons
-	withTagButton := tgbotapi.NewKeyboardButton("/withTag")
-	withNameButton := tgbotapi.NewKeyboardButton("/withName")
+	withTagButton := tgbotapi.NewInlineKeyboardButtonData("/withTag", "/withTag")
+	withNameButton := tgbotapi.NewInlineKeyboardButtonData("/withName", "/withName")
 	// Create rows
-	row := tgbotapi.NewKeyboardButtonRow(withTagButton, withNameButton)
+	row := tgbotapi.NewInlineKeyboardRow(withTagButton, withNameButton)
 
-	replyKeyboard := tgbotapi.NewReplyKeyboard(row)
-	replyKeyboard.ResizeKeyboard = true
-	replyKeyboard.OneTimeKeyboard = true
-	replyKeyboard.Selective = true
-	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
@@ -145,10 +139,15 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	switch userState {
 	case constants.QuerySelectType:
-		// Expect user to select from reply markup keyboard
-		message, _, err := utils.GetMessage(update)
+		// Expect user to select from inline markup keyboard
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
+		message, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
-			log.Printf("error GetMessage: %+v", err)
+			log.Printf("error GetCallbackQueryMessage: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
@@ -174,7 +173,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			// getAll GoTo QueryAllRetrieve
 			placeNames, err := utils.GetPlaceNames(update)
 			if err != nil {
-				log.Printf("error getting place names: %+v", err)
+				log.Printf("error GetPlaceNames: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
@@ -187,15 +186,18 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-		default:
-			sendQuerySelectType(update, "Please select a response from the provided options")
 		}
 	/* Ask to get one using tag or name */
 	case constants.QueryOneTagOrName:
-		// Expect user to select from reply markup keyboard (use tag or name to search)
-		message, _, err := utils.GetMessage(update)
+		// Expect user to select from inline markup keyboard (use tag or name to search)
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
+		message, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
-			log.Printf("error GetMessage: %+v", err)
+			log.Printf("error GetCallbackQueryMessage: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
@@ -217,14 +219,17 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-		default:
-			sendQueryOneTagOrNameResponse(update, "Please select one of the provided resposnes")
 		}
 
 	/* Ask for name to search with */
 	case constants.QueryOneSetName:
 		// Expect user to select from inline markup keyboard (select name of place)
-		// set name, GoTo QueryRetrieve. Markup("yes, no"), ask with pics
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
+
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
@@ -237,11 +242,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
-		}
-
-		/* If user send a message instead */
-		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
 		}
 
 	/* Ask how many records to get */
@@ -306,6 +306,12 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryRetrieve:
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
+
 		// Expect user to select from inline keyboard markup (yes or no to image)
 		sendImage, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
@@ -370,11 +376,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-		}
-
-		/* If user send a message instead */
-		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
 		}
 	}
 }

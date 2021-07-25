@@ -8,7 +8,7 @@ import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-func HandleUserInput(update tgbotapi.Update) {
+func HandleUserInput(update *tgbotapi.Update) {
 	/* Debugging */
 	utils.LogMessage(update)
 	utils.LogUpdate(update)

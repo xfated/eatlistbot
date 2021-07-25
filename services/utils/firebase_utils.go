@@ -48,7 +48,7 @@ func InitFirebase() {
 }
 
 /* ########## User State ##########*/
-func SetUserState(update tgbotapi.Update, state constants.State) error {
+func SetUserState(update *tgbotapi.Update, state constants.State) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -64,7 +64,7 @@ func SetUserState(update tgbotapi.Update, state constants.State) error {
 	return nil
 }
 
-func GetUserState(update tgbotapi.Update) (constants.State, error) {
+func GetUserState(update *tgbotapi.Update) (constants.State, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -84,7 +84,7 @@ func GetUserState(update tgbotapi.Update) (constants.State, error) {
 }
 
 /* ########## Name (Init place) ##########*/
-func InitPlace(update tgbotapi.Update) error {
+func InitPlace(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -106,7 +106,7 @@ func InitPlace(update tgbotapi.Update) error {
 }
 
 /* ########## Address ##########*/
-func SetTempPlaceAddress(update tgbotapi.Update) error {
+func SetTempPlaceAddress(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -128,7 +128,7 @@ func SetTempPlaceAddress(update tgbotapi.Update) error {
 	return nil
 }
 
-func UpdatePlaceAddress(update tgbotapi.Update, placeName, address string) error {
+func UpdatePlaceAddress(update *tgbotapi.Update, placeName, address string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -145,7 +145,7 @@ func UpdatePlaceAddress(update tgbotapi.Update, placeName, address string) error
 }
 
 /* ########## Notes ##########*/
-func SetTempPlaceNotes(update tgbotapi.Update) error {
+func SetTempPlaceNotes(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -167,7 +167,7 @@ func SetTempPlaceNotes(update tgbotapi.Update) error {
 	return nil
 }
 
-func UpdatePlaceNotes(update tgbotapi.Update, placeName, notes string) error {
+func UpdatePlaceNotes(update *tgbotapi.Update, placeName, notes string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -184,7 +184,7 @@ func UpdatePlaceNotes(update tgbotapi.Update, placeName, notes string) error {
 }
 
 /* ########## URL ##########*/
-func SetTempPlaceURL(update tgbotapi.Update) error {
+func SetTempPlaceURL(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -206,7 +206,7 @@ func SetTempPlaceURL(update tgbotapi.Update) error {
 	return nil
 }
 
-func UpdatePlaceURL(update tgbotapi.Update, placeName, url string) error {
+func UpdatePlaceURL(update *tgbotapi.Update, placeName, url string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -223,7 +223,7 @@ func UpdatePlaceURL(update tgbotapi.Update, placeName, url string) error {
 }
 
 /* ########## Images ##########*/
-func AddTempPlaceImage(update tgbotapi.Update) error {
+func AddTempPlaceImage(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -249,7 +249,7 @@ func AddTempPlaceImage(update tgbotapi.Update) error {
 	return nil
 }
 
-func AddPlaceImage(update tgbotapi.Update, placeName, imageID string) error {
+func AddPlaceImage(update *tgbotapi.Update, placeName, imageID string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -265,7 +265,7 @@ func AddPlaceImage(update tgbotapi.Update, placeName, imageID string) error {
 	return nil
 }
 
-func DeletePlaceImage(update tgbotapi.Update, placeName, imageID string) error {
+func DeletePlaceImage(update *tgbotapi.Update, placeName, imageID string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -280,7 +280,7 @@ func DeletePlaceImage(update tgbotapi.Update, placeName, imageID string) error {
 }
 
 /* ########## Tags ##########*/
-func AddTempPlaceTag(update tgbotapi.Update, tag string) error {
+func AddTempPlaceTag(update *tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -298,7 +298,7 @@ func AddTempPlaceTag(update tgbotapi.Update, tag string) error {
 	return nil
 }
 
-func AddPlaceTag(update tgbotapi.Update, placeName, tag string) error {
+func AddPlaceTag(update *tgbotapi.Update, placeName, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -314,7 +314,7 @@ func AddPlaceTag(update tgbotapi.Update, placeName, tag string) error {
 	return nil
 }
 
-func DeletePlaceTag(update tgbotapi.Update, placeName, tag string) error {
+func DeletePlaceTag(update *tgbotapi.Update, placeName, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -329,7 +329,7 @@ func DeletePlaceTag(update tgbotapi.Update, placeName, tag string) error {
 }
 
 /* get list of places */
-func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.PlaceDetails, error) {
+func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants.PlaceDetails, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -380,7 +380,7 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 }
 
 /* ########## Add Place ##########*/
-func SetChatTarget(update tgbotapi.Update, chatID int64) error {
+func SetChatTarget(update *tgbotapi.Update, chatID int64) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -395,7 +395,7 @@ func SetChatTarget(update tgbotapi.Update, chatID int64) error {
 	return nil
 }
 
-func GetChatTarget(update tgbotapi.Update) (int64, error) {
+func GetChatTarget(update *tgbotapi.Update) (int64, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -411,7 +411,7 @@ func GetChatTarget(update tgbotapi.Update) (int64, error) {
 	return target, nil
 }
 
-func GetTempPlace(update tgbotapi.Update) (constants.PlaceDetails, error) {
+func GetTempPlace(update *tgbotapi.Update) (constants.PlaceDetails, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -426,7 +426,7 @@ func GetTempPlace(update tgbotapi.Update) (constants.PlaceDetails, error) {
 	return PlaceData, nil
 }
 
-func GetPlace(update tgbotapi.Update, name string) (constants.PlaceDetails, error) {
+func GetPlace(update *tgbotapi.Update, name string) (constants.PlaceDetails, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -443,7 +443,7 @@ func GetPlace(update tgbotapi.Update, name string) (constants.PlaceDetails, erro
 	return placeData, nil
 }
 
-func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
+func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails) error {
 	ctx := context.Background()
 	// Get target chat, where addplace was initiated
 	chatID, err := GetChatTarget(update)
@@ -479,7 +479,7 @@ func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
 	return nil
 }
 
-func AddPlaceFromTemp(update tgbotapi.Update) (string, error) {
+func AddPlaceFromTemp(update *tgbotapi.Update) (string, error) {
 	// get from user details
 	placeData, err := GetTempPlace(update)
 	if err != nil {
@@ -493,7 +493,7 @@ func AddPlaceFromTemp(update tgbotapi.Update) (string, error) {
 }
 
 /* ########## Delete Place ##########*/
-func SetMessageTarget(update tgbotapi.Update, messageID int) error {
+func SetMessageTarget(update *tgbotapi.Update, messageID int) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -510,7 +510,7 @@ func SetMessageTarget(update tgbotapi.Update, messageID int) error {
 	return nil
 }
 
-func GetMessageTarget(update tgbotapi.Update) (int, error) {
+func GetMessageTarget(update *tgbotapi.Update) (int, error) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -526,7 +526,7 @@ func GetMessageTarget(update tgbotapi.Update) (int, error) {
 	return target, nil
 }
 
-func GetPlaceNames(update tgbotapi.Update) (map[string]bool, error) {
+func GetPlaceNames(update *tgbotapi.Update) (map[string]bool, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -543,7 +543,7 @@ func GetPlaceNames(update tgbotapi.Update) (map[string]bool, error) {
 }
 
 /* Read / Delete / Update tags */
-func GetTags(update tgbotapi.Update) (map[string]bool, error) {
+func GetTags(update *tgbotapi.Update) (map[string]bool, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -567,7 +567,7 @@ func GetTags(update tgbotapi.Update) (map[string]bool, error) {
 	return tags, nil
 }
 
-func DeleteTag(update tgbotapi.Update, tag string) error {
+func DeleteTag(update *tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -582,7 +582,7 @@ func DeleteTag(update tgbotapi.Update, tag string) error {
 	return nil
 }
 
-func updateTags(update tgbotapi.Update, chatID string, tag string) error {
+func updateTags(update *tgbotapi.Update, chatID string, tag string) error {
 	/* If same tag won't update. Implicitly prevent double records */
 	ctx := context.Background()
 
@@ -597,7 +597,7 @@ func updateTags(update tgbotapi.Update, chatID string, tag string) error {
 }
 
 /* ########## Query ##########*/
-func ResetQuery(update tgbotapi.Update) error {
+func ResetQuery(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -613,7 +613,7 @@ func ResetQuery(update tgbotapi.Update) error {
 }
 
 // message should contain name
-func SetQueryName(update tgbotapi.Update, name string) error {
+func SetQueryName(update *tgbotapi.Update, name string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -629,7 +629,7 @@ func SetQueryName(update tgbotapi.Update, name string) error {
 	return nil
 }
 
-func GetQueryName(update tgbotapi.Update) (string, error) {
+func GetQueryName(update *tgbotapi.Update) (string, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -644,7 +644,7 @@ func GetQueryName(update tgbotapi.Update) (string, error) {
 	return name, err
 }
 
-func SetQueryNum(update tgbotapi.Update, num int) error {
+func SetQueryNum(update *tgbotapi.Update, num int) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -661,7 +661,7 @@ func SetQueryNum(update tgbotapi.Update, num int) error {
 	return nil
 }
 
-func GetQueryNum(update tgbotapi.Update) (int, error) {
+func GetQueryNum(update *tgbotapi.Update) (int, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -677,7 +677,7 @@ func GetQueryNum(update tgbotapi.Update) (int, error) {
 }
 
 // message should contain tag
-func AddQueryTag(update tgbotapi.Update, tag string) error {
+func AddQueryTag(update *tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -694,7 +694,7 @@ func AddQueryTag(update tgbotapi.Update, tag string) error {
 	return nil
 }
 
-func GetQueryTags(update tgbotapi.Update) (map[string]bool, error) {
+func GetQueryTags(update *tgbotapi.Update) (map[string]bool, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -716,8 +716,25 @@ func GetQueryTags(update tgbotapi.Update) (map[string]bool, error) {
 	return tagsMap, nil
 }
 
+// func SetRecentInlineMessage(update *tgbotapi.Update) {
+// 	ctx := context.Background()
+// 	_, userID, err := GetChatUserIDString(update)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	/* Add tag */
+// 	queryRef := client.NewRef("users").Child(userID).Child("query")
+// 	if err := queryRef.Child("tags").Update(ctx, map[string]interface{}{
+// 		tag: true,
+// 	}); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
+
 /* ########## Delete Place ##########*/
-func SetPlaceTarget(update tgbotapi.Update, name string) error {
+func SetPlaceTarget(update *tgbotapi.Update, name string) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -734,7 +751,7 @@ func SetPlaceTarget(update tgbotapi.Update, name string) error {
 	return nil
 }
 
-func GetPlaceTarget(update tgbotapi.Update) (string, error) {
+func GetPlaceTarget(update *tgbotapi.Update) (string, error) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -750,7 +767,7 @@ func GetPlaceTarget(update tgbotapi.Update) (string, error) {
 	return target, nil
 }
 
-func DeletePlace(update tgbotapi.Update, placeName string) error {
+func DeletePlace(update *tgbotapi.Update, placeName string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {

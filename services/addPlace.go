@@ -10,7 +10,7 @@ import (
 )
 
 /* Create and send template reply keyboard */
-func sendTemplateReplies(update tgbotapi.Update, text string) {
+func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	// Create buttons
 	addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
 	addNotesButton := tgbotapi.NewKeyboardButton("/addNotes")
@@ -31,7 +31,7 @@ func sendTemplateReplies(update tgbotapi.Update, text string) {
 	replyKeyboard.Selective = true
 	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
 }
-func sendExistingTagsResponse(update tgbotapi.Update, text string) {
+func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	tagsMap, err := utils.GetTags(update)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
@@ -62,7 +62,7 @@ func sendExistingTagsResponse(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func sendConfirmSubmitResponse(update tgbotapi.Update, text string) {
+func sendConfirmSubmitResponse(update *tgbotapi.Update, text string) {
 	// Create buttons
 	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
 	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
@@ -73,7 +73,7 @@ func sendConfirmSubmitResponse(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
+func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.SetName:
 		// Expect user to send a text message (name of place)

@@ -9,7 +9,7 @@ import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-func sendPlacesToDeleteResponse(update tgbotapi.Update, text string) {
+func sendPlacesToDeleteResponse(update *tgbotapi.Update, text string) {
 	placeNames, err := utils.GetPlaceNames(update)
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
@@ -29,7 +29,7 @@ func sendPlacesToDeleteResponse(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func sendConfirmDeleteResponse(update tgbotapi.Update, text string) {
+func sendConfirmDeleteResponse(update *tgbotapi.Update, text string) {
 	// Create buttons
 	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
 	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
@@ -40,7 +40,7 @@ func sendConfirmDeleteResponse(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func deletePlaceHandler(update tgbotapi.Update, userState constants.State) {
+func deletePlaceHandler(update *tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.DeleteSelect:
 		// Expect user to select from inline keyboard markup. (name of places to delete)
