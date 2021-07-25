@@ -20,7 +20,8 @@ func sendQuerySelectType(update *tgbotapi.Update, text string) {
 	row := tgbotapi.NewInlineKeyboardRow(getOneButton, getFewButton, getAllButton)
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	message := utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	utils.SetRecentInlineMessage(update, message)
 }
 
 func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
@@ -31,7 +32,8 @@ func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
 	row := tgbotapi.NewInlineKeyboardRow(withTagButton, withNameButton)
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	message := utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	utils.SetRecentInlineMessage(update, message)
 }
 
 func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
@@ -42,7 +44,8 @@ func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
 	row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	message := utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	utils.SetRecentInlineMessage(update, message)
 }
 
 /* Search from available tags to get */

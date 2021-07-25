@@ -77,15 +77,15 @@ func LogCallbackQuery(update *tgbotapi.Update) {
 }
 
 /* Sending */
-func SendMessage(update *tgbotapi.Update, text string) error {
+func SendMessage(update *tgbotapi.Update, text string) (*tgbotapi.Message, error) {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	bot.Send(msg)
-	return nil
+	message, err := bot.Send(msg)
+	return &message, nil
 }
 
 func SendMessageTargetChat(text string, chatID int64) error {

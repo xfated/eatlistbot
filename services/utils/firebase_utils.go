@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -712,26 +713,83 @@ func GetQueryTags(update *tgbotapi.Update) (map[string]bool, error) {
 	return tagsMap, nil
 }
 
-// func SetRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
-// 	ctx := context.Background()
-// 	chatID, userID, err := GetChatUserIDString(update)
-// 	if err != nil {
-// 		return err
-// 	}
+func SetRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
 
-// 	if message == nil {
-// 		return errors.New("nil message")
-// 	}
-// 	messageID := message.MessageID
-// 	/* Add tag */
-// 	queryRef := client.NewRef("users").Child(userID).Child("query")
-// 	if err := queryRef.Child("tags").Update(ctx, map[string]interface{}{
-// 		tag: true,
-// 	}); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	if message == nil {
+		return errors.New("nil message")
+	}
+	messageID := message.MessageID
+
+	/* Add recent message data */
+	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
+	if err := recentInlineRef.Child("inline").Set(ctx, messageID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Add recent message data */
+	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
+	var messageID int
+	if err := recentInlineRef.Child("inline").Get(ctx, &messageID); err != nil {
+		return err
+	}
+
+	// TODO: Add Delete
+	return nil
+}
+
+func AddRecentMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	if message == nil {
+		return errors.New("nil message")
+	}
+	messageID := strconv.Itoa(message.MessageID)
+
+	/* Add recent message data */
+	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
+	if err := recentInlineRef.Child("messages").Update(ctx, map[string]interface{}{
+		messageID: true,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteRecentMessages(update *tgbotapi.Update) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Add recent message data */
+	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
+	var messageIDs map[string]bool
+	if err := recentInlineRef.Child("messages").Get(ctx, &messageIDs); err != nil {
+		return err
+	}
+
+	// TODO: implement delete
+	return nil
+}
 
 /* ########## Delete Place ##########*/
 func SetPlaceTarget(update *tgbotapi.Update, name string) error {
