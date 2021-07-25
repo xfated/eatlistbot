@@ -565,18 +565,13 @@ func ResetQuery(update tgbotapi.Update) error {
 }
 
 // message should contain name
-func SetQueryName(update tgbotapi.Update) error {
+func SetQueryName(update tgbotapi.Update, name string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	/* Set temp under userRef */
-	name, _, err := GetMessage(update)
-	if err != nil {
-		return err
-	}
 	queryRef := client.NewRef("users").Child(userID).Child("query")
 	if err := queryRef.Update(ctx, map[string]interface{}{
 		"name": name,

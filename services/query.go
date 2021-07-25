@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/xfated/golistbot/services/constants"
@@ -76,7 +77,7 @@ func addAndSendSelectedTags(update tgbotapi.Update, tag string) {
 func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	tagsMap, err := utils.GetTags(update)
 	if err != nil {
-		log.Printf("error sending tags: %+v", err)
+		log.Printf("error GetTags: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
 	}
 
@@ -97,12 +98,6 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
 		)
 		i++
-		// /* Show if tag not chosen yet */
-		// if !queryTagsMap[tag] {
-		// 	tagButtons = append(tagButtons, tgbotapi.NewInlineKeyboardRow(
-		// 		tgbotapi.NewInlineKeyboardButtonData(tag, tag),
-		// 	))
-		// }
 	}
 	tagButtons[len(tagsMap)] = doneRow
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
@@ -111,15 +106,42 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 
 /* Search from name of places */
 func sendAvailablePlaceNamesResponse(update tgbotapi.Update, text string) {
+	placeNames, err := utils.GetPlaceNames(update)
+	if err != nil {
+		log.Printf("error GetPlaceNames: %+v", err)
+		utils.SendMessage(update, "Sorry, an error occured!")
+	}
 
+	/* Set each name as its own inline row */
+	var nameButtons = make([][]tgbotapi.InlineKeyboardButton, len(placeNames))
+	i := 0
+	for name := range placeNames {
+		nameButtons[i] = tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(name, name),
+		)
+		i++
+	}
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(nameButtons...)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 func queryHandler(update tgbotapi.Update, userState constants.State) {
+	/* Check if there are any places registed */
+	placeNames, err := utils.GetPlaceNames(update)
+	if err != nil {
+		log.Printf("error GetPlaceNames: %+v", err)
+		utils.SendMessage(update, "Sorry an error occured")
+	}
+	if len(placeNames) == 0 {
+		utils.SendMessage(update, "No places registered :( go add some")
+		return
+	}
+
 	switch userState {
 	case constants.QuerySelectType:
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
-			log.Printf("error getting message: %+v", err)
+			log.Printf("error GetMessage: %+v", err)
 		}
 		switch message {
 		case "/getOne":
@@ -132,7 +154,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			}
 		case "/getFew":
 			// getFew GoTo QueryFewSetNum. Message how many they want?
-			utils.RemoveMarkupKeyboard(update, "How many places do you want?")
+			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("How many places do you want? (you have %v recorded)", len(placeNames)))
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -158,7 +180,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	case constants.QueryOneTagOrName:
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
-			log.Printf("error getting message: %+v", err)
+			log.Printf("error GetMessage: %+v", err)
 		}
 		switch message {
 		case "/withTag":
@@ -185,16 +207,43 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask for name to search with */
 	case constants.QueryOneSetName:
-		// message, _, err := utils.GetMessage(update)
-		// if err != nil {
-		// 	log.Printf("error setting message: %+v", err)
-		// }
+		// set name, GoTo QueryRetrieve. Markup("yes, no"), ask with pics
+		name, err := utils.GetCallbackQueryMessage(update)
+		if err != nil {
+			log.Printf("error GetCallbackQueryMessage: %+v", err)
+		}
+		utils.SetQueryName(update, name)
 
-		// set name, GoTo QueryOneRetrieve. Markup("yes, no"), ask with pics
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+		}
 
 	/* Ask how many records to get */
 	case constants.QueryFewSetNum:
+		// Get queryNum
+		message, _, err := utils.GetMessage(update)
+		if err != nil {
+			log.Printf("error GetMessage: %+v", err)
+		}
+		numQuery, err := strconv.Atoi(message)
+		if err != nil || numQuery < 0 {
+			utils.SendMessage(update, "comeon, send a proper number")
+			return
+		}
 
+		// Add queryNum
+		if numQuery > len(placeNames) {
+			utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
+			utils.SetQueryNum(update, len(placeNames))
+		} else {
+			utils.SetQueryNum(update, numQuery)
+		}
+
+		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+			log.Printf("error SetUserState: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+		}
 	/* Ask for tags to search with */
 	case constants.QuerySetTags:
 		// tag addTag, preview current, inline (show tags not yet added, /done)
@@ -221,7 +270,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryRetrieve:
 		sendImage, err := utils.GetCallbackQueryMessage(update)
-		log.Printf("sendImage: %+s", sendImage)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
@@ -273,7 +321,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			for _, placeData := range places[:queryNum] {
-				log.Printf("senting details for: %+v", placeData)
 				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 			}
 		}
