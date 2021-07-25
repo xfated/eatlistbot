@@ -140,6 +140,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	switch userState {
 	case constants.QuerySelectType:
+		// Expect user to select from reply markup keyboard
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error GetMessage: %+v", err)
@@ -180,6 +181,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		}
 	/* Ask to get one using tag or name */
 	case constants.QueryOneTagOrName:
+		// Expect user to select from reply markup keyboard (use tag or name to search)
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error GetMessage: %+v", err)
@@ -209,6 +211,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask for name to search with */
 	case constants.QueryOneSetName:
+		// Expect user to select from inline markup keyboard (select name of place)
 		// set name, GoTo QueryRetrieve. Markup("yes, no"), ask with pics
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
@@ -228,6 +231,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask how many records to get */
 	case constants.QueryFewSetNum:
+		// Expect user to send a number (number of records to query)
 		// Get queryNum
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
@@ -247,13 +251,17 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SetQueryNum(update, numQuery)
 		}
 
-		sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
-		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
+		utils.SendMessage(update, "(Don't add any to consider all places)")
+		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 		}
+
 	/* Ask for tags to search with */
 	case constants.QuerySetTags:
+		// Expect user to select from inline keyboard markup (tags to include)
+
 		// tag addTag, preview current, inline (show tags not yet added, /done)
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
@@ -277,6 +285,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryRetrieve:
+		// Expect user to select from inline keyboard markup (yes or no to image)
 		sendImage, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)

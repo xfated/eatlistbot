@@ -31,10 +31,40 @@ func sendTemplateReplies(update tgbotapi.Update, text string) {
 	replyKeyboard.Selective = true
 	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
 }
+func sendExistingTagsResponse(update tgbotapi.Update, text string) {
+	tagsMap, err := utils.GetTags(update)
+	if err != nil {
+		log.Printf("error GetTags: %+v", err)
+		utils.SendMessage(update, "Sorry, an error occured!")
+	}
 
+	doneButton := tgbotapi.NewInlineKeyboardButtonData("/done", "/done")
+	doneRow := tgbotapi.NewInlineKeyboardRow(doneButton)
+
+	/* No tags, just send done */
+	if len(tagsMap) == 0 {
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(doneRow)
+		utils.SendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", inlineKeyboard)
+		return
+	}
+
+	/* Set each tag as its own inline row */
+	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, len(tagsMap)+1)
+	i := 0
+	for tag := range tagsMap {
+		tagButtons[i] = tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
+		)
+		i++
+	}
+	tagButtons[len(tagsMap)] = doneRow
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+}
 func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.SetName:
+		// Expect user to send a text message (name of place)
 		// Message should contain name of place
 		if err := utils.InitPlace(update); err != nil {
 			log.Printf("Error creating new place: %+v", err)
@@ -46,6 +76,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 		}
 		utils.SendMessage(update, "Start adding the details for the place")
 	case constants.ReadyForNextAction:
+		// Expect user to pick next state from reply markup
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error setting message: %+v", err)
@@ -85,14 +116,16 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
-			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of places)")
+			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of places)\n"+
+				"Type new or pick from existing\nPress done once done!")
+			sendExistingTagsResponse(update, "Existing tags:")
 		case "/preview":
 			// Get data and send
 			placeData, err := utils.GetTempPlace(update)
 			if err != nil {
 				log.Printf("error getting temp place: %+v", err)
 			}
-			utils.SendPlaceDetails(update, placeData, false)
+			utils.SendPlaceDetails(update, placeData, true)
 			sendTemplateReplies(update, "Select your next action")
 		case "/submit":
 			// Submit
@@ -119,6 +152,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 		}
 		return
 	case constants.SetAddress:
+		// Expect user to send a text message (address of place)
 		// Message should contain address
 		if err := utils.SetTempPlaceAddress(update); err != nil {
 			log.Printf("Error adding address: %+v", err)
@@ -132,6 +166,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 		}
 	case constants.SetNotes:
+		// Expect user to send a text message (notes for the place)
 		// Message should contain notes
 		if err := utils.SetTempPlaceNotes(update); err != nil {
 			log.Printf("Error adding notes: %+v", err)
@@ -145,6 +180,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 		}
 	case constants.SetURL:
+		// Expect user to send a text message (URL for the place)
 		// Message should contain url
 		if err := utils.SetTempPlaceURL(update); err != nil {
 			log.Printf("Error adding url: %+v", err)
@@ -158,6 +194,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 		}
 	case constants.SetImages:
+		// Expect user to send a photo
 		// should be an image input
 		if err := utils.AddTempPlaceImage(update); err != nil {
 			log.Printf("Error adding image: %+v", err)
@@ -171,17 +208,45 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 		}
 	case constants.SetTags:
-		// Message should contain text
-		if err := utils.AddTempPlaceTag(update); err != nil {
-			log.Printf("Error adding tag: %+v", err)
-			utils.SendMessage(update, "Tag should be a text")
-		} else {
-			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", update.Message.Text))
+		// Expect user to send a text message or Select from inline keyboard markup (set as tag for the place)
+		// First Check if is typed.
+		if update.Message != nil {
+			tag, _, err := utils.GetMessage(update)
+			if err != nil {
+				log.Printf("error GetMessage: %+v", err)
+			}
+			if err := utils.AddTempPlaceTag(update, tag); err != nil {
+				log.Printf("Error adding tag: %+v", err)
+				utils.SendMessage(update, "Tag should be a text")
+			} else {
+				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", update.Message.Text))
+			}
+			// Only continue if /done is pressed
+			return
 		}
-		// Prep for next state
-		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
-			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+
+		// Then check if its a keyboard reply
+		tag, err := utils.GetCallbackQueryMessage(update)
+		if err != nil {
+			log.Printf("error GetCallbackQueryMessage: %+v", err)
+		}
+		if len(tag) > 0 {
+			switch tag {
+			case "/done":
+				// Prep for next state
+				if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
+					log.Printf("error SetUserState: %+v", err)
+					utils.SendMessage(update, "Sorry an error occured!")
+				}
+			default:
+				if err := utils.AddTempPlaceTag(update, tag); err != nil {
+					log.Printf("Error adding tag: %+v", err)
+				} else {
+					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", update.Message.Text))
+				}
+				return
+				// Don't continue to next action if adding tag through inline
+			}
 		}
 	}
 

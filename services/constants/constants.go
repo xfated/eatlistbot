@@ -6,7 +6,7 @@ type State int
 const (
 	Idle State = iota
 
-	/* #### Adding place #### */
+	/* #### Adding Place #### */
 	ReadyForNextAction
 	SetName
 	SetAddress
@@ -27,7 +27,10 @@ const (
 	QueryRetrieve
 	/* ######## */
 
-	Finished
+	/* #### Delete Place #### */
+	DeleteSelect
+	DeleteConfirm
+	/* ######## */
 )
 
 type PlaceDetails struct {
@@ -76,6 +79,16 @@ func IsQuery(state State) bool {
 
 		QuerySetTags,
 		QueryRetrieve:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsDeletePlace(state State) bool {
+	switch state {
+	case DeleteSelect,
+		DeleteConfirm:
 		return true
 	default:
 		return false

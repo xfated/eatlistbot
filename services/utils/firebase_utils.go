@@ -46,7 +46,7 @@ func InitFirebase() {
 	log.Println("Loaded firebase")
 }
 
-/* User State */
+/* ########## User State ##########*/
 func SetUserState(update tgbotapi.Update, state constants.State) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -82,7 +82,7 @@ func GetUserState(update tgbotapi.Update) (constants.State, error) {
 	return constants.State(stateInt), err
 }
 
-/* Name (Also init place) */
+/* ########## Name (Init place) ##########*/
 func InitPlace(update tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -104,7 +104,7 @@ func InitPlace(update tgbotapi.Update) error {
 	return nil
 }
 
-/* Address */
+/* ########## Address ##########*/
 func SetTempPlaceAddress(update tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -143,7 +143,7 @@ func UpdatePlaceAddress(update tgbotapi.Update, placeName, address string) error
 	return nil
 }
 
-/* Notes */
+/* ########## Notes ##########*/
 func SetTempPlaceNotes(update tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -182,7 +182,7 @@ func UpdatePlaceNotes(update tgbotapi.Update, placeName, notes string) error {
 	return nil
 }
 
-/* URL */
+/* ########## URL ##########*/
 func SetTempPlaceURL(update tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -221,7 +221,7 @@ func UpdatePlaceURL(update tgbotapi.Update, placeName, url string) error {
 	return nil
 }
 
-/* Images */
+/* ########## Images ##########*/
 func AddTempPlaceImage(update tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -278,8 +278,8 @@ func DeletePlaceImage(update tgbotapi.Update, placeName, imageID string) error {
 	return nil
 }
 
-/* Tags */
-func AddTempPlaceTag(update tgbotapi.Update) error {
+/* ########## Tags ##########*/
+func AddTempPlaceTag(update tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -287,10 +287,6 @@ func AddTempPlaceTag(update tgbotapi.Update) error {
 	}
 
 	/* Set temp under userRef */
-	tag, _, err := GetMessage(update)
-	if err != nil {
-		return err
-	}
 	userRef := client.NewRef("users").Child(userID)
 	if err := userRef.Child("placeToAdd").Child("tags").Update(ctx, map[string]interface{}{
 		tag: true,
@@ -382,7 +378,7 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 	return placesList, nil
 }
 
-/* Add / Delete places */
+/* ########## Add / Delete ##########*/
 func GetTempPlace(update tgbotapi.Update) (constants.PlaceDetails, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -548,7 +544,7 @@ func updateTags(update tgbotapi.Update, tag string) error {
 	return nil
 }
 
-/* Handle queries */
+/* ########## Query ##########*/
 func ResetQuery(update tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -588,7 +584,7 @@ func GetQueryName(update tgbotapi.Update) (string, error) {
 		return "", err
 	}
 
-	queryRef := client.NewRef("users").Child(userID).Child("query")
+	queryRef := client.NewRef("users").Child(userID).Child("query").Child("name")
 	var name string
 	if err := queryRef.Get(ctx, &name); err != nil {
 		return "", err
@@ -666,4 +662,38 @@ func GetQueryTags(update tgbotapi.Update) (map[string]bool, error) {
 	// 	i++
 	// }
 	return tagsMap, nil
+}
+
+/* ########## Delete Place ##########*/
+func SetPlaceTarget(update tgbotapi.Update, name string) error {
+	ctx := context.Background()
+	chatID, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Set target */
+	placeTargetRef := client.NewRef("users").Child(userID).Child("target")
+	if err := placeTargetRef.Update(ctx, map[string]interface{}{
+		chatID: name,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetPlaceTarget(update tgbotapi.Update) (string, error) {
+	ctx := context.Background()
+	chatID, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return "", err
+	}
+
+	/* Get target */
+	var target string
+	placeTargetRef := client.NewRef("users").Child(userID).Child("target")
+	if err := placeTargetRef.Child(chatID).Get(ctx, &target); err != nil {
+		return "", err
+	}
+	return target, nil
 }

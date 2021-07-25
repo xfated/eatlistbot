@@ -45,6 +45,13 @@ func HandleUserInput(update tgbotapi.Update) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			return
+		case "/deleteplace",
+			"/deleteplace@toGoListBot":
+			sendPlacesToDeleteResponse(update, "Just select place do you want to delete?")
+			if err := utils.SetUserState(update, constants.DeleteSelect); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
 		}
 	}
 
@@ -67,8 +74,15 @@ func HandleUserInput(update tgbotapi.Update) {
 		return
 	}
 
+	/* Querying places */
 	if constants.IsQuery(userState) {
 		queryHandler(update, userState)
+		return
+	}
+
+	/* Delete place */
+	if constants.IsDeletePlace(userState) {
+		deletePlaceHandler(update, userState)
 		return
 	}
 }
