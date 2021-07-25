@@ -240,6 +240,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SetQueryNum(update, numQuery)
 		}
 
+		sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
