@@ -224,7 +224,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
-		if !(sendImage == "yes" || sendImage == "no") {
+		if !(sendImage == "/yes" || sendImage == "/no") {
 			sendQueryGetImagesResponse(update, "yes or no?")
 		} else {
 			queryName, _ := utils.GetQueryName(update)
@@ -240,7 +240,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 					utils.SendMessage(update, "Sorry, error with getting data on the place.")
 					return
 				}
-				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
+				utils.SendPlaceDetails(update, placeData, sendImage == "/yes")
 				if err := utils.SetUserState(update, constants.Idle); err != nil {
 					log.Printf("error SetUserState: %+v", err)
 				}
@@ -271,7 +271,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			for _, placeData := range places[:queryNum] {
-				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
+				utils.SendPlaceDetails(update, placeData, sendImage == "/yes")
 			}
 		}
 
