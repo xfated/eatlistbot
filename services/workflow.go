@@ -30,6 +30,14 @@ func HandleUserInput(update tgbotapi.Update) {
 			return
 		case "/start addPlace":
 			// Add place in pm after redirect
+			targetChat, err := utils.GetChatTarget(update)
+			if err != nil {
+				log.Printf("error GetChatTarget: %+v", err)
+			}
+			if targetChat == 0 {
+				utils.SendMessage(update, "Please send /addplace back in the chat if you'd like to add a place")
+				return
+			}
 			utils.SendMessage(update, "Please enter the name of the place to begin")
 			if err := utils.SetUserState(update, constants.SetName); err != nil {
 				log.Printf("error setting state: %+v", err)

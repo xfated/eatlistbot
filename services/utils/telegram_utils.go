@@ -88,9 +88,10 @@ func SendMessage(update tgbotapi.Update, text string) error {
 	return nil
 }
 
-func SendMessageTargetChat(text string, chatID int64) {
+func SendMessageTargetChat(text string, chatID int64) error {
 	msg := tgbotapi.NewMessage(chatID, text)
-	bot.Send(msg)
+	_, err := bot.Send(msg)
+	return err
 }
 
 func SendUnknownCommand(update tgbotapi.Update) {

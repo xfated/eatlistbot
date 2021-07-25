@@ -288,7 +288,11 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s has been added!", name))
-			utils.SendMessage(update, "To add a new place to the chat, please initiate /addaddress within that chat")
+			utils.SendMessage(update, "To add a new place to the chat, please initiate /addchat back in that chat")
+			err = utils.SetChatTarget(update, 0)
+			if err != nil {
+				log.Printf("error SetChatTarget: %+v", err)
+			}
 			return
 		} else if confirm == "no" {
 			if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {

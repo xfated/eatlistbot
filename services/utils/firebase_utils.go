@@ -458,8 +458,10 @@ func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
 	if err := chatRef.Child(placeData.Name).Set(ctx, placeData); err != nil {
 		return err
 	}
-	SendMessageTargetChat(fmt.Sprintf("%s has been added to the chat", placeData.Name), chatID)
-
+	err = SendMessageTargetChat(fmt.Sprintf("%s has been added here", placeData.Name), chatID)
+	if err != nil {
+		log.Printf("error SendMessageTargetChat: %+v", err)
+	}
 	/* Add tags to tag collection */
 	for tag := range placeData.Tags {
 		if err := updateTags(update, tag, chatIDString); err != nil {
