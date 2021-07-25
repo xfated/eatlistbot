@@ -56,7 +56,9 @@ func deletePlaceHandler(update tgbotapi.Update, userState constants.State) {
 		}
 		utils.SetPlaceTarget(update, name)
 		sendConfirmDeleteResponse(update, "Are you sure?")
-
+		if err := utils.SetUserState(update, constants.DeleteSelect); err != nil {
+			log.Printf("error SetUserState: %+v", err)
+		}
 	case constants.DeleteConfirm:
 		/* If user send a message instead */
 		if update.Message != nil {
