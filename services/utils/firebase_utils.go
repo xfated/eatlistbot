@@ -342,7 +342,7 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 
 	/* get places */
 	var places map[string]constants.PlaceDetails
-	userRef := client.NewRef("place").Child(chatID)
+	userRef := client.NewRef("places").Child(chatID)
 	if err := userRef.Get(ctx, &places); err != nil {
 		return []constants.PlaceDetails{}, err
 	}
