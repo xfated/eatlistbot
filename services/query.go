@@ -231,7 +231,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			// if name != "", get and show place data. (one result)
 			if len(queryName) > 0 {
 				// DEBUG
-				log.Printf("Sending query with name: %s", queryName)
+				// log.Printf("Sending query with name: %s", queryName)
 
 				placeData, err := utils.GetPlace(update, queryName)
 				if err != nil {
