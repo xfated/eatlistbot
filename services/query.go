@@ -55,7 +55,7 @@ func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
 
 /* Search from available tags to get */
 func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
-	tags, err := utils.GetTags(update)
+	tagsMap, err := utils.GetTags(update)
 	if err != nil {
 		log.Printf("error sending tags: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
@@ -65,30 +65,40 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	doneRow := tgbotapi.NewInlineKeyboardRow(doneButton)
 
 	/* No tags, just send done */
-	if len(tags) == 0 {
+	if len(tagsMap) == 0 {
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(doneRow)
 		utils.SendInlineKeyboard(update, "No tags found", inlineKeyboard)
 	}
 
 	/* Extract tags */
-	queryTags, err := utils.GetQueryTags(update)
+	queryTagsMap, err := utils.GetQueryTags(update)
 	if err != nil {
 		log.Printf("error getting query tags: %+v", err)
 	}
 
 	/* Send current tags */
-	if len(queryTags) > 0 {
+	if len(queryTagsMap) > 0 {
+		var queryTags = make([]string, len(queryTagsMap))
+		i := 0
+		for tag := range queryTagsMap {
+			queryTags[i] = tag
+			i++
+		}
 		curTags := strings.Join(queryTags, ", ")
 		utils.SendMessage(update, fmt.Sprintf("Current tags: %s", curTags))
 	}
+
 	/* Set each tag as its own inline row */
-	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, len(queryTags)+1)
-	for i, tag := range queryTags {
-		tagButtons[i] = tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
-		)
+	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, 0)
+	for tag := range tagsMap {
+		/* Show if tag not chosen yet */
+		if !queryTagsMap[tag] {
+			tagButtons = append(tagButtons, tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(tag, tag),
+			))
+		}
 	}
-	tagButtons[len(tagButtons)-1] = doneRow
+	tagButtons = append(tagButtons, doneRow)
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
 	utils.SendInlineKeyboard(update, "Add another tag or done", inlineKeyboard)
 }

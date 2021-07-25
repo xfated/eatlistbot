@@ -413,28 +413,28 @@ func DeletePlace(update tgbotapi.Update, placeName string) error {
 }
 
 /* Read / Delete / Update tags */
-func GetTags(update tgbotapi.Update) ([]string, error) {
+func GetTags(update tgbotapi.Update) (map[string]bool, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
-		return []string{}, err
+		return map[string]bool{}, err
 	}
 	chatRef := client.NewRef("tags").Child(chatID)
 
 	/* Retrieve tags */
 	var tags map[string]bool
 	if err := chatRef.Get(ctx, &tags); err != nil {
-		return []string{}, err
+		return map[string]bool{}, err
 	}
 
-	/* get slice of tags */
-	tagSlice := make([]string, len(tags))
-	i := 0
-	for tag := range tags {
-		tagSlice[i] = tag
-		i++
-	}
-	return tagSlice, nil
+	// /* get slice of tags */
+	// tagSlice := make([]string, len(tags))
+	// i := 0
+	// for tag := range tags {
+	// 	tagSlice[i] = tag
+	// 	i++
+	// }
+	return tags, nil
 }
 
 func DeleteTag(update tgbotapi.Update, tag string) error {
@@ -653,24 +653,24 @@ func AddQueryTag(update tgbotapi.Update) error {
 	return nil
 }
 
-func GetQueryTags(update tgbotapi.Update) ([]string, error) {
+func GetQueryTags(update tgbotapi.Update) (map[string]bool, error) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
-		return []string{}, err
+		return map[string]bool{}, err
 	}
 
 	var tagsMap map[string]bool
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
 	if err := userRef.Child("query").Child("tags").Get(ctx, &tagsMap); err != nil {
-		return []string{}, err
+		return map[string]bool{}, err
 	}
 
-	var tags = make([]string, len(tagsMap))
-	i := 0
-	for tag := range tagsMap {
-		tags[i] = tag
-		i++
-	}
-	return tags, nil
+	// var tags = make([]string, len(tagsMap))
+	// i := 0
+	// for tag := range tagsMap {
+	// 	tags[i] = tag
+	// 	i++
+	// }
+	return tagsMap, nil
 }
