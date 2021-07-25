@@ -224,13 +224,14 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
-		if !(sendImage == "/yes" || sendImage == "/no") {
-			sendQueryGetImagesResponse(update, "yes or no?")
-		} else {
+		if len(sendImage) > 0 {
 			queryName, _ := utils.GetQueryName(update)
 
 			// if name != "", get and show place data. (one result)
 			if len(queryName) > 0 {
+				// DEBUG
+				log.Printf("Sending query with name: %s", queryName)
+
 				placeData, err := utils.GetPlace(update, queryName)
 				if err != nil {
 					log.Printf("error GetPlace: %+v", err)
