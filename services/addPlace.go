@@ -219,7 +219,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				log.Printf("Error adding tag: %+v", err)
 				utils.SendMessage(update, "Tag should be a text")
 			} else {
-				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", update.Message.Text))
+				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
 			}
 			// Only continue if /done is pressed
 			return
@@ -242,7 +242,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				if err := utils.AddTempPlaceTag(update, tag); err != nil {
 					log.Printf("Error adding tag: %+v", err)
 				} else {
-					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", update.Message.Text))
+					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
 				}
 				return
 				// Don't continue to next action if adding tag through inline

@@ -43,15 +43,18 @@ func deletePlaceHandler(update tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.DeleteSelect:
 		// Expect user to select from inline keyboard markup. (name of places to delete)
-		// name, err := utils.GetCallbackQueryMessage(update)
-		// if err != nil {
-		// 	log.Printf("error getting message from callback: %+v", err)
-		// }
-
 		/* If user send a message instead */
 		if update.Message != nil {
 			utils.SendMessage(update, "Please select from the above options")
+			return
 		}
+
+		name, err := utils.GetCallbackQueryMessage(update)
+		if err != nil {
+			log.Printf("error getting message from callback: %+v", err)
+		}
+		utils.SetPlaceTarget(update, name)
+
 	case constants.DeleteConfirm:
 	}
 }

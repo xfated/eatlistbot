@@ -261,6 +261,11 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	/* Ask for tags to search with */
 	case constants.QuerySetTags:
 		// Expect user to select from inline keyboard markup (tags to include)
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
 
 		// tag addTag, preview current, inline (show tags not yet added, /done)
 		tag, err := utils.GetCallbackQueryMessage(update)
@@ -276,11 +281,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			}
 		} else {
 			addAndSendSelectedTags(update, tag)
-		}
-
-		/* If user send a message instead */
-		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
 		}
 
 	/* Ask whether want pics, and retrieve */
