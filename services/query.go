@@ -221,6 +221,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryRetrieve:
 		sendImage, err := utils.GetCallbackQueryMessage(update)
+		log.Printf("sendImage: %+s", sendImage)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
