@@ -1,267 +1,59 @@
 package services
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
+	"github.com/xfated/golistbot/services/constants"
+	"github.com/xfated/golistbot/services/utils"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
 func HandleUserInput(update tgbotapi.Update) {
 	/* Check for main commands */
-	message, _, err := getMessage(update)
+	message, _, err := utils.GetMessage(update)
 	if err == nil {
 		switch message {
-		case "/start":
-			// sendStartInstructions(update)
-			removeMarkupKeyboard(update, "Haha you sent start")
-			if err := setUserState(update, Idle); err != nil {
+		case "/start",
+			"/start@toGoListBot",
+			"/reset",
+			"/reset@toGoListBot":
+			utils.RemoveMarkupKeyboard(update, "I am ready!")
+			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry an error occured!")
 			}
+		case "/query",
+			"/query@toGoListBot":
+			sendQuerySelectType(update, "How many places are you asking for?")
+			if err := utils.SetUserState(update, constants.QuerySelectType); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			return
 		}
 	}
 
 	/* Get user state for Targeted handling */
-	userState, err := getUserState(update)
+	userState, err := utils.GetUserState(update)
 	if err != nil {
 		log.Printf("error getting user state: %+v", err)
 		return
 	}
 
 	/* Idle state */
-	if userState == Idle {
-		switch update.Message.Text {
-		case "/addplace":
-		case "/addplace@toGoListBot":
-			if err := setUserState(update, SetName); err != nil {
-				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
-			}
-			sendMessage(update, "Please enter the name of the place to begin")
-		}
+	if userState == constants.Idle {
+		idleHandler(update)
 		return
 	}
 
 	/* Adding new place */
-	if IsAddingNewPlace(userState) {
-		/* Create and send template reply keyboard */
-		sendTemplateReplies := func(text string) {
-			// Create buttons
-			addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
-			addURLButton := tgbotapi.NewKeyboardButton("/addURL")
-			addImageButton := tgbotapi.NewKeyboardButton("/addImage")
-			addTagButton := tgbotapi.NewKeyboardButton("/addTag")
-			previewButton := tgbotapi.NewKeyboardButton("/preview")
-			submitButton := tgbotapi.NewKeyboardButton("/submit")
-			cancelButton := tgbotapi.NewKeyboardButton("/cancel")
-			// Create rows
-			row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton)
-			row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton)
-			row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
-
-			replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
-			replyKeyboard.ResizeKeyboard = true
-			replyKeyboard.OneTimeKeyboard = true
-			replyKeyboard.Selective = true
-			setReplyMarkupKeyboard(update, text, replyKeyboard)
-		}
-
-		switch userState {
-		case SetName:
-			// Message should contain name of place
-			if err := initPlace(update); err != nil {
-				log.Printf("Error creating new place: %+v", err)
-				sendMessage(update, "Message should be a text")
-			}
-			if err := setUserState(update, ReadyForNextAction); err != nil {
-				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
-			}
-			sendMessage(update, "Start adding the details for the place")
-		case ReadyForNextAction:
-			message, _, err := getMessage(update)
-			if err != nil {
-				log.Printf("error getting message: %+v", err)
-			}
-			switch message {
-			case "/addAddress":
-				// Prep for next state
-				if err := setUserState(update, SetAddress); err != nil {
-					log.Printf("error setting state: %+v", err)
-					sendMessage(update, "Sorry an error occured!")
-				}
-				removeMarkupKeyboard(update, "Send an address to be added")
-			case "/addURL":
-				// Prep for next state
-				if err := setUserState(update, SetURL); err != nil {
-					log.Printf("error setting state: %+v", err)
-					sendMessage(update, "Sorry an error occured!")
-				}
-				removeMarkupKeyboard(update, "Send a URL to be added")
-			case "/addImage":
-				// Prep for next state
-				if err := setUserState(update, SetImages); err != nil {
-					log.Printf("error setting state: %+v", err)
-					sendMessage(update, "Sorry an error occured!")
-				}
-				removeMarkupKeyboard(update, "Send an image to be added")
-			case "/addTag":
-				// Prep for next state
-				if err := setUserState(update, SetTags); err != nil {
-					log.Printf("error setting state: %+v", err)
-					sendMessage(update, "Sorry an error occured!")
-				}
-				removeMarkupKeyboard(update, "Send a tag to be added")
-			case "/preview":
-				// Get data and send
-				placeData, err := getTempPlace(update)
-				if err != nil {
-					log.Printf("error getting temp place: %+v", err)
-				}
-				placeText := ""
-				if placeData.Name != "" {
-					placeText = placeText + fmt.Sprintf("Name: %s\n", placeData.Name)
-				}
-				if placeData.Address != "" {
-					placeText = placeText + fmt.Sprintf("Address: %s\n", placeData.Address)
-				}
-				if placeData.URL != "" {
-					placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
-				}
-				if placeData.Images != nil {
-					placeText = placeText + fmt.Sprintf("Images: %v\n", len(placeData.Images))
-				}
-				if placeData.Tags != nil {
-					tags := make([]string, len(placeData.Tags))
-					i := 0
-					for tag := range placeData.Tags {
-						tags[i] = tag
-						i++
-					}
-					tagText := strings.Join(tags, ", ")
-					placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
-				}
-				sendMessage(update, placeText)
-				sendTemplateReplies("Select your next action")
-			case "/submit":
-				// Submit
-				name, err := addPlaceFromTemp(update)
-				if err != nil {
-					log.Printf("error adding place from temp: %+v", err)
-					sendMessage(update, "An error occured :( please try again")
-				}
-				// Prep for next state
-				if err := setUserState(update, Idle); err != nil {
-					log.Printf("error setting state: %+v", err)
-					sendMessage(update, "Sorry an error occured!")
-				}
-				removeMarkupKeyboard(update, fmt.Sprintf("%s was added for this chat!", name))
-			case "/cancel":
-				// Prep for next state
-				if err := setUserState(update, Idle); err != nil {
-					log.Printf("error setting state: %+v", err)
-					sendMessage(update, "Sorry an error occured!")
-				}
-				removeMarkupKeyboard(update, "/addplace process cancelled")
-			}
-			return
-		case SetAddress:
-			// Message should contain address
-			if err := setTempPlaceAddress(update); err != nil {
-				log.Printf("Error adding address: %+v", err)
-				sendMessage(update, "Address should be a text")
-			} else {
-				sendMessage(update, fmt.Sprintf("Address set to %s", update.Message.Text))
-			}
-			// Prep for next state
-			if err := setUserState(update, ReadyForNextAction); err != nil {
-				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
-			}
-		case SetURL:
-			// Message should contain url
-			if err := setTempPlaceURL(update); err != nil {
-				log.Printf("Error adding url: %+v", err)
-				sendMessage(update, "URL should be a text")
-			} else {
-				sendMessage(update, fmt.Sprintf("URL set to %s", update.Message.Text))
-			}
-			// Prep for next state
-			if err := setUserState(update, ReadyForNextAction); err != nil {
-				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
-			}
-		case SetImages:
-			// should be an image input
-			if err := addTempPlaceImage(update); err != nil {
-				log.Printf("Error adding image: %+v", err)
-				sendMessage(update, "Error occured. Did you send an image?")
-			} else {
-				sendMessage(update, "Image added")
-			}
-			// Prep for next state
-			if err := setUserState(update, ReadyForNextAction); err != nil {
-				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
-			}
-		case SetTags:
-			// Message should contain text
-			if err := addTempPlaceTag(update); err != nil {
-				log.Printf("Error adding tag: %+v", err)
-				sendMessage(update, "Tag should be a text")
-			} else {
-				sendMessage(update, fmt.Sprintf("Tag %s added", update.Message.Text))
-			}
-			// Prep for next state
-			if err := setUserState(update, ReadyForNextAction); err != nil {
-				log.Printf("error setting state: %+v", err)
-				sendMessage(update, "Sorry an error occured!")
-			}
-		}
-
-		/* Create and send keyboard for targeted response */
-		sendTemplateReplies("What do you want to do next?")
+	if constants.IsAddingNewPlace(userState) {
+		addPlaceHandler(update, userState)
 		return
 	}
 
-	switch update.Message.Text {
-	case "/start":
-		sendStartInstructions(update)
-		// case "/addName":
-		// 	initPlace(update)
-		// case "/addAddress":
-		// 	setTempPlaceAddress(update)
-		// case "/addURL":
-		// 	setTempPlaceURL(update)
-		// case "/addTags":
-		// 	addTempPlaceTag(update)
-		// case "/addPlace":
-		// 	addPlaceFromTemp(update)
-		// case "/deletePlace":
-		// 	deletePlace(update, "addName")
-		// case "/updatePlaceAddress":
-		// 	updatePlaceAddress(update, "addName", "new address")
-		// case "/addMoreTags":
-		// 	addPlaceTag(update, "addName", "more tags")
-		// case "/deleteTag":
-		// 	deletePlaceTag(update, "addName", "more tags")
-		// default:
-		// 	LogUpdate(update)
-		// 	LogMessage(update)
-
-		// photoIDs, err := services.GetPhotoIDs(update)
-		// if err != nil {
-		// 	log.Printf("error sending photo: %+v", photoIDs)
-		// }
-		// log.Printf("photoIDs: %+v", photoIDs)
-		// for _, id := range photoIDs {
-		// 	services.SendPhoto(update, id)
-		// }
-
-		// if err := sendMessage(update, "received"); err != nil {
-		// 	log.Printf("error sending message: %+v", err)
-		// }
+	if constants.IsQuery(userState) {
+		queryHandler(update, userState)
+		return
 	}
 }

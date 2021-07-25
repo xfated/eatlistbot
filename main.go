@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/xfated/golistbot/services"
+	"github.com/xfated/golistbot/services/utils"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
@@ -51,11 +52,11 @@ func main() {
 	router.Use(gin.Logger())
 
 	// telegram
-	services.InitTelegram()
-	router.POST("/"+services.TELEGRAM_BOT_TOKEN, webhookHandler)
+	utils.InitTelegram()
+	router.POST("/"+utils.TELEGRAM_BOT_TOKEN, webhookHandler)
 
 	// firebase
-	services.InitFirebase()
+	utils.InitFirebase()
 
 	err := router.Run(":" + port)
 	if err != nil {

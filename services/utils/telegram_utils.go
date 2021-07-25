@@ -1,11 +1,14 @@
-package services
+package utils
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
+	"github.com/xfated/golistbot/services/constants"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
@@ -46,8 +49,8 @@ func LogUpdate(update tgbotapi.Update) {
 }
 
 /* Sending */
-func sendMessage(update tgbotapi.Update, text string) error {
-	chatID, _, err := getChatUserID(update)
+func SendMessage(update tgbotapi.Update, text string) error {
+	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return err
 	}
@@ -57,22 +60,13 @@ func sendMessage(update tgbotapi.Update, text string) error {
 	return nil
 }
 
-func sendStartInstructions(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Haha you sent start")
-	bot.Send(msg)
-	setUserState(update, Idle)
-
-	// Debug
-	LogMessage(update)
-}
-
-func sendUnknownCommand(update tgbotapi.Update) {
+func SendUnknownCommand(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Unknown command, please use /start for commands")
 	bot.Send(msg)
 }
 
-func sendPhoto(update tgbotapi.Update, photoID string) error {
-	chatID, _, err := getChatUserID(update)
+func SendPhoto(update tgbotapi.Update, photoID string) error {
+	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return err
 	}
@@ -81,7 +75,41 @@ func sendPhoto(update tgbotapi.Update, photoID string) error {
 	return nil
 }
 
-func setReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
+func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails) []string {
+	placeText := ""
+	imageIDs := make([]string, 0)
+
+	if placeData.Name != "" {
+		placeText = placeText + fmt.Sprintf("Name: %s\n", placeData.Name)
+	}
+	if placeData.Address != "" {
+		placeText = placeText + fmt.Sprintf("Address: %s\n", placeData.Address)
+	}
+	if placeData.URL != "" {
+		placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
+	}
+	if placeData.Images != nil {
+		placeText = placeText + fmt.Sprintf("Images: %v\n", len(placeData.Images))
+		imageIDs = placeData.GetImageIDs()
+	}
+	if placeData.Tags != nil {
+		tags := make([]string, len(placeData.Tags))
+		i := 0
+		for tag := range placeData.Tags {
+			tags[i] = tag
+			i++
+		}
+		tagText := strings.Join(tags, ", ")
+		placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
+	}
+	if placeData.Notes != "" {
+		placeText = placeText + fmt.Sprintf("Notes: %s", placeData.Notes)
+	}
+	SendMessage(update, placeText)
+	return imageIDs
+}
+
+func SetReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
 	msg.ReplyToMessageID = update.Message.MessageID
@@ -91,7 +119,16 @@ func setReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbota
 	}
 }
 
-func removeMarkupKeyboard(update tgbotapi.Update, text string) {
+func SendInlineKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.InlineKeyboardMarkup) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	msg.BaseChat.ReplyMarkup = keyboard
+	_, err := bot.Send(msg)
+	if err != nil {
+		log.Printf("Error setting markup keyboard: %+v", err)
+	}
+}
+
+func RemoveMarkupKeyboard(update tgbotapi.Update, text string) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 	removeKeyboard := tgbotapi.NewRemoveKeyboard(true)
 	removeKeyboard.Selective = true
@@ -104,7 +141,7 @@ func removeMarkupKeyboard(update tgbotapi.Update, text string) {
 }
 
 /* Getting */
-func getChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
+func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
 	if update.Message == nil {
 		chatID = 0
 		userID = 0
@@ -118,7 +155,7 @@ func getChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error)
 	return
 }
 
-func getChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
+func GetChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
 	if update.Message == nil {
 		chatID = ""
 		userID = ""
@@ -132,7 +169,7 @@ func getChatUserIDString(update tgbotapi.Update) (chatID, userID string, err err
 	return
 }
 
-func getMessage(update tgbotapi.Update) (message string, messageID int, err error) {
+func GetMessage(update tgbotapi.Update) (message string, messageID int, err error) {
 	if update.Message == nil {
 		message = ""
 		messageID = 0
@@ -146,7 +183,7 @@ func getMessage(update tgbotapi.Update) (message string, messageID int, err erro
 	return
 }
 
-func getPhotoIDs(update tgbotapi.Update) ([]string, error) {
+func GetPhotoIDs(update tgbotapi.Update) ([]string, error) {
 	if update.Message == nil {
 		return []string{}, errors.New("invalid message")
 	}
