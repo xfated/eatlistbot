@@ -37,15 +37,16 @@ func InitTelegram() {
 	log.Println("Loaded telegram bot")
 }
 
-// /* Redirect */
-// func RedirectToBotChat(update tgbotapi.Update, text string) {
-// 	chatID, userID, err := GetChatUserID(update)
-// 	if err != nil {
-// 		log.Printf("error GetChatUserID: %+v", err)
-// 	}
-// 	redirect := tgbotapi.NewCallback(fmt.Sprintf("redirect%vfrom%v", userID, chatID), text)
-// 	redirect.URL =
-// }
+/* Redirect */
+func RedirectToBotChat(update tgbotapi.Update, text string) {
+	chatID, userID, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("error GetChatUserID: %+v", err)
+	}
+	redirect := tgbotapi.NewCallback(fmt.Sprintf("redirect%vfrom%v", userID, chatID), text)
+	redirect.URL = "t.me/toGoListBot"
+	bot.Send(redirect)
+}
 
 /* General Logging */
 func LogMessage(update tgbotapi.Update) {
@@ -166,14 +167,28 @@ func SendInlineKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.I
 }
 
 func RemoveMarkupKeyboard(update tgbotapi.Update, text string) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		log.Printf("Error GetChatUserID: %+v", err)
+	}
+	msg := tgbotapi.NewMessage(chatID, text)
 	removeKeyboard := tgbotapi.NewRemoveKeyboard(true)
 	removeKeyboard.Selective = true
 	msg.BaseChat.ReplyMarkup = removeKeyboard
-	msg.ReplyToMessageID = update.Message.MessageID
-	_, err := bot.Send(msg)
+
+	messageTarget := 0
+	if update.Message != nil {
+		messageTarget = update.Message.MessageID
+	} else {
+		messageTarget, err = GetMessageTarget(update)
+		if err != nil {
+			log.Printf("Error GetMessageTarget: %+v", err)
+		}
+	}
+	msg.ReplyToMessageID = messageTarget
+	_, err = bot.Send(msg)
 	if err != nil {
-		log.Printf("Error removing markup kerboard: %+v", err)
+		log.Printf("Error removing markup keyboard: %+v", err)
 	}
 }
 
