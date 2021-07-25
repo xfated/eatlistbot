@@ -88,6 +88,7 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	if len(tagsMap) == 0 {
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(doneRow)
 		utils.SendInlineKeyboard(update, "No tags found", inlineKeyboard)
+		return
 	}
 
 	/* Set each tag as its own inline row */
