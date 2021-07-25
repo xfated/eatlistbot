@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 
@@ -332,20 +333,48 @@ func DeletePlaceTag(update tgbotapi.Update, placeName, tag string) error {
 }
 
 /* get list of places */
-func GetPlaces(update tgbotapi.Update) (map[string]constants.PlaceDetails, error) {
+func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.PlaceDetails, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
-		return map[string]constants.PlaceDetails{}, err
+		return []constants.PlaceDetails{}, err
 	}
 
 	/* get places */
-	var Places map[string]constants.PlaceDetails
+	var places map[string]constants.PlaceDetails
 	userRef := client.NewRef("place").Child(chatID)
-	if err := userRef.Get(ctx, &Places); err != nil {
-		return map[string]constants.PlaceDetails{}, err
+	if err := userRef.Get(ctx, &places); err != nil {
+		return []constants.PlaceDetails{}, err
 	}
-	return Places, nil
+	placesList := make([]constants.PlaceDetails, len(places))
+	i := 0
+	for _, placeDetails := range places {
+		placesList[i] = placeDetails
+		i++
+	}
+
+	/* filter if tags are present */
+	if len(filterTags) > 0 {
+		filteredPlaces := make([]constants.PlaceDetails, 0)
+		for _, place := range places {
+			consider := false
+			if place.Tags != nil {
+				for tag := range place.Tags {
+					/* select if any tag match */
+					if filterTags[tag] {
+						consider = true
+						break
+					}
+				}
+			}
+			if consider {
+				filteredPlaces = append(filteredPlaces, place)
+			}
+		}
+		placesList = filteredPlaces
+	}
+	rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
+	return placesList, nil
 }
 
 /* Add / Delete places */
@@ -362,6 +391,23 @@ func GetTempPlace(update tgbotapi.Update) (constants.PlaceDetails, error) {
 		return constants.PlaceDetails{}, err
 	}
 	return PlaceData, nil
+}
+
+func GetPlace(update tgbotapi.Update, name string) (constants.PlaceDetails, error) {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return constants.PlaceDetails{}, err
+	}
+
+	/* Get place */
+	var placeData constants.PlaceDetails
+	chatRef := client.NewRef("places").Child(chatID)
+	if err := chatRef.Child(name).Get(ctx, &placeData); err != nil {
+		return constants.PlaceDetails{}, err
+	}
+
+	return placeData, nil
 }
 
 func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
@@ -382,6 +428,14 @@ func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
 		if err := updateTags(update, tag); err != nil {
 			return err
 		}
+	}
+
+	/* Add name to name collection */
+	nameRef := client.NewRef("placeNames").Child(chatID)
+	if err := nameRef.Update(ctx, map[string]interface{}{
+		placeData.Name: true,
+	}); err != nil {
+		return err
 	}
 	return nil
 }
@@ -409,7 +463,27 @@ func DeletePlace(update tgbotapi.Update, placeName string) error {
 	if err := chatRef.Child(placeName).Delete(ctx); err != nil {
 		return err
 	}
+	nameRef := client.NewRef("placeNames").Child(chatID)
+	if err := nameRef.Child(placeName).Delete(ctx); err != nil {
+		return err
+	}
 	return nil
+}
+
+func GetPlaceNames(update tgbotapi.Update) (map[string]bool, error) {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return map[string]bool{}, err
+	}
+
+	var placeNames map[string]bool
+	nameRef := client.NewRef("placeNames").Child(chatID)
+	if err := nameRef.Get(ctx, &placeNames); err != nil {
+		return map[string]bool{}, err
+	}
+
+	return placeNames, nil
 }
 
 /* Read / Delete / Update tags */
@@ -559,7 +633,7 @@ func GetQueryType(update tgbotapi.Update) (string, error) {
 	return queryType, err
 }
 
-func SetQueryNum(update tgbotapi.Update) error {
+func SetQueryNum(update tgbotapi.Update, num int) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -567,15 +641,6 @@ func SetQueryNum(update tgbotapi.Update) error {
 	}
 
 	/* Set number of queries*/
-	queryNum, _, err := GetMessage(update)
-	if err != nil {
-		return err
-	}
-	num, err := strconv.Atoi(queryNum)
-	if err != nil {
-		return err
-	}
-
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
 	if err := userRef.Child("query").Update(ctx, map[string]interface{}{
 		"queryNum": num,

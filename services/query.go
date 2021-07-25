@@ -125,20 +125,30 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		case "/getOne":
 			// getOne markup (/withTag, /withName), GoTo QueryOneTagOrName
 			sendQueryOneTagOrNameResponse(update, "How do you want to search?")
+			utils.SetQueryNum(update, 1)
 			if err := utils.SetUserState(update, constants.QueryOneTagOrName); err != nil {
-				log.Printf("error setting state: %+v", err)
+				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		case "/getFew":
 			// getFew GoTo QueryFewSetNum. Message how many they want?
+			utils.RemoveMarkupKeyboard(update, "How many places do you want?")
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
-				log.Printf("error setting state: %+v", err)
+				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		case "/getAll":
 			// getAll GoTo QueryAllRetrieve
-			if err := utils.SetUserState(update, constants.QueryAllRetrieve); err != nil {
-				log.Printf("error setting state: %+v", err)
+			placeNames, err := utils.GetPlaceNames(update)
+			if err != nil {
+				log.Printf("error getting place names: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.SetQueryNum(update, len(placeNames))
+			// Go straight to retrieve
+			sendQueryGetImagesResponse(update, "Do you want the images as well?")
+			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		default:
@@ -155,10 +165,10 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			// withTag inline (tags, /done), GoTo QuerySetTags
 			// Send message "Don't add any to consider all places"
 			utils.RemoveMarkupKeyboard(update, "Starting search with tags")
-			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"/done\" once finished")
+			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
 			utils.SendMessage(update, "(Don't add any to consider all places)")
-			if err := utils.SetUserState(update, constants.QueryOneSetTags); err != nil {
-				log.Printf("error setting state: %+v", err)
+			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
+				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		case "/withName":
@@ -166,25 +176,28 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			utils.RemoveMarkupKeyboard(update, "Starting search with name")
 			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
-				log.Printf("error setting state: %+v", err)
+				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		default:
 			sendQueryOneTagOrNameResponse(update, "Please select one of the provided resposnes")
 		}
 
+	/* Ask how many records to get */
+	case constants.QueryFewSetNum:
+
 	/* Ask for tags to search with */
-	case constants.QueryOneSetTags:
+	case constants.QuerySetTags:
 		// tag addTag, preview current, inline (show tags not yet added, /done)
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
-		// done GoTo QueryOneRetrieve. Markup("yes, no"), ask with pic
+		// done GoTo QueryRetrieve. Markup("yes, no"), ask with pic
 		if tag == "/done" {
 			sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
-			if err := utils.SetUserState(update, constants.QueryOneRetrieve); err != nil {
-				log.Printf("error setting state: %+v", err)
+			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 		} else {
@@ -206,79 +219,65 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		// set name, GoTo QueryOneRetrieve. Markup("yes, no"), ask with pics
 
 	/* Ask whether want pics, and retrieve */
-	case constants.QueryOneRetrieve:
-		response, err := utils.GetCallbackQueryMessage(update)
+	case constants.QueryRetrieve:
+		sendImage, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
-		switch response {
-		case "yes":
-		case "no":
-		default:
+		if !(sendImage == "yes" || sendImage == "no") {
 			sendQueryGetImagesResponse(update, "yes or no?")
+		} else {
+			queryName, _ := utils.GetQueryName(update)
+
+			// if name != "", get and show place data. (one result)
+			if len(queryName) > 0 {
+				placeData, err := utils.GetPlace(update, queryName)
+				if err != nil {
+					log.Printf("error GetPlace: %+v", err)
+					if err := utils.SetUserState(update, constants.Idle); err != nil {
+						log.Printf("error SetUserState: %+v", err)
+					}
+					utils.SendMessage(update, "Sorry, error with getting data on the place.")
+					return
+				}
+				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
+				if err := utils.SetUserState(update, constants.Idle); err != nil {
+					log.Printf("error SetUserState: %+v", err)
+				}
+				return
+			}
+
+			// Get number of queries to return
+			queryNum, err := utils.GetQueryNum(update)
+			if err != nil {
+				log.Printf("error GetQueryNum: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+			// Get tags for filter
+			queryTags, err := utils.GetQueryTags(update)
+			if err != nil {
+				log.Printf("error GetQueryTags: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+
+			// Get matching places
+			// if len(tags) == 0, get all, randomly choose QueryNum
+			// if len(tags) > 0, get all, extract with matching tags. randomly select queryNum
+			places, err := utils.GetPlaces(update, queryTags)
+			if err != nil {
+				log.Printf("error GetPlaces: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			for _, placeData := range places[:queryNum] {
+				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
+			}
 		}
 
 		/* If user send a message instead */
 		if update.Message != nil {
 			utils.SendMessage(update, "Please select from the above options")
 		}
-
-		// if name != "", get and show place data.
-		// if len(tags) == 0, get all, randomly choose one
-		// if len(tags) > 0, get all, extract with matching tags. randomly select one
-		// if "yes", send pics, goto Idle
-
-	/* Ask how many they want */
-	case constants.QueryFewSetNum:
-		// message, _, err := utils.GetMessage(update)
-		// if err != nil {
-		// 	log.Printf("error setting message: %+v", err)
-		// }
-
-		// Set number, GoTo QueryFewSetTags. inline (tags, /done)
-		// Send message "Don't add any to consider all places"
-
-	/* Ask for tags to search with */
-	case constants.QueryFewSetTags:
-		message, _, err := utils.GetMessage(update)
-		if err != nil {
-			log.Printf("error setting message: %+v", err)
-		}
-		switch message {
-		case "":
-		default:
-			sendAvailableTagsResponse(update, "Please select one of the provided resposnes")
-		}
-		// tag addTag, preview current, inline (show tags not yet added, /done)
-		// done GoTo QueryFewRetrieve, Markup("yes, no") ask with pics
-
-	/* Ask whether want pics and retrieve */
-	case constants.QueryFewRetrieve:
-		message, _, err := utils.GetMessage(update)
-		if err != nil {
-			log.Printf("error setting message: %+v", err)
-		}
-		switch message {
-		case "":
-		default:
-			sendQueryGetImagesResponse(update, "yes or no?")
-		}
-		// if len(tags) == 0, randomly select
-		// if "yes", send pics. GoTo Idle
-
-	/* Ask whether want pics and retrieve */
-	case constants.QueryAllRetrieve:
-		message, _, err := utils.GetMessage(update)
-		if err != nil {
-			log.Printf("error setting message: %+v", err)
-		}
-		switch message {
-		case "":
-		default:
-			sendQueryGetImagesResponse(update, "yes or no?")
-		}
-		// fetch all, send one by one
-
-		// if "yes", send pics. GoTo Idle
 	}
 }

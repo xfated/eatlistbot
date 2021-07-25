@@ -21,14 +21,10 @@ const (
 
 	QueryOneTagOrName
 	QueryOneSetName
-	QueryOneSetTags
-	QueryOneRetrieve
 
-	QueryFewSetTags
+	QuerySetTags
 	QueryFewSetNum
-	QueryFewRetrieve
-
-	QueryAllRetrieve
+	QueryRetrieve
 	/* ######## */
 
 	Finished
@@ -75,14 +71,11 @@ func IsQuery(state State) bool {
 
 		QueryOneTagOrName,
 		QueryOneSetName,
-		QueryOneSetTags,
-		QueryOneRetrieve,
 
-		QueryFewSetTags,
 		QueryFewSetNum,
-		QueryFewRetrieve,
 
-		QueryAllRetrieve:
+		QuerySetTags,
+		QueryRetrieve:
 		return true
 	default:
 		return false

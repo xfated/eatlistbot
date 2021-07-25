@@ -82,9 +82,8 @@ func SendPhoto(update tgbotapi.Update, photoID string) error {
 	return nil
 }
 
-func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails) []string {
+func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails, sendImage bool) {
 	placeText := ""
-	imageIDs := make([]string, 0)
 
 	if placeData.Name != "" {
 		placeText = placeText + fmt.Sprintf("Name: %s\n", placeData.Name)
@@ -97,7 +96,6 @@ func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails) 
 	}
 	if placeData.Images != nil {
 		placeText = placeText + fmt.Sprintf("Images: %v\n", len(placeData.Images))
-		imageIDs = placeData.GetImageIDs()
 	}
 	if placeData.Tags != nil {
 		tags := make([]string, len(placeData.Tags))
@@ -113,7 +111,11 @@ func SendPlaceDetails(update tgbotapi.Update, placeData constants.PlaceDetails) 
 		placeText = placeText + fmt.Sprintf("Notes: %s", placeData.Notes)
 	}
 	SendMessage(update, placeText)
-	return imageIDs
+	if sendImage && placeData.Images != nil {
+		for imageID := range placeData.Images {
+			SendPhoto(update, imageID)
+		}
+	}
 }
 
 func SetReplyMarkupKeyboard(update tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
