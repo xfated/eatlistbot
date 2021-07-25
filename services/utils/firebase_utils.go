@@ -374,6 +374,9 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 		placesList = filteredPlaces
 	}
 	rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
+
+	// DEBUG
+	log.Printf("placesList: %+v", placesList)
 	return placesList, nil
 }
 
