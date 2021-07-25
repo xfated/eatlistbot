@@ -716,9 +716,10 @@ func GetQueryTags(update *tgbotapi.Update) (map[string]bool, error) {
 	return tagsMap, nil
 }
 
-// func SetRecentInlineMessage(update *tgbotapi.Update) {
+// func SetRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
 // 	ctx := context.Background()
-// 	_, userID, err := GetChatUserIDString(update)
+// 	chatID, userID, err := GetChatUserIDString(update)
+
 // 	if err != nil {
 // 		return err
 // 	}

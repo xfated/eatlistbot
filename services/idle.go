@@ -5,7 +5,7 @@ import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-func idleHandler(update tgbotapi.Update) {
+func idleHandler(update *tgbotapi.Update) {
 	message, _, err := utils.GetMessage(update)
 	if err != nil {
 		return

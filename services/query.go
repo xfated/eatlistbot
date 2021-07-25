@@ -11,7 +11,7 @@ import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-func sendQuerySelectType(update tgbotapi.Update, text string) {
+func sendQuerySelectType(update *tgbotapi.Update, text string) {
 	// Create buttons
 	getOneButton := tgbotapi.NewInlineKeyboardButtonData("/getOne", "/getOne")
 	getFewButton := tgbotapi.NewInlineKeyboardButtonData("/getFew", "/getFew")
@@ -23,7 +23,7 @@ func sendQuerySelectType(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func sendQueryOneTagOrNameResponse(update tgbotapi.Update, text string) {
+func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
 	// Create buttons
 	withTagButton := tgbotapi.NewInlineKeyboardButtonData("/withTag", "/withTag")
 	withNameButton := tgbotapi.NewInlineKeyboardButtonData("/withName", "/withName")
@@ -34,7 +34,7 @@ func sendQueryOneTagOrNameResponse(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
+func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
 	// Create buttons
 	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
 	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
@@ -46,7 +46,7 @@ func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
 }
 
 /* Search from available tags to get */
-func addAndSendSelectedTags(update tgbotapi.Update, tag string) {
+func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 	utils.AddQueryTag(update, tag)
 
 	/* Extract tags */
@@ -70,7 +70,7 @@ func addAndSendSelectedTags(update tgbotapi.Update, tag string) {
 	}
 }
 
-func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
+func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 	tagsMap, err := utils.GetTags(update)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
@@ -103,7 +103,7 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 }
 
 /* Search from name of places */
-func sendAvailablePlaceNamesResponse(update tgbotapi.Update, text string) {
+func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
 	placeNames, err := utils.GetPlaceNames(update)
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
@@ -124,7 +124,7 @@ func sendAvailablePlaceNamesResponse(update tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func queryHandler(update tgbotapi.Update, userState constants.State) {
+func queryHandler(update *tgbotapi.Update, userState constants.State) {
 	/* Check if there are any places registed */
 	placeNames, err := utils.GetPlaceNames(update)
 	if err != nil {
