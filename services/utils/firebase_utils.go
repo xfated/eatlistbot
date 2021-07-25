@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -379,6 +380,37 @@ func GetPlaces(update tgbotapi.Update, filterTags map[string]bool) ([]constants.
 }
 
 /* ########## Add Place ##########*/
+func SetChatTarget(update tgbotapi.Update, chatID int64) error {
+	ctx := context.Background()
+	_, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Set target */
+	chatTargetRef := client.NewRef("users").Child(userID).Child("target").Child("chat")
+	if err := chatTargetRef.Set(ctx, chatID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetChatTarget(update tgbotapi.Update) (int64, error) {
+	ctx := context.Background()
+	chatID, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return 0, err
+	}
+
+	/* Get target */
+	var target int64
+	chatTargetRef := client.NewRef("users").Child(userID).Child("target").Child("chat")
+	if err := chatTargetRef.Child(chatID).Get(ctx, &target); err != nil {
+		return 0, err
+	}
+	return target, nil
+}
+
 func GetTempPlace(update tgbotapi.Update) (constants.PlaceDetails, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -413,26 +445,30 @@ func GetPlace(update tgbotapi.Update, name string) (constants.PlaceDetails, erro
 
 func AddPlace(update tgbotapi.Update, placeData constants.PlaceDetails) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
+	// Get target chat, where addAddress was initiated
+	chatID, err := GetChatTarget(update)
+	chatIDString := strconv.FormatInt(chatID, 10)
+	// chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
 	/* Add place to place collection */
-	chatRef := client.NewRef("places").Child(chatID)
+	chatRef := client.NewRef("places").Child(chatIDString)
 	if err := chatRef.Child(placeData.Name).Set(ctx, placeData); err != nil {
 		return err
 	}
+	SendMessageTargetChat(fmt.Sprintf("%s has been added to the chat", placeData.Name), chatID)
 
 	/* Add tags to tag collection */
 	for tag := range placeData.Tags {
-		if err := updateTags(update, tag); err != nil {
+		if err := updateTags(update, tag, chatIDString); err != nil {
 			return err
 		}
 	}
 
 	/* Add name to name collection */
-	nameRef := client.NewRef("placeNames").Child(chatID)
+	nameRef := client.NewRef("placeNames").Child(chatIDString)
 	if err := nameRef.Update(ctx, map[string]interface{}{
 		placeData.Name: true,
 	}); err != nil {
@@ -544,13 +580,10 @@ func DeleteTag(update tgbotapi.Update, tag string) error {
 	return nil
 }
 
-func updateTags(update tgbotapi.Update, tag string) error {
+func updateTags(update tgbotapi.Update, chatID string, tag string) error {
 	/* If same tag won't update. Implicitly prevent double records */
 	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return err
-	}
+
 	chatRef := client.NewRef("tags").Child(chatID)
 	if err := chatRef.Update(ctx, map[string]interface{}{
 		tag: true,

@@ -38,10 +38,10 @@ func InitTelegram() {
 }
 
 /* Redirect */
-func RedirectToBotChat(update tgbotapi.Update, text string) {
+func RedirectToBotChat(update tgbotapi.Update, text string, url string) {
 	// Create button
 	redirectButton := tgbotapi.NewInlineKeyboardButtonData("Add place", "test")
-	redirectLink := "t.me/toGoListBot?start=XXXX"
+	redirectLink := url
 	redirectButton.URL = &redirectLink
 
 	// Create rows
@@ -86,6 +86,11 @@ func SendMessage(update tgbotapi.Update, text string) error {
 	msg := tgbotapi.NewMessage(chatID, text)
 	bot.Send(msg)
 	return nil
+}
+
+func SendMessageTargetChat(text string, chatID int64) {
+	msg := tgbotapi.NewMessage(chatID, text)
+	bot.Send(msg)
 }
 
 func SendUnknownCommand(update tgbotapi.Update) {

@@ -28,13 +28,35 @@ func HandleUserInput(update tgbotapi.Update) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			return
-		case "/addplace",
-			"/addplace@toGoListBot":
+		case "/start addPlace":
+			// Add place in pm after redirect
 			utils.SendMessage(update, "Please enter the name of the place to begin")
 			if err := utils.SetUserState(update, constants.SetName); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+			return
+		case "/addplace",
+			"/addplace@toGoListBot":
+			// Check if is already private.
+			chatID, userID, err := utils.GetChatUserID(update)
+			utils.SetChatTarget(update, chatID)
+
+			if err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			// Same == same chat
+			if chatID == int64(userID) {
+				utils.SendMessage(update, "Please enter the name of the place to begin")
+				if err := utils.SetUserState(update, constants.SetName); err != nil {
+					log.Printf("error setting state: %+v", err)
+					utils.SendMessage(update, "Sorry an error occured!")
+				}
+				return
+			}
+			// If not private, redirect
+			utils.RedirectToBotChat(update, "Click the button to start adding", "https://t.me/toGoListBot?start=addPlace")
 			return
 		case "/query",
 			"/query@toGoListBot":
@@ -53,9 +75,9 @@ func HandleUserInput(update tgbotapi.Update) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			return
-		case "/testredirect":
-			utils.RedirectToBotChat(update, "Click the button to start adding")
-			return
+			// case "/testredirect":
+			// 	utils.RedirectToBotChat(update, "Click the button to start adding")
+			// 	return
 		}
 	}
 
