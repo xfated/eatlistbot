@@ -30,11 +30,8 @@ func webhookHandler(c *gin.Context) {
 	}
 
 	if update.Message == nil {
-		return
+		log.Printf("From: %+v Text: %+v\n", update.Message.From, update.Message.Text)
 	}
-
-	// to monitor changes run: heroku logs --tail
-	log.Printf("From: %+v Text: %+v\n", update.Message.From, update.Message.Text)
 
 	// Handle user input
 	services.HandleUserInput(update)
