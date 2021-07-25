@@ -38,15 +38,25 @@ func InitTelegram() {
 }
 
 /* Redirect */
-// func RedirectToBotChat(update tgbotapi.Update, text string) {
-// 	chatID, userID, err := GetChatUserID(update)
-// 	if err != nil {
-// 		log.Printf("error GetChatUserID: %+v", err)
-// 	}
-// 	redirect := tgbotapi.NewCallback(fmt.Sprintf("redirect%vfrom%v", userID, chatID), text)
-// 	redirect.URL = "t.me/toGoListBot"
-// 	bot.Send(redirect)
-// }
+func RedirectToBotChat(update tgbotapi.Update, text string) {
+	// Create button
+	redirectButton := tgbotapi.NewInlineKeyboardButtonData("Add place", "test")
+	redirectLink := "t.me/toGoListBot"
+	redirectButton.URL = &redirectLink
+
+	// Create rows
+	row := tgbotapi.NewInlineKeyboardRow(redirectButton)
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	SendInlineKeyboard(update, text, inlineKeyboard)
+	// chatID, userID, err := GetChatUserID(update)
+	// if err != nil {
+	// 	log.Printf("error GetChatUserID: %+v", err)
+	// }
+	// redirect := tgbotapi.NewCallback(fmt.Sprintf("redirect%vfrom%v", userID, chatID), text)
+	// redirect.URL = "t.me/toGoListBot"
+	// bot.Send(redirect)
+}
 
 /* General Logging */
 func LogMessage(update tgbotapi.Update) {

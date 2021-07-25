@@ -52,8 +52,10 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+			return
 		case "/testredirect":
-
+			utils.RedirectToBotChat(update, "Click the button to start adding")
+			return
 		}
 	}
 
