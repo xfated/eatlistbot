@@ -331,6 +331,9 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			for _, placeData := range places[:queryNum] {
 				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 			}
+			if err := utils.SetUserState(update, constants.Idle); err != nil {
+				log.Printf("error SetUserState: %+v", err)
+			}
 		}
 
 		/* If user send a message instead */
