@@ -235,7 +235,7 @@ func AddTempPlaceImage(update tgbotapi.Update) error {
 	if err != nil {
 		return err
 	}
-	imageID := imageIDs[3] // Take largest file size
+	imageID := imageIDs[len(imageIDs)-1] // Take largest file size
 	if err != nil {
 		return err
 	}

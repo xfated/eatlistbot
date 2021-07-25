@@ -77,70 +77,76 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.SetName:
 		// Expect user to send a text message (name of place)
-		// Message should contain name of place
 		if err := utils.InitPlace(update); err != nil {
 			log.Printf("Error creating new place: %+v", err)
 			utils.SendMessage(update, "Message should be a text")
+			break
 		}
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			break
 		}
 		utils.SendMessage(update, "Start adding the details for the place")
 	case constants.ReadyForNextAction:
-		// Expect user to pick next state from reply markup
+		// Expect user to select reply markup (pick next action)
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error setting message: %+v", err)
 		}
 		switch message {
 		case "/addAddress":
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.SetAddress); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send an address to be added")
 		case "/addNotes":
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.SetNotes); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Give some additional details as notes")
 		case "/addURL":
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.SetURL); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send a URL to be added")
 		case "/addImage":
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.SetImages); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send an image to be added")
 		case "/addTag":
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.SetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
+			/* Get message ID for targeted reply afterward */
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.SetMessageTarget(update, messageID)
+
 			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of places)\n"+
 				"Type new or pick from existing\nPress done once done!")
 			sendExistingTagsResponse(update, "Existing tags:")
 		case "/preview":
-			// Get data and send
 			placeData, err := utils.GetTempPlace(update)
 			if err != nil {
 				log.Printf("error getting temp place: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.SendPlaceDetails(update, placeData, true)
 			sendTemplateReplies(update, "Select your next action")
@@ -148,18 +154,21 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			if err := utils.SetUserState(update, constants.ConfirmAddPlaceSubmit); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.SetMessageTarget(update, messageID)
 			sendConfirmSubmitResponse(update, "Are you really ready to submit?")
 		case "/cancel":
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				break
 			}
 			utils.RemoveMarkupKeyboard(update, "/addplace process cancelled")
 		default:
@@ -168,74 +177,77 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 		return
 	case constants.SetAddress:
 		// Expect user to send a text message (address of place)
-		// Message should contain address
 		if err := utils.SetTempPlaceAddress(update); err != nil {
 			log.Printf("Error adding address: %+v", err)
 			utils.SendMessage(update, "Address should be a text")
-		} else {
-			utils.SendMessage(update, fmt.Sprintf("Address set to: %s", update.Message.Text))
+			return
 		}
-		// Prep for next state
+		utils.SendMessage(update, fmt.Sprintf("Address set to: %s", update.Message.Text))
+
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 	case constants.SetNotes:
 		// Expect user to send a text message (notes for the place)
-		// Message should contain notes
 		if err := utils.SetTempPlaceNotes(update); err != nil {
 			log.Printf("Error adding notes: %+v", err)
 			utils.SendMessage(update, "Notes should be a text")
-		} else {
-			utils.SendMessage(update, fmt.Sprintf("Notes set to: %s", update.Message.Text))
+			return
 		}
-		// Prep for next state
+		utils.SendMessage(update, fmt.Sprintf("Notes set to: %s", update.Message.Text))
+
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 	case constants.SetURL:
 		// Expect user to send a text message (URL for the place)
-		// Message should contain url
 		if err := utils.SetTempPlaceURL(update); err != nil {
 			log.Printf("Error adding url: %+v", err)
 			utils.SendMessage(update, "URL should be a text")
-		} else {
-			utils.SendMessage(update, fmt.Sprintf("URL set to: %s", update.Message.Text))
+			return
 		}
-		// Prep for next state
+		utils.SendMessage(update, fmt.Sprintf("URL set to: %s", update.Message.Text))
+
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 	case constants.SetImages:
 		// Expect user to send a photo
 		// should be an image input
 		if err := utils.AddTempPlaceImage(update); err != nil {
 			log.Printf("Error adding image: %+v", err)
-			utils.SendMessage(update, "Error occured. Did you send an image?")
-		} else {
-			utils.SendMessage(update, "Image added")
+			utils.SendMessage(update, "Error occured. Did you send an image? Try it again")
+			return
 		}
-		// Prep for next state
+		utils.SendMessage(update, "Image added")
+
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 	case constants.SetTags:
 		// Expect user to send a text message or Select from inline keyboard markup (set as tag for the place)
-		// First Check if is typed.
 		if update.Message != nil {
 			tag, _, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 			if err := utils.AddTempPlaceTag(update, tag); err != nil {
 				log.Printf("Error adding tag: %+v", err)
 				utils.SendMessage(update, "Tag should be a text")
-			} else {
-				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+				return
 			}
+			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+
 			// Only continue if /done is pressed
 			return
 		}
@@ -244,23 +256,26 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		if len(tag) > 0 {
 			switch tag {
 			case "/done":
-				// Prep for next state
 				if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 					log.Printf("error SetUserState: %+v", err)
 					utils.SendMessage(update, "Sorry an error occured!")
+					return
 				}
 			default:
 				if err := utils.AddTempPlaceTag(update, tag); err != nil {
 					log.Printf("Error adding tag: %+v", err)
-				} else {
-					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+					utils.SendMessage(update, "Sorry an error occured!")
+					return
 				}
-				return
+				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
 				// Don't continue to next action if adding tag through inline
+				return
 			}
 		}
 	case constants.ConfirmAddPlaceSubmit:
@@ -274,30 +289,36 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 		confirm, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		if confirm == "yes" {
 			// Submit
 			name, err := utils.AddPlaceFromTemp(update)
 			if err != nil {
 				log.Printf("error adding place from temp: %+v", err)
-				utils.SendMessage(update, "An error occured :( please try again")
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
-			// Prep for next state
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s has been added!", name))
-			utils.SendMessage(update, "To add a new place to the chat, please initiate /addchat back in that chat")
+			utils.SendMessage(update, "To add a new place to the chat, please initiate /addplace back in that chat")
 			err = utils.SetChatTarget(update, 0)
 			if err != nil {
 				log.Printf("error SetChatTarget: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 			return
 		} else if confirm == "no" {
 			if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		}
 	}

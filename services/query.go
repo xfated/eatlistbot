@@ -59,6 +59,8 @@ func addAndSendSelectedTags(update tgbotapi.Update, tag string) {
 	queryTagsMap, err := utils.GetQueryTags(update)
 	if err != nil {
 		log.Printf("error getting query tags: %+v", err)
+		utils.SendMessage(update, "Sorry an error occured!")
+		return
 	}
 
 	/* Send current tags */
@@ -79,6 +81,7 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
+		return
 	}
 
 	doneButton := tgbotapi.NewInlineKeyboardButtonData("/done", "/done")
@@ -111,6 +114,7 @@ func sendAvailablePlaceNamesResponse(update tgbotapi.Update, text string) {
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
+		return
 	}
 
 	/* Set each name as its own inline row */
@@ -132,6 +136,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
 		utils.SendMessage(update, "Sorry an error occured")
+		return
 	}
 	if len(placeNames) == 0 {
 		utils.SendMessage(update, "No places registered :( go add some")
@@ -144,6 +149,8 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error GetMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		switch message {
 		case "/getOne":
@@ -153,6 +160,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			if err := utils.SetUserState(update, constants.QueryOneTagOrName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		case "/getFew":
 			// getFew GoTo QueryFewSetNum. Message how many they want?
@@ -160,6 +168,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		case "/getAll":
 			// getAll GoTo QueryAllRetrieve
@@ -167,6 +176,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			if err != nil {
 				log.Printf("error getting place names: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 			utils.SetQueryNum(update, len(placeNames))
 			// Go straight to retrieve
@@ -175,6 +185,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		default:
 			sendQuerySelectType(update, "Please select a response from the provided options")
@@ -185,25 +196,26 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error GetMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		switch message {
 		case "/withTag":
-			// withTag inline (tags, /done), GoTo QuerySetTags
-			// Send message "Don't add any to consider all places"
 			utils.RemoveMarkupKeyboard(update, "Searching for tags")
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
 			utils.SendMessage(update, "(Don't add any to consider all places)")
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		case "/withName":
-			// withName inline (names)
 			utils.RemoveMarkupKeyboard(update, "Searching for places")
 			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		default:
 			sendQueryOneTagOrNameResponse(update, "Please select one of the provided resposnes")
@@ -216,12 +228,15 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		utils.SetQueryName(update, name)
 		sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 
 		/* If user send a message instead */
@@ -236,6 +251,8 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error GetMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		numQuery, err := strconv.Atoi(message)
 		if err != nil || numQuery < 0 {
@@ -256,6 +273,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 
 	/* Ask for tags to search with */
@@ -271,6 +289,8 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		// done GoTo QueryRetrieve. Markup("yes, no"), ask with pic
 		if tag == "/done" {
@@ -278,6 +298,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		} else {
 			addAndSendSelectedTags(update, tag)
@@ -289,20 +310,21 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		sendImage, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		if len(sendImage) > 0 {
 			queryName, _ := utils.GetQueryName(update)
 
 			// if name != "", get and show place data. (one result)
 			if len(queryName) > 0 {
-				// DEBUG
-				// log.Printf("Sending query with name: %s", queryName)
-
 				placeData, err := utils.GetPlace(update, queryName)
 				if err != nil {
 					log.Printf("error GetPlace: %+v", err)
 					if err := utils.SetUserState(update, constants.Idle); err != nil {
 						log.Printf("error SetUserState: %+v", err)
+						utils.SendMessage(update, "Sorry an error occured!")
+						return
 					}
 					utils.SendMessage(update, "Sorry, error with getting data on the place.")
 					return
@@ -310,6 +332,8 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 				if err := utils.SetUserState(update, constants.Idle); err != nil {
 					log.Printf("error SetUserState: %+v", err)
+					utils.SendMessage(update, "Sorry an error occured!")
+					return
 				}
 				return
 			}
@@ -336,12 +360,15 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			if err != nil {
 				log.Printf("error GetPlaces: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 			for _, placeData := range places[:queryNum] {
 				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 			}
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
 			}
 		}
 

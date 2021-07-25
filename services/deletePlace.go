@@ -53,11 +53,15 @@ func deletePlaceHandler(update tgbotapi.Update, userState constants.State) {
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		utils.SetPlaceTarget(update, name)
 		sendConfirmDeleteResponse(update, "Are you sure?")
 		if err := utils.SetUserState(update, constants.DeleteConfirm); err != nil {
 			log.Printf("error SetUserState: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 	case constants.DeleteConfirm:
 		/* If user send a message instead */
@@ -69,21 +73,25 @@ func deletePlaceHandler(update tgbotapi.Update, userState constants.State) {
 		confirm, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 		if confirm == "yes" {
 			target, err := utils.GetPlaceTarget(update)
 			if err != nil {
 				log.Printf("error GetPlaceTarget: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured")
-			} else {
-				utils.DeletePlace(update, target)
-				utils.SendMessage(update, fmt.Sprintf("%s has been deleted", target))
+				return
 			}
+			utils.DeletePlace(update, target)
+			utils.SendMessage(update, fmt.Sprintf("%s has been deleted", target))
 		} else if confirm == "no" {
 			utils.SendMessage(update, "Deletion process cancelled")
 		}
 		if err := utils.SetUserState(update, constants.Idle); err != nil {
 			log.Printf("error SetUserState: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
 		}
 	}
 }
