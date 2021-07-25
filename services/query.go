@@ -54,6 +54,27 @@ func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
 }
 
 /* Search from available tags to get */
+func addAndSendSelectedTags(update tgbotapi.Update, tag string) {
+	utils.AddQueryTag(update, tag)
+	/* Extract tags */
+	queryTagsMap, err := utils.GetQueryTags(update)
+	if err != nil {
+		log.Printf("error getting query tags: %+v", err)
+	}
+
+	/* Send current tags */
+	if len(queryTagsMap) > 0 {
+		var queryTags = make([]string, len(queryTagsMap))
+		i := 0
+		for tag := range queryTagsMap {
+			queryTags[i] = tag
+			i++
+		}
+		curTags := strings.Join(queryTags, ", ")
+		utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
+	}
+}
+
 func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	tagsMap, err := utils.GetTags(update)
 	if err != nil {
@@ -70,37 +91,24 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 		utils.SendInlineKeyboard(update, "No tags found", inlineKeyboard)
 	}
 
-	/* Extract tags */
-	queryTagsMap, err := utils.GetQueryTags(update)
-	if err != nil {
-		log.Printf("error getting query tags: %+v", err)
-	}
-
-	/* Send current tags */
-	if len(queryTagsMap) > 0 {
-		var queryTags = make([]string, len(queryTagsMap))
-		i := 0
-		for tag := range queryTagsMap {
-			queryTags[i] = tag
-			i++
-		}
-		curTags := strings.Join(queryTags, ", ")
-		utils.SendMessage(update, fmt.Sprintf("Current tags: %s", curTags))
-	}
-
 	/* Set each tag as its own inline row */
-	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, 0)
+	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, len(tagsMap)+1)
+	i := 0
 	for tag := range tagsMap {
-		/* Show if tag not chosen yet */
-		if !queryTagsMap[tag] {
-			tagButtons = append(tagButtons, tgbotapi.NewInlineKeyboardRow(
-				tgbotapi.NewInlineKeyboardButtonData(tag, tag),
-			))
-		}
+		tagButtons[i] = tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
+		)
+		i++
+		// /* Show if tag not chosen yet */
+		// if !queryTagsMap[tag] {
+		// 	tagButtons = append(tagButtons, tgbotapi.NewInlineKeyboardRow(
+		// 		tgbotapi.NewInlineKeyboardButtonData(tag, tag),
+		// 	))
+		// }
 	}
-	tagButtons = append(tagButtons, doneRow)
+	tagButtons[len(tagsMap)-1] = doneRow
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
-	utils.SendInlineKeyboard(update, "Add another tag or done", inlineKeyboard)
+	utils.SendInlineKeyboard(update, "Add tags or /done", inlineKeyboard)
 }
 
 /* Search from name of places */
@@ -113,7 +121,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	case constants.QuerySelectType:
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
-			log.Printf("error setting message: %+v", err)
+			log.Printf("error getting message: %+v", err)
 		}
 		switch message {
 		case "/getOne":
@@ -142,12 +150,13 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 	case constants.QueryOneTagOrName:
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
-			log.Printf("error setting message: %+v", err)
+			log.Printf("error getting message: %+v", err)
 		}
 		switch message {
 		case "/withTag":
 			// withTag inline (tags, /done), GoTo QuerySetTags
 			// Send message "Don't add any to consider all places"
+			utils.RemoveMarkupKeyboard(update, "Starting search with tags")
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with!")
 			utils.SendMessage(update, "(Don't add any to consider all places)")
 			if err := utils.SetUserState(update, constants.QueryOneSetTags); err != nil {
@@ -156,6 +165,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			}
 		case "/withName":
 			// withName inline (names)
+			utils.RemoveMarkupKeyboard(update, "Starting search with name")
 			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -167,15 +177,11 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask for tags to search with */
 	case constants.QueryOneSetTags:
-		message, _, err := utils.GetMessage(update)
+		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
-			log.Printf("error setting message: %+v", err)
+			log.Printf("error getting message from callback: %+v", err)
 		}
-		switch message {
-		case "":
-		default:
-			sendAvailableTagsResponse(update, "Please select one of the provided responses")
-		}
+		addAndSendSelectedTags(update, tag)
 		// tag addTag, preview current, inline (show tags not yet added, /done)
 		// done GoTo QueryOneRetrieve. Markup("yes, no"), ask with pic
 

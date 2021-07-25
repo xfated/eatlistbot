@@ -632,7 +632,7 @@ func GetQueryWithPics(update tgbotapi.Update) (string, error) {
 }
 
 // message should contain tag
-func AddQueryTag(update tgbotapi.Update) error {
+func AddQueryTag(update tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -640,10 +640,6 @@ func AddQueryTag(update tgbotapi.Update) error {
 	}
 
 	/* Add tag */
-	tag, _, err := GetMessage(update)
-	if err != nil {
-		return err
-	}
 	userRef := client.NewRef("users").Child(userID).Child(chatID)
 	if err := userRef.Child("query").Child("tags").Update(ctx, map[string]interface{}{
 		tag: true,

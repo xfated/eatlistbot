@@ -156,7 +156,7 @@ func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error)
 }
 
 func GetChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
-	if update.Message == nil {
+	if update.Message != nil {
 		chatID = ""
 		userID = ""
 		err = errors.New("invalid message")
@@ -181,6 +181,14 @@ func GetMessage(update tgbotapi.Update) (message string, messageID int, err erro
 	messageID = update.Message.MessageID
 	err = nil
 	return
+}
+
+func GetCallbackQueryMessage(update tgbotapi.Update) (string, error) {
+	log.Printf("Message in callback: %+v", update.Message)
+	if update.CallbackQuery == nil {
+		return "", errors.New("invalid callback data")
+	}
+	return update.CallbackQuery.Message.Text, nil
 }
 
 func GetPhotoIDs(update tgbotapi.Update) ([]string, error) {
