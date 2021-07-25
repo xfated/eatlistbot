@@ -87,7 +87,7 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	/* No tags, just send done */
 	if len(tagsMap) == 0 {
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(doneRow)
-		utils.SendInlineKeyboard(update, "No tags found", inlineKeyboard)
+		utils.SendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", inlineKeyboard)
 		return
 	}
 
@@ -187,7 +187,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		case "/withTag":
 			// withTag inline (tags, /done), GoTo QuerySetTags
 			// Send message "Don't add any to consider all places"
-			utils.RemoveMarkupKeyboard(update, "Starting search with tags")
+			utils.RemoveMarkupKeyboard(update, "Searching for tags")
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
 			utils.SendMessage(update, "(Don't add any to consider all places)")
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
@@ -196,7 +196,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			}
 		case "/withName":
 			// withName inline (names)
-			utils.RemoveMarkupKeyboard(update, "Starting search with name")
+			utils.RemoveMarkupKeyboard(update, "Searching for places")
 			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
