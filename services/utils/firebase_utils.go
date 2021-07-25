@@ -690,7 +690,7 @@ func SetPlaceTarget(update tgbotapi.Update, name string) error {
 	}
 
 	/* Set target */
-	placeTargetRef := client.NewRef("users").Child(userID).Child("target")
+	placeTargetRef := client.NewRef("users").Child(userID).Child("target").Child("place")
 	if err := placeTargetRef.Update(ctx, map[string]interface{}{
 		chatID: name,
 	}); err != nil {
@@ -708,7 +708,7 @@ func GetPlaceTarget(update tgbotapi.Update) (string, error) {
 
 	/* Get target */
 	var target string
-	placeTargetRef := client.NewRef("users").Child(userID).Child("target")
+	placeTargetRef := client.NewRef("users").Child(userID).Child("target").Child("place")
 	if err := placeTargetRef.Child(chatID).Get(ctx, &target); err != nil {
 		return "", err
 	}

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/xfated/golistbot/services/constants"
@@ -54,7 +55,33 @@ func deletePlaceHandler(update tgbotapi.Update, userState constants.State) {
 			log.Printf("error getting message from callback: %+v", err)
 		}
 		utils.SetPlaceTarget(update, name)
+		sendConfirmDeleteResponse(update, "Are you sure?")
 
 	case constants.DeleteConfirm:
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
+
+		confirm, err := utils.GetCallbackQueryMessage(update)
+		if err != nil {
+			log.Printf("error getting message from callback: %+v", err)
+		}
+		if confirm == "yes" {
+			target, err := utils.GetPlaceTarget(update)
+			if err != nil {
+				log.Printf("error GetPlaceTarget: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured")
+			} else {
+				utils.DeletePlace(update, target)
+				utils.SendMessage(update, fmt.Sprintf("%s has been deleted", target))
+			}
+		} else if confirm == "no" {
+			utils.SendMessage(update, "Deletion process cancelled")
+		}
+		if err := utils.SetUserState(update, constants.Idle); err != nil {
+			log.Printf("error SetUserState: %+v", err)
+		}
 	}
 }
