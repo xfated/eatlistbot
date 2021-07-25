@@ -169,6 +169,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			}
 			utils.SetQueryNum(update, len(placeNames))
 			// Go straight to retrieve
+			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall go fetch your %v places", len(placeNames)))
 			sendQueryGetImagesResponse(update, "Do you want the images as well?")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
