@@ -9,6 +9,9 @@ import (
 )
 
 func HandleUserInput(update tgbotapi.Update) {
+	/* Debugging */
+	utils.LogMessage(update)
+	utils.LogUpdate(update)
 	/* Check for main commands */
 	message, _, err := utils.GetMessage(update)
 	if err == nil {
