@@ -148,16 +148,22 @@ func RemoveMarkupKeyboard(update tgbotapi.Update, text string) {
 
 /* Getting */
 func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error) {
-	if update.Message == nil {
-		chatID = 0
-		userID = 0
-		err = errors.New("invalid message")
+	if update.Message != nil {
+		chatID = update.Message.Chat.ID
+		userID = update.Message.From.ID
+		err = nil
+		return
+	}
+	if update.CallbackQuery != nil {
+		chatID = update.Message.Chat.ID
+		userID = update.Message.From.ID
+		err = nil
 		return
 	}
 
-	chatID = update.Message.Chat.ID
-	userID = update.Message.From.ID
-	err = nil
+	chatID = 0
+	userID = 0
+	err = errors.New("invalid message or callback query")
 	return
 }
 
