@@ -88,7 +88,7 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
 		)
 	}
-	tagButtons[len(tagButtons)] = doneRow
+	tagButtons[len(tagButtons)-1] = doneRow
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
 	utils.SendInlineKeyboard(update, "Add another tag or done", inlineKeyboard)
 }
