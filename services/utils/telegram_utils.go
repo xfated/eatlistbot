@@ -156,7 +156,7 @@ func GetChatUserID(update tgbotapi.Update) (chatID int64, userID int, err error)
 }
 
 func GetChatUserIDString(update tgbotapi.Update) (chatID, userID string, err error) {
-	if update.Message != nil {
+	if update.Message == nil {
 		chatID = ""
 		userID = ""
 		err = errors.New("invalid message")
