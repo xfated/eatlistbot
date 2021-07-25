@@ -42,8 +42,8 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
-			return
 		}
+		return
 	}
 
 	/* Get user state for Targeted handling */
