@@ -134,7 +134,18 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			log.Printf("error setting message: %+v", err)
 		}
 		switch message {
-		case "":
+		case "/withTag":
+			sendAvailableTagsResponse(update, "Add the tags you'd like to search with!")
+			if err := utils.SetUserState(update, constants.QueryOneSetTags); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+		case "/withName":
+			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
+			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
 		default:
 			sendQueryOneTagOrNameResponse(update, "Please select one of the provided resposnes")
 		}
