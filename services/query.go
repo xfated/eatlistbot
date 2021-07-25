@@ -71,7 +71,13 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 }
 
 func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
-	tagsMap, err := utils.GetTags(update)
+	chatID, _, err := utils.GetChatUserIDString(update)
+	if err != nil {
+		log.Printf("error GetChatUserID: %+v", chatID)
+		utils.SendMessage(update, "Sorry, an error occured!")
+		return
+	}
+	tagsMap, err := utils.GetTags(update, chatID)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")

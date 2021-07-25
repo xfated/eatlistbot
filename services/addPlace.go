@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/xfated/golistbot/services/constants"
 	"github.com/xfated/golistbot/services/utils"
@@ -32,7 +33,10 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
 }
 func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
-	tagsMap, err := utils.GetTags(update)
+	chatID, err := utils.GetChatTarget(update)
+	chatIDString := strconv.FormatInt(chatID, 10)
+
+	tagsMap, err := utils.GetTags(update, chatIDString)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")

@@ -543,12 +543,8 @@ func GetPlaceNames(update *tgbotapi.Update) (map[string]bool, error) {
 }
 
 /* Read / Delete / Update tags */
-func GetTags(update *tgbotapi.Update) (map[string]bool, error) {
+func GetTags(update *tgbotapi.Update, chatID string) (map[string]bool, error) {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return map[string]bool{}, err
-	}
 	chatRef := client.NewRef("tags").Child(chatID)
 
 	/* Retrieve tags */
@@ -719,11 +715,14 @@ func GetQueryTags(update *tgbotapi.Update) (map[string]bool, error) {
 // func SetRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
 // 	ctx := context.Background()
 // 	chatID, userID, err := GetChatUserIDString(update)
-
 // 	if err != nil {
 // 		return err
 // 	}
 
+// 	if message == nil {
+// 		return errors.New("nil message")
+// 	}
+// 	messageID := message.MessageID
 // 	/* Add tag */
 // 	queryRef := client.NewRef("users").Child(userID).Child("query")
 // 	if err := queryRef.Child("tags").Update(ctx, map[string]interface{}{
