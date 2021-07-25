@@ -37,10 +37,14 @@ func InitTelegram() {
 	log.Println("Loaded telegram bot")
 }
 
-/* Redirect */
-// func RedirectToBotChat(update tgbotapi.Update) {
-// 	chatID, userID, err := Get
-// 	redirect := tgbotapi.NewCallback("")
+// /* Redirect */
+// func RedirectToBotChat(update tgbotapi.Update, text string) {
+// 	chatID, userID, err := GetChatUserID(update)
+// 	if err != nil {
+// 		log.Printf("error GetChatUserID: %+v", err)
+// 	}
+// 	redirect := tgbotapi.NewCallback(fmt.Sprintf("redirect%vfrom%v", userID, chatID), text)
+// 	redirect.URL =
 // }
 
 /* General Logging */

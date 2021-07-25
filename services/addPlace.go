@@ -154,6 +154,7 @@ func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			utils.SetMessageTarget(update, messageID)
+			sendConfirmSubmitResponse(update, "Are you really ready to submit?")
 		case "/cancel":
 			// Prep for next state
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
