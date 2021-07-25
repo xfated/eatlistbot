@@ -41,8 +41,8 @@ func sendQueryOneTagOrNameResponse(update tgbotapi.Update, text string) {
 
 func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
 	// Create buttons
-	yesButton := tgbotapi.NewInlineKeyboardButtonData("/yes", "/yes")
-	noButton := tgbotapi.NewInlineKeyboardButtonData("/no", "/no")
+	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
+	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
 	// Create rows
 	row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
 
@@ -183,6 +183,15 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			sendQueryOneTagOrNameResponse(update, "Please select one of the provided resposnes")
 		}
 
+	/* Ask for name to search with */
+	case constants.QueryOneSetName:
+		// message, _, err := utils.GetMessage(update)
+		// if err != nil {
+		// 	log.Printf("error setting message: %+v", err)
+		// }
+
+		// set name, GoTo QueryOneRetrieve. Markup("yes, no"), ask with pics
+
 	/* Ask how many records to get */
 	case constants.QueryFewSetNum:
 
@@ -209,15 +218,6 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Please select from the above options")
 		}
 
-	/* Ask for name to search with */
-	case constants.QueryOneSetName:
-		// message, _, err := utils.GetMessage(update)
-		// if err != nil {
-		// 	log.Printf("error setting message: %+v", err)
-		// }
-
-		// set name, GoTo QueryOneRetrieve. Markup("yes, no"), ask with pics
-
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryRetrieve:
 		sendImage, err := utils.GetCallbackQueryMessage(update)
@@ -242,7 +242,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 					utils.SendMessage(update, "Sorry, error with getting data on the place.")
 					return
 				}
-				utils.SendPlaceDetails(update, placeData, sendImage == "/yes")
+				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 				if err := utils.SetUserState(update, constants.Idle); err != nil {
 					log.Printf("error SetUserState: %+v", err)
 				}
@@ -274,7 +274,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			}
 			for _, placeData := range places[:queryNum] {
 				log.Printf("senting details for: %+v", placeData)
-				utils.SendPlaceDetails(update, placeData, sendImage == "/yes")
+				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 			}
 		}
 

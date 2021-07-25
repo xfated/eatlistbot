@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"errors"
 	"log"
 	"math/rand"
 	"os"
@@ -558,8 +557,8 @@ func ResetQuery(update tgbotapi.Update) error {
 	}
 
 	/* Delete query */
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Delete(ctx); err != nil {
+	queryRef := client.NewRef("users").Child(userID).Child("query")
+	if err := queryRef.Delete(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -578,8 +577,8 @@ func SetQueryName(update tgbotapi.Update) error {
 	if err != nil {
 		return err
 	}
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Update(ctx, map[string]interface{}{
+	queryRef := client.NewRef("users").Child(userID).Child("query")
+	if err := queryRef.Update(ctx, map[string]interface{}{
 		"name": name,
 	}); err != nil {
 		return err
@@ -594,49 +593,12 @@ func GetQueryName(update tgbotapi.Update) (string, error) {
 		return "", err
 	}
 
-	userRef := client.NewRef("users").Child(userID)
+	queryRef := client.NewRef("users").Child(userID).Child("query")
 	var name string
-	if err := userRef.Child("query").Get(ctx, &name); err != nil {
+	if err := queryRef.Get(ctx, &name); err != nil {
 		return "", err
 	}
 	return name, err
-}
-
-/* Message should contain query type */
-func SetQueryType(update tgbotapi.Update) error {
-	ctx := context.Background()
-	_, userID, err := GetChatUserIDString(update)
-	if err != nil {
-		return err
-	}
-
-	/* Set temp under userRef */
-	queryType, _, err := GetMessage(update)
-	if err != nil {
-		return err
-	}
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Update(ctx, map[string]interface{}{
-		"queryType": queryType,
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetQueryType(update tgbotapi.Update) (string, error) {
-	ctx := context.Background()
-	_, userID, err := GetChatUserIDString(update)
-	if err != nil {
-		return "", err
-	}
-
-	userRef := client.NewRef("users").Child(userID)
-	var queryType string
-	if err := userRef.Child("queryType").Get(ctx, &queryType); err != nil {
-		return "", err
-	}
-	return queryType, err
 }
 
 func SetQueryNum(update tgbotapi.Update, num int) error {
@@ -647,8 +609,8 @@ func SetQueryNum(update tgbotapi.Update, num int) error {
 	}
 
 	/* Set number of queries*/
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Update(ctx, map[string]interface{}{
+	queryRef := client.NewRef("users").Child(userID).Child("query")
+	if err := queryRef.Update(ctx, map[string]interface{}{
 		"queryNum": num,
 	}); err != nil {
 		return err
@@ -663,58 +625,12 @@ func GetQueryNum(update tgbotapi.Update) (int, error) {
 		return 0, err
 	}
 
-	userRef := client.NewRef("users").Child(userID)
+	queryRef := client.NewRef("users").Child(userID).Child("query")
 	var queryNum int
-	if err := userRef.Child("queryNum").Get(ctx, &queryNum); err != nil {
+	if err := queryRef.Child("queryNum").Get(ctx, &queryNum); err != nil {
 		return 0, err
 	}
 	return queryNum, err
-}
-
-// message should contain yes/no
-func SetQueryWithPics(update tgbotapi.Update) error {
-	ctx := context.Background()
-	_, userID, err := GetChatUserIDString(update)
-	if err != nil {
-		return err
-	}
-
-	/* Check answer whether to get pic */
-	toGetPic, _, err := GetMessage(update)
-	if err != nil {
-		return err
-	}
-	var getPic bool
-	if toGetPic == "yes" {
-		getPic = true
-	} else if toGetPic == "no" {
-		getPic = false
-	} else {
-		return errors.New("invalid answer")
-	}
-
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Update(ctx, map[string]interface{}{
-		"getPic": getPic,
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetQueryWithPics(update tgbotapi.Update) (string, error) {
-	ctx := context.Background()
-	_, userID, err := GetChatUserIDString(update)
-	if err != nil {
-		return "", err
-	}
-
-	var getPic string
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Get(ctx, &getPic); err != nil {
-		return "", err
-	}
-	return getPic, nil
 }
 
 // message should contain tag
@@ -726,8 +642,8 @@ func AddQueryTag(update tgbotapi.Update, tag string) error {
 	}
 
 	/* Add tag */
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Child("tags").Update(ctx, map[string]interface{}{
+	queryRef := client.NewRef("users").Child(userID).Child("query")
+	if err := queryRef.Child("tags").Update(ctx, map[string]interface{}{
 		tag: true,
 	}); err != nil {
 		return err
@@ -743,8 +659,8 @@ func GetQueryTags(update tgbotapi.Update) (map[string]bool, error) {
 	}
 
 	var tagsMap map[string]bool
-	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("query").Child("tags").Get(ctx, &tagsMap); err != nil {
+	queryRef := client.NewRef("users").Child(userID).Child("query")
+	if err := queryRef.Child("tags").Get(ctx, &tagsMap); err != nil {
 		return map[string]bool{}, err
 	}
 
