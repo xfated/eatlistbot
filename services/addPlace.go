@@ -33,7 +33,6 @@ func sendTemplateReplies(update tgbotapi.Update, text string) {
 }
 
 func addPlaceHandler(update tgbotapi.Update, userState constants.State) {
-
 	switch userState {
 	case constants.SetName:
 		// Message should contain name of place

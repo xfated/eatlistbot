@@ -29,11 +29,11 @@ func HandleUserInput(update tgbotapi.Update) {
 			}
 		case "/addplace",
 			"/addplace@toGoListBot":
+			utils.SendMessage(update, "Please enter the name of the place to begin")
 			if err := utils.SetUserState(update, constants.SetName); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
-			utils.SendMessage(update, "Please enter the name of the place to begin")
 		case "/query",
 			"/query@toGoListBot":
 			utils.ResetQuery(update)
