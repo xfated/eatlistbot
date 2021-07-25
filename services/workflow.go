@@ -52,6 +52,8 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+		case "/testredirect":
+
 		}
 	}
 

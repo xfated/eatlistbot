@@ -37,6 +37,9 @@ func InitTelegram() {
 	log.Println("Loaded telegram bot")
 }
 
+// /* Redirect */
+// func redirect
+
 /* General Logging */
 func LogMessage(update tgbotapi.Update) {
 	if update.Message != nil {
