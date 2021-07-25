@@ -213,6 +213,11 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
 		}
 		utils.SetQueryName(update, name)
+		sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
+		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+			log.Printf("error SetUserState: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+		}
 
 		/* If user send a message instead */
 		if update.Message != nil {
