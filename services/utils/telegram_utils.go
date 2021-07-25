@@ -48,6 +48,12 @@ func LogUpdate(update tgbotapi.Update) {
 	log.Printf("Update: %+v", update)
 }
 
+func LogCallbackQuery(update tgbotapi.Update) {
+	if update.CallbackQuery != nil {
+		log.Printf("Callback Query: %+v", update.CallbackQuery)
+	}
+}
+
 /* Sending */
 func SendMessage(update tgbotapi.Update, text string) error {
 	chatID, _, err := GetChatUserID(update)
