@@ -56,6 +56,7 @@ func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
 /* Search from available tags to get */
 func addAndSendSelectedTags(update tgbotapi.Update, tag string) {
 	utils.AddQueryTag(update, tag)
+
 	/* Extract tags */
 	queryTagsMap, err := utils.GetQueryTags(update)
 	if err != nil {
@@ -178,13 +179,26 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask for tags to search with */
 	case constants.QueryOneSetTags:
+		// tag addTag, preview current, inline (show tags not yet added, /done)
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
 		}
-		addAndSendSelectedTags(update, tag)
-		// tag addTag, preview current, inline (show tags not yet added, /done)
 		// done GoTo QueryOneRetrieve. Markup("yes, no"), ask with pic
+		if tag == "/done" {
+			sendQueryGetImagesResponse(update, "Do you want the images too?")
+			if err := utils.SetUserState(update, constants.QueryOneRetrieve); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+		} else {
+			addAndSendSelectedTags(update, tag)
+		}
+
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+		}
 
 	/* Ask for name to search with */
 	case constants.QueryOneSetName:
@@ -202,7 +216,8 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			log.Printf("error setting message: %+v", err)
 		}
 		switch message {
-		case "":
+		case "yes":
+		case "no":
 		default:
 			sendQueryGetImagesResponse(update, "yes or no?")
 		}

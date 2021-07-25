@@ -51,7 +51,7 @@ func LogUpdate(update tgbotapi.Update) {
 func LogCallbackQuery(update tgbotapi.Update) {
 	if update.CallbackQuery != nil {
 		log.Printf("Callback Query: %+v", update.CallbackQuery)
-		log.Printf("Callbakc Query Message: %+v", update.CallbackQuery.Message)
+		// log.Printf("Callback Query Message: %+v", update.CallbackQuery.Message)
 	}
 }
 
