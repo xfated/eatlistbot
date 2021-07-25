@@ -41,7 +41,7 @@ func InitTelegram() {
 func RedirectToBotChat(update tgbotapi.Update, text string) {
 	// Create button
 	redirectButton := tgbotapi.NewInlineKeyboardButtonData("Add place", "test")
-	redirectLink := "t.me/toGoListBot"
+	redirectLink := "t.me/toGoListBot?start=XXXX"
 	redirectButton.URL = &redirectLink
 
 	// Create rows
