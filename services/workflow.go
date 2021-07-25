@@ -27,6 +27,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+			return
 		case "/addplace",
 			"/addplace@toGoListBot":
 			utils.SendMessage(update, "Please enter the name of the place to begin")
@@ -34,6 +35,7 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+			return
 		case "/query",
 			"/query@toGoListBot":
 			utils.ResetQuery(update)
@@ -42,8 +44,8 @@ func HandleUserInput(update tgbotapi.Update) {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
+			return
 		}
-		return
 	}
 
 	/* Get user state for Targeted handling */
