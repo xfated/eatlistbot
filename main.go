@@ -29,7 +29,7 @@ func webhookHandler(c *gin.Context) {
 		return
 	}
 
-	if update.Message == nil {
+	if update.Message != nil {
 		log.Printf("From: %+v Text: %+v\n", update.Message.From, update.Message.Text)
 	}
 
