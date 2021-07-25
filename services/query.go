@@ -41,16 +41,13 @@ func sendQueryOneTagOrNameResponse(update tgbotapi.Update, text string) {
 
 func sendQueryGetImagesResponse(update tgbotapi.Update, text string) {
 	// Create buttons
-	yesButton := tgbotapi.NewKeyboardButton("/yes")
-	noButton := tgbotapi.NewKeyboardButton("/no")
+	yesButton := tgbotapi.NewInlineKeyboardButtonData("/yes", "/yes")
+	noButton := tgbotapi.NewInlineKeyboardButtonData("/no", "/no")
 	// Create rows
-	row := tgbotapi.NewKeyboardButtonRow(yesButton, noButton)
+	row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
 
-	replyKeyboard := tgbotapi.NewReplyKeyboard(row)
-	replyKeyboard.ResizeKeyboard = true
-	replyKeyboard.OneTimeKeyboard = true
-	replyKeyboard.Selective = true
-	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 /* Search from available tags to get */
@@ -109,8 +106,7 @@ func sendAvailableTagsResponse(update tgbotapi.Update, text string) {
 	}
 	tagButtons[len(tagsMap)] = doneRow
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
-	log.Printf("inlinekeyboard: %+v", tagButtons)
-	utils.SendInlineKeyboard(update, "Add tags or /done", inlineKeyboard)
+	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 /* Search from name of places */
@@ -159,7 +155,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 			// withTag inline (tags, /done), GoTo QuerySetTags
 			// Send message "Don't add any to consider all places"
 			utils.RemoveMarkupKeyboard(update, "Starting search with tags")
-			sendAvailableTagsResponse(update, "Add the tags you'd like to search with!")
+			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"/done\" once finished")
 			utils.SendMessage(update, "(Don't add any to consider all places)")
 			if err := utils.SetUserState(update, constants.QueryOneSetTags); err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -186,7 +182,7 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 		}
 		// done GoTo QueryOneRetrieve. Markup("yes, no"), ask with pic
 		if tag == "/done" {
-			sendQueryGetImagesResponse(update, "Do you want the images too?")
+			sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 			if err := utils.SetUserState(update, constants.QueryOneRetrieve); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -211,16 +207,22 @@ func queryHandler(update tgbotapi.Update, userState constants.State) {
 
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryOneRetrieve:
-		message, _, err := utils.GetMessage(update)
+		response, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
-			log.Printf("error setting message: %+v", err)
+			log.Printf("error getting message from callback: %+v", err)
 		}
-		switch message {
+		switch response {
 		case "yes":
 		case "no":
 		default:
 			sendQueryGetImagesResponse(update, "yes or no?")
 		}
+
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+		}
+
 		// if name != "", get and show place data.
 		// if len(tags) == 0, get all, randomly choose one
 		// if len(tags) > 0, get all, extract with matching tags. randomly select one

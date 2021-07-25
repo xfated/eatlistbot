@@ -470,6 +470,21 @@ func updateTags(update tgbotapi.Update, tag string) error {
 }
 
 /* Handle queries */
+func ResetQuery(update tgbotapi.Update) error {
+	ctx := context.Background()
+	chatID, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Delete query */
+	userRef := client.NewRef("users").Child(userID).Child(chatID)
+	if err := userRef.Child("query").Delete(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
 // message should contain name
 func SetQueryName(update tgbotapi.Update) error {
 	ctx := context.Background()
