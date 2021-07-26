@@ -132,7 +132,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			msg, err := utils.SendMessage(update, "Please select from the above options")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			return
 		}
 		// Get message
@@ -213,7 +218,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard (use tag or name to search)
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			msg, err := utils.SendMessage(update, "Please select from the above options")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			return
 		}
 		message, err := utils.GetCallbackQueryMessage(update)
@@ -224,9 +234,19 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 		switch message {
 		case "/withTag":
-			utils.RemoveMarkupKeyboard(update, "Searching for tags")
+			// Send responses
+			msg := utils.RemoveMarkupKeyboard(update, "Searching for tags")
+			utils.AddMessageToDelete(update, msg)
+
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
-			utils.SendMessage(update, "(Don't add any to consider all places)")
+
+			msg, err = utils.SendMessage(update, "(Don't add any to consider all places)")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
+
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")

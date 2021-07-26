@@ -770,9 +770,27 @@ func AddMessageToDelete(update *tgbotapi.Update, message *tgbotapi.Message) erro
 	return nil
 }
 
+func ResetMessagesToDelete(update *tgbotapi.Update) error {
+	ctx := context.Background()
+	chatID, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Delete recent message data */
+	recentDeleteRef := client.NewRef("deleteRecord").Child(chatID)
+	if err := recentDeleteRef.Child("messages").Delete(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteRecentMessages(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	chatIDString, _, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return err
@@ -784,15 +802,19 @@ func DeleteRecentMessages(update *tgbotapi.Update) error {
 	if err := recentDeleteRef.Child("messages").Get(ctx, &messageIDs); err != nil {
 		return err
 	}
-
+	// Delete one by one
 	for messageIDString := range messageIDs {
 		messageID, err := strconv.Atoi(messageIDString)
 		if err != nil {
 			return err
 		}
-		DeleteMessage(chatID, messageID)
+		if err := DeleteMessage(chatID, messageID); err != nil {
+			return err
+		}
 	}
-	// TODO: implement delete
+	if err := ResetMessagesToDelete(update); err != nil {
+		return err
+	}
 	return nil
 }
 
