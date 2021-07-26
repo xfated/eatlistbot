@@ -248,51 +248,53 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-			if err := utils.AddTempPlaceTag(update, tag); err != nil {
-				log.Printf("Error adding tag: %+v", err)
-				utils.SendMessage(update, "Tag should be a text")
-				return
-			}
-			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
-
-			// Only continue if /done is pressed
-			if tag == "/done" || tag == "done" {
-				if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
-					log.Printf("error SetUserState: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
-					return
-				}
-			} else {
-				return
-			}
-		}
-
-		// Then check if its a keyboard reply
-		tag, err := utils.GetCallbackQueryMessage(update)
-		if err != nil {
-			log.Printf("error GetCallbackQueryMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
-		}
-		if len(tag) > 0 {
 			switch tag {
-			case "/done":
+			case "/done",
+				"done",
+				"Done":
 				if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 					log.Printf("error SetUserState: %+v", err)
 					utils.SendMessage(update, "Sorry an error occured!")
 					return
 				}
+				// Only continue if /done is pressed
 			default:
 				if err := utils.AddTempPlaceTag(update, tag); err != nil {
 					log.Printf("Error adding tag: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
+					utils.SendMessage(update, "Tag should be a text")
 					return
 				}
 				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
-				// Don't continue to next action if adding tag through inline
+			}
+		} else {
+			// Then check if its a keyboard reply
+			tag, err := utils.GetCallbackQueryMessage(update)
+			if err != nil {
+				log.Printf("error GetCallbackQueryMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
+			if len(tag) > 0 {
+				switch tag {
+				case "/done":
+					if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
+						log.Printf("error SetUserState: %+v", err)
+						utils.SendMessage(update, "Sorry an error occured!")
+						return
+					}
+				default:
+					if err := utils.AddTempPlaceTag(update, tag); err != nil {
+						log.Printf("Error adding tag: %+v", err)
+						utils.SendMessage(update, "Sorry an error occured!")
+						return
+					}
+					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+					// Don't continue to next action if adding tag through inline
+					return
+				}
+			}
 		}
+
 	case constants.ConfirmAddPlaceSubmit:
 		// Expect user to select from inline query (yes or no to submit)
 		/* If user send a message instead */
