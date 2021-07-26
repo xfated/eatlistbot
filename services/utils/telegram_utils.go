@@ -46,13 +46,13 @@ func RedirectToBotChat(update *tgbotapi.Update, text string, url string) {
 	SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func RedirectToChat(update *tgbotapi.Update, text string, chatID string) {
-	redirectButton := tgbotapi.NewInlineKeyboardButtonSwitch("Go to chat", chatID)
-	row := tgbotapi.NewInlineKeyboardRow(redirectButton)
+// func RedirectToChat(update *tgbotapi.Update, text string) {
+// 	redirectButton := tgbotapi.NewInlineKeyboardButtonSwitch("Exit to chats", "")
+// 	row := tgbotapi.NewInlineKeyboardRow(redirectButton)
 
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	SendInlineKeyboard(update, text, inlineKeyboard)
-}
+// 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+// 	SendInlineKeyboard(update, text, inlineKeyboard)
+// }
 
 /* General Logging */
 func LogMessage(update *tgbotapi.Update) {
