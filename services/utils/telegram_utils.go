@@ -49,13 +49,6 @@ func RedirectToBotChat(update *tgbotapi.Update, text string, url string) {
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
 	SendInlineKeyboard(update, text, inlineKeyboard)
-	// chatID, userID, err := GetChatUserID(update)
-	// if err != nil {
-	// 	log.Printf("error GetChatUserID: %+v", err)
-	// }
-	// redirect := tgbotapi.NewCallback(fmt.Sprintf("redirect%vfrom%v", userID, chatID), text)
-	// redirect.URL = "t.me/toGoListBot"
-	// bot.Send(redirect)
 }
 
 /* General Logging */
@@ -118,9 +111,6 @@ func SendPlaceDetails(update *tgbotapi.Update, placeData constants.PlaceDetails,
 	if placeData.Address != "" {
 		placeText = placeText + fmt.Sprintf("Address: %s\n", placeData.Address)
 	}
-	if placeData.URL != "" {
-		placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
-	}
 	if placeData.Images != nil {
 		placeText = placeText + fmt.Sprintf("Images: %v\n", len(placeData.Images))
 	}
@@ -137,7 +127,22 @@ func SendPlaceDetails(update *tgbotapi.Update, placeData constants.PlaceDetails,
 	if placeData.Notes != "" {
 		placeText = placeText + fmt.Sprintf("Notes: %s", placeData.Notes)
 	}
-	SendMessage(update, placeText)
+	if placeData.URL != "" {
+		// placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
+
+		/* To send as inline keyboard */
+		// Create button
+		redirectButton := tgbotapi.NewInlineKeyboardButtonData(placeData.URL, placeData.URL)
+		redirectLink := placeData.URL
+		redirectButton.URL = &redirectLink
+
+		// Create rows
+		row := tgbotapi.NewInlineKeyboardRow(redirectButton)
+		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+		SendInlineKeyboard(update, placeText, inlineKeyboard)
+	} else {
+		SendMessage(update, placeText)
+	}
 	if sendImage && placeData.Images != nil {
 		for imageID := range placeData.Images {
 			SendPhoto(update, imageID)
@@ -296,7 +301,6 @@ func CheckForSlash(update *tgbotapi.Update) error {
 		if err != nil {
 			return err
 		}
-		log.Printf(message)
 		if strings.Contains(message, "/") {
 			SendMessage(update, "Don't use / here! I will get confused :(")
 			SendMessage(update, "Please resend with a proper message")

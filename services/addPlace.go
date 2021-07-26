@@ -99,7 +99,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			break
 		}
-		utils.SendMessage(update, "Start adding the details for the place")
+		utils.SendMessage(update, "You may start adding the details for the place")
 	case constants.ReadyForNextAction:
 		// Expect user to select reply markup (pick next action)
 		message, _, err := utils.GetMessage(update)
