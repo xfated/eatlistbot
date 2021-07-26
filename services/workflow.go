@@ -22,7 +22,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			"/start@toGoListBot",
 			"/reset",
 			"/reset@toGoListBot":
-			go utils.RemoveMarkupKeyboard(update, "I am ready!")
+			utils.RemoveMarkupKeyboard(update, "I am ready!")
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -41,7 +41,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				utils.SendMessage(update, "Please send /addplace back in the chat if you'd like to add a place")
 				return
 			}
-			go utils.SendMessage(update, "Please enter the name of the place to begin")
+			utils.SendMessage(update, "Please enter the name of the place to begin")
 			if err := utils.SetUserState(update, constants.AddNewSetName); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -52,7 +52,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			"/addplace@toGoListBot":
 			// Check if is already private.
 			chatID, userID, err := utils.GetChatUserID(update)
-			go utils.SetChatTarget(update, chatID)
+			utils.SetChatTarget(update, chatID)
 
 			if err != nil {
 				log.Printf("error setting state: %+v", err)
@@ -61,7 +61,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			}
 			// Same == same chat
 			if chatID == int64(userID) {
-				go utils.SendMessage(update, "Please enter the name of the place to begin")
+				utils.SendMessage(update, "Please enter the name of the place to begin")
 				if err := utils.SetUserState(update, constants.AddNewSetName); err != nil {
 					log.Printf("error setting state: %+v", err)
 					utils.SendMessage(update, "Sorry an error occured!")
@@ -70,11 +70,11 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			// If not private, redirect
-			go utils.RedirectToBotChat(update, "Click the button to start adding", "https://t.me/toGoListBot?start=addPlace")
+			utils.RedirectToBotChat(update, "Click the button to start adding", "https://t.me/toGoListBot?start=addPlace")
 			return
 		case "/query",
 			"/query@toGoListBot":
-			go utils.ResetQuery(update)
+			utils.ResetQuery(update)
 			// End query if no place
 			err := checkAnyPlace(update)
 			if err != nil {
@@ -86,9 +86,9 @@ func HandleUserInput(update *tgbotapi.Update) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-			go utils.SetMessageTarget(update, messageID)
+			utils.SetMessageTarget(update, messageID)
 
-			go sendQuerySelectType(update, "What kind of query do you seek?")
+			sendQuerySelectType(update, "What kind of query do you seek?")
 			if err := utils.SetUserState(update, constants.QuerySelectType); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -97,7 +97,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			return
 		case "/deleteplace",
 			"/deleteplace@toGoListBot":
-			go sendPlacesToDeleteResponse(update, "Just select place do you want to delete?")
+			sendPlacesToDeleteResponse(update, "Just select place do you want to delete?")
 			if err := utils.SetUserState(update, constants.DeleteSelect); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -106,7 +106,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			return
 		case "/help",
 			"/help@toGoListBot":
-			go helpHandler(update)
+			helpHandler(update)
 		}
 	}
 
@@ -119,25 +119,25 @@ func HandleUserInput(update *tgbotapi.Update) {
 
 	/* Idle state */
 	if userState == constants.Idle {
-		go idleHandler(update)
+		idleHandler(update)
 		return
 	}
 
 	/* Adding new place */
 	if constants.IsAddingNewPlace(userState) {
-		go addPlaceHandler(update, userState)
+		addPlaceHandler(update, userState)
 		return
 	}
 
 	/* Querying places */
 	if constants.IsQuery(userState) {
-		go queryHandler(update, userState)
+		queryHandler(update, userState)
 		return
 	}
 
 	/* Delete place */
 	if constants.IsDeletePlace(userState) {
-		go deletePlaceHandler(update, userState)
+		deletePlaceHandler(update, userState)
 		return
 	}
 }

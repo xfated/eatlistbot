@@ -191,7 +191,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SetMessageTarget(update, messageID)
 
 			utils.RemoveMarkupKeyboard(update, "Select a tag to remove\nPress done once done!")
-			sendExistingTagsResponse(update, "Existing tags:")
+			sendAddedTagsResponse(update, "Existing tags:")
 		case "/preview":
 			placeData, err := utils.GetTempPlace(update)
 			if err != nil {

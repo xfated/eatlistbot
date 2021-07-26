@@ -34,7 +34,7 @@ func webhookHandler(c *gin.Context) {
 	}
 
 	// Handle user input
-	services.HandleUserInput(&update)
+	go services.HandleUserInput(&update)
 }
 
 func main() {
