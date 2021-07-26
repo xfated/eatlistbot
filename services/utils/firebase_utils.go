@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -386,34 +387,30 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 	}
 
 	// To delete any tags that have not been used
-	unusedTags := make([]string, 0)
+	tagsList := make([]string, len(filterTags))
+	tagUsed := make([]bool, len(filterTags))
+	i = 0
+	for tag := range filterTags {
+		tagsList[i] = tag
+		tagUsed[i] = false
+		i++
+	}
 
 	/* filter if tags are present */
 	if len(filterTags) > 0 {
 		filteredPlaces := make([]constants.PlaceDetails, 0)
+		// For each place
 		for _, place := range places {
 			consider := false
+			// If have tags
 			if place.Tags != nil {
-				/* Search using place tags */
-				// for tag := range place.Tags {
-				// 	/* select if any tag match */
-				// 	if filterTags[tag] {
-				// 		consider = true
-				// 		break
-				// 	}
-				// }
-				/* Search using filter tags (should have lesser) */
-				for tag := range filterTags {
-					tagUsed := false
+				// Check if match any filter
+				for idx, tag := range tagsList {
 					/* select if any tag match */
 					if place.Tags[tag] {
 						consider = true
-						tagUsed = true
+						tagUsed[idx] = true
 						break
-					}
-					// Add for deletion if unused
-					if !tagUsed {
-						unusedTags = append(unusedTags, tag)
 					}
 				}
 			}
@@ -424,6 +421,12 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 		placesList = filteredPlaces
 	}
 
+	unusedTags := make([]string, 0)
+	for idx, tag := range tagsList {
+		if !tagUsed[idx] {
+			unusedTags = append(unusedTags, tag)
+		}
+	}
 	if len(unusedTags) > 0 {
 		tagsString := strings.Join(unusedTags, ", ")
 		SendMessage(update, fmt.Sprintf("There is no place with these tags: %s.\nSo imma delete them", tagsString))
@@ -431,8 +434,9 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 			DeleteTag(update, tag)
 		}
 	}
-	/* Comment to check if its already random? */
-	// rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
+
+	/* Shuffle for random */
+	rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
 
 	// DEBUG
 	// log.Printf("filterTags: %+v", filterTags)
