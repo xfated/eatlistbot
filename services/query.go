@@ -80,6 +80,7 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 		utils.SendMessage(update, "Sorry, an error occured!")
 		return
 	}
+	log.Printf("ChatID query: %s", chatID)
 	tagsMap, err := utils.GetTags(update, chatID)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)

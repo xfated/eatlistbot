@@ -34,8 +34,13 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 }
 func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	chatID, err := utils.GetChatTarget(update)
+	if err != nil {
+		log.Printf("Error GetChatTarget: %+v", err)
+	}
 	chatIDString := strconv.FormatInt(chatID, 10)
 
+	log.Printf("chatID addPlace: %v", chatID)
+	log.Printf("chatID addPlace: %s", chatIDString)
 	tagsMap, err := utils.GetTags(update, chatIDString)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
