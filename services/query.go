@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -12,15 +13,33 @@ import (
 )
 
 func sendQuerySelectType(update *tgbotapi.Update, text string) {
-	utils.CreateAndSendInlineKeyboard(update, text, 3, "/getOne", "/getFew", "/getAll")
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 3, "/getOne", "/getFew", "/getAll")
+	utils.AddMessageToDelete(update, msg)
 }
 
 func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
-	utils.CreateAndSendInlineKeyboard(update, text, 2, "/withTag", "/withName")
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 2, "/withTag", "/withName")
+	utils.AddMessageToDelete(update, msg)
 }
 
 func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
-	utils.CreateAndSendInlineKeyboard(update, text, 2, "/yes", "/no")
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 2, "/yes", "/no")
+	utils.AddMessageToDelete(update, msg)
+}
+
+func checkAnyPlace(update *tgbotapi.Update) error {
+	/* Check if there are any places registed */
+	placeNames, err := utils.GetPlaceNames(update)
+	if err != nil {
+		log.Printf("error GetPlaceNames: %+v", err)
+		utils.SendMessage(update, "Sorry an error occured")
+		return err
+	}
+	if len(placeNames) == 0 {
+		utils.SendMessage(update, "No places registered :( go add some")
+		return errors.New("no place registered")
+	}
+	return nil
 }
 
 /* Search from available tags to get */
@@ -44,7 +63,13 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 			i++
 		}
 		curTags := strings.Join(queryTags, ", ")
-		utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
+		msg, err := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
+		if err != nil {
+			log.Printf("error getting query tags: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
+		}
+		utils.AddMessageToDelete(update, msg)
 	}
 }
 
@@ -76,7 +101,8 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 		i++
 	}
 	tags[len(tagsMap)] = "/done"
-	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
+	utils.AddMessageToDelete(update, msg)
 }
 
 /* Search from name of places */
@@ -96,22 +122,11 @@ func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
 		i++
 	}
 	placeNames[len(placeNamesMap)] = "/done"
-	utils.CreateAndSendInlineKeyboard(update, text, 1, placeNames...)
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 1, placeNames...)
+	utils.AddMessageToDelete(update, msg)
 }
 
 func queryHandler(update *tgbotapi.Update, userState constants.State) {
-	/* Check if there are any places registed */
-	placeNames, err := utils.GetPlaceNames(update)
-	if err != nil {
-		log.Printf("error GetPlaceNames: %+v", err)
-		utils.SendMessage(update, "Sorry an error occured")
-		return
-	}
-	if len(placeNames) == 0 {
-		utils.SendMessage(update, "No places registered :( go add some")
-		return
-	}
-
 	switch userState {
 	case constants.QuerySelectType:
 		// Expect user to select from inline markup keyboard
@@ -120,8 +135,15 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Please select from the above options")
 			return
 		}
+		// Get message
 		message, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
+			log.Printf("error GetCallbackQueryMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
+		}
+		// Delete messages
+		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
@@ -138,13 +160,30 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 		case "/getFew":
 			// getFew GoTo QueryFewSetNum. Message how many they want?
-			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(placeNames)))
+			placeNames, err := utils.GetPlaceNames(update)
+			if err != nil {
+				log.Printf("error GetPlaceNames: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured")
+				return
+			}
+
+			// Store to delete
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(placeNames)))
+			utils.AddMessageToDelete(update, msg)
+			// Get message
 			messageID, err := utils.GetMessageTarget(update)
 			if err != nil {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-			utils.SendMessageForceReply(update, "How many places do you want?", messageID)
+			// Store to delete
+			msg, err = utils.SendMessageForceReply(update, "How many places do you want?", messageID)
+			if err != nil {
+				log.Printf("error SetMessageForceReply: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
+			// Set state
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -159,8 +198,9 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 			utils.SetQueryNum(update, len(placeNames))
-			// Go straight to retrieve
-			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall go fetch your %v places", len(placeNames)))
+			// Store to delete
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall go fetch your %v places", len(placeNames)))
+			utils.AddMessageToDelete(update, msg)
 			sendQueryGetImagesResponse(update, "Do you want the images as well?")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
@@ -242,6 +282,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 
 		// Add queryNum
+		placeNames, err := utils.GetPlaceNames(update)
+		if err != nil {
+			log.Printf("error GetPlaceNames: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured")
+			return
+		}
+
 		if numQuery > len(placeNames) {
 			utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
 			utils.SetQueryNum(update, len(placeNames))

@@ -748,45 +748,7 @@ func GetQueryTags(update *tgbotapi.Update) (map[string]bool, error) {
 	return tagsMap, nil
 }
 
-func SetRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
-	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return err
-	}
-
-	if message == nil {
-		return errors.New("nil message")
-	}
-	messageID := message.MessageID
-
-	/* Add recent message data */
-	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
-	if err := recentInlineRef.Child("inline").Set(ctx, messageID); err != nil {
-		return err
-	}
-	return nil
-}
-
-func DeleteRecentInlineMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
-	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return err
-	}
-
-	/* Add recent message data */
-	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
-	var messageID int
-	if err := recentInlineRef.Child("inline").Get(ctx, &messageID); err != nil {
-		return err
-	}
-
-	// TODO: Add Delete
-	return nil
-}
-
-func AddRecentMessage(update *tgbotapi.Update, message *tgbotapi.Message) error {
+func AddMessageToDelete(update *tgbotapi.Update, message *tgbotapi.Message) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -799,8 +761,8 @@ func AddRecentMessage(update *tgbotapi.Update, message *tgbotapi.Message) error 
 	messageID := strconv.Itoa(message.MessageID)
 
 	/* Add recent message data */
-	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
-	if err := recentInlineRef.Child("messages").Update(ctx, map[string]interface{}{
+	recentDeleteRef := client.NewRef("deleteRecord").Child(chatID)
+	if err := recentDeleteRef.Child("messages").Update(ctx, map[string]interface{}{
 		messageID: true,
 	}); err != nil {
 		return err
@@ -810,18 +772,26 @@ func AddRecentMessage(update *tgbotapi.Update, message *tgbotapi.Message) error 
 
 func DeleteRecentMessages(update *tgbotapi.Update) error {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
+	chatIDString, _, err := GetChatUserIDString(update)
+	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return err
 	}
 
-	/* Add recent message data */
-	recentInlineRef := client.NewRef("deleteRecord").Child(chatID)
+	/* Get recent message data */
+	recentDeleteRef := client.NewRef("deleteRecord").Child(chatIDString)
 	var messageIDs map[string]bool
-	if err := recentInlineRef.Child("messages").Get(ctx, &messageIDs); err != nil {
+	if err := recentDeleteRef.Child("messages").Get(ctx, &messageIDs); err != nil {
 		return err
 	}
 
+	for messageIDString := range messageIDs {
+		messageID, err := strconv.Atoi(messageIDString)
+		if err != nil {
+			return err
+		}
+		DeleteMessage(chatID, messageID)
+	}
 	// TODO: implement delete
 	return nil
 }

@@ -75,6 +75,11 @@ func HandleUserInput(update *tgbotapi.Update) {
 		case "/query",
 			"/query@toGoListBot":
 			utils.ResetQuery(update)
+			// End query if no place
+			err := checkAnyPlace(update)
+			if err != nil {
+				return
+			}
 			// Record id for selective force reply
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {

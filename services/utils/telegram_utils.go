@@ -72,6 +72,15 @@ func LogCallbackQuery(update *tgbotapi.Update) {
 	}
 }
 
+/* Deleting */
+func DeleteMessage(chatID int64, messageID int) error {
+	deleteConfig := tgbotapi.NewDeleteMessage(chatID, messageID)
+	if _, err := bot.DeleteMessage(deleteConfig); err != nil {
+		return err
+	}
+	return nil
+}
+
 /* Sending */
 func SendMessage(update *tgbotapi.Update, text string) (*tgbotapi.Message, error) {
 	chatID, _, err := GetChatUserID(update)
@@ -188,7 +197,7 @@ func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbot
 	}
 }
 
-func CreateAndSendInlineKeyboard(update *tgbotapi.Update, text string, col int, buttons ...string) {
+func CreateAndSendInlineKeyboard(update *tgbotapi.Update, text string, col int, buttons ...string) *tgbotapi.Message {
 	var buttonList []tgbotapi.InlineKeyboardButton
 
 	for _, button := range buttons {
@@ -206,7 +215,7 @@ func CreateAndSendInlineKeyboard(update *tgbotapi.Update, text string, col int, 
 	}
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
-	SendInlineKeyboard(update, text, inlineKeyboard)
+	return SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
@@ -226,7 +235,7 @@ func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.
 
 }
 
-func RemoveMarkupKeyboard(update *tgbotapi.Update, text string) {
+func RemoveMarkupKeyboard(update *tgbotapi.Update, text string) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		log.Printf("Error GetChatUserID: %+v", err)
@@ -246,10 +255,11 @@ func RemoveMarkupKeyboard(update *tgbotapi.Update, text string) {
 		}
 	}
 	msg.ReplyToMessageID = messageTarget
-	_, err = bot.Send(msg)
+	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error removing markup keyboard: %+v", err)
 	}
+	return &message
 }
 
 /* Getting */
