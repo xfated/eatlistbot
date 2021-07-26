@@ -150,8 +150,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
+			// utils.SendMessage(update, "Sorry an error occured!")
+			// return
 		}
 		switch message {
 		case "/getOne":
@@ -229,8 +229,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
+			// utils.SendMessage(update, "Sorry an error occured!")
+			// return
 		}
 
 		message, err := utils.GetCallbackQueryMessage(update)
@@ -322,8 +322,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
+			// utils.SendMessage(update, "Sorry an error occured!")
+			// return
 		}
 
 		// Add queryNum
@@ -385,8 +385,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			// Delete messages
 			if err := utils.DeleteRecentMessages(update); err != nil {
 				log.Printf("error DeleteRecentMessages: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-				return
+				// utils.SendMessage(update, "Sorry an error occured!")
+				// return
 			}
 			sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
@@ -413,8 +413,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
+			// utils.SendMessage(update, "Sorry an error occured!")
+			// return
 		}
 
 		// Expect user to select from inline keyboard markup (yes or no to image)
