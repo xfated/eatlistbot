@@ -40,9 +40,7 @@ func InitTelegram() {
 /* Redirect */
 func RedirectToBotChat(update *tgbotapi.Update, text string, url string) {
 	// Create button
-	redirectButton := tgbotapi.NewInlineKeyboardButtonData("Add place", "test")
-	redirectLink := url
-	redirectButton.URL = &redirectLink
+	redirectButton := tgbotapi.NewInlineKeyboardButtonURL("Add place", url)
 
 	// Create rows
 	row := tgbotapi.NewInlineKeyboardRow(redirectButton)
@@ -131,12 +129,7 @@ func SendPlaceDetails(update *tgbotapi.Update, placeData constants.PlaceDetails,
 		// placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
 
 		/* To send as inline keyboard */
-		// Create button
-		redirectButton := tgbotapi.NewInlineKeyboardButtonData(placeData.URL, placeData.URL)
-		redirectLink := placeData.URL
-		redirectButton.URL = &redirectLink
-
-		// Create rows
+		redirectButton := tgbotapi.NewInlineKeyboardButtonURL(placeData.URL, placeData.URL)
 		row := tgbotapi.NewInlineKeyboardRow(redirectButton)
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
 		SendInlineKeyboard(update, placeText, inlineKeyboard)
