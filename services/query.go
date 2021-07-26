@@ -59,23 +59,21 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 	go utils.AddQueryTag(update, tag)
 
 	/* Send current tags */
-	if len(queryTagsMap) > 0 {
-		var queryTags = make([]string, len(queryTagsMap)+1)
-		i := 0
-		for tag := range queryTagsMap {
-			queryTags[i] = tag
-			i++
-		}
-		queryTags[len(queryTagsMap)] = tag
-		curTags := strings.Join(queryTags, ", ")
-		msg, err := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
-		if err != nil {
-			log.Printf("error getting query tags: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
-		}
-		utils.AddMessageToDelete(update, msg)
+	var queryTags = make([]string, len(queryTagsMap)+1)
+	i := 0
+	for tag := range queryTagsMap {
+		queryTags[i] = tag
+		i++
 	}
+	queryTags[len(queryTagsMap)] = tag
+	curTags := strings.Join(queryTags, ", ")
+	msg, err := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
+	if err != nil {
+		log.Printf("error getting query tags: %+v", err)
+		utils.SendMessage(update, "Sorry an error occured!")
+		return
+	}
+	utils.AddMessageToDelete(update, msg)
 }
 
 func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
