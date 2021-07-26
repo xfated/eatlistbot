@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/db"
@@ -385,6 +385,9 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 		i++
 	}
 
+	// To delete any tags that have not been used
+	unusedTags := make([]string, 0)
+
 	/* filter if tags are present */
 	if len(filterTags) > 0 {
 		filteredPlaces := make([]constants.PlaceDetails, 0)
@@ -401,10 +404,16 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 				// }
 				/* Search using filter tags (should have lesser) */
 				for tag := range filterTags {
+					tagUsed := false
 					/* select if any tag match */
 					if place.Tags[tag] {
 						consider = true
+						tagUsed = true
 						break
+					}
+					// Add for deletion if unused
+					if !tagUsed {
+						unusedTags = append(unusedTags, tag)
 					}
 				}
 			}
@@ -415,7 +424,15 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 		placesList = filteredPlaces
 	}
 
-	rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
+	if len(unusedTags) > 0 {
+		tagsString := strings.Join(unusedTags, ", ")
+		SendMessage(update, fmt.Sprintf("There is no place with these tags: %s.\nSo imma delete them", tagsString))
+		for _, tag := range unusedTags {
+			DeleteTag(update, tag)
+		}
+	}
+	/* Comment to check if its already random? */
+	// rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
 
 	// DEBUG
 	// log.Printf("filterTags: %+v", filterTags)
