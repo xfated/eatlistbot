@@ -256,7 +256,15 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
 
 			// Only continue if /done is pressed
-			return
+			if tag == "/done" || tag == "done" {
+				if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
+					log.Printf("error SetUserState: %+v", err)
+					utils.SendMessage(update, "Sorry an error occured!")
+					return
+				}
+			} else {
+				return
+			}
 		}
 
 		// Then check if its a keyboard reply
