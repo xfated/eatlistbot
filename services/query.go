@@ -182,12 +182,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 			// Store to delete
-			msg, err = utils.SendMessageForceReply(update, "How many places do you want?", messageID)
-			if err != nil {
-				log.Printf("error SetMessageForceReply: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
-			utils.AddMessageToDelete(update, msg)
+			utils.SendMessageForceReply(update, "How many places do you want?", messageID)
+			// if err != nil {
+			// 	log.Printf("error SetMessageForceReply: %+v", err)
+			// 	utils.SendMessage(update, "Sorry an error occured!")
+			// }
+			// utils.AddMessageToDelete(update, msg)
 			// Set state
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
 				log.Printf("error SetUserState: %+v", err)
