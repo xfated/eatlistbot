@@ -12,40 +12,15 @@ import (
 )
 
 func sendQuerySelectType(update *tgbotapi.Update, text string) {
-	// Create buttons
-	getOneButton := tgbotapi.NewInlineKeyboardButtonData("/getOne", "/getOne")
-	getFewButton := tgbotapi.NewInlineKeyboardButtonData("/getFew", "/getFew")
-	getAllButton := tgbotapi.NewInlineKeyboardButtonData("/getAll", "/getAll")
-	// Create rows
-	row := tgbotapi.NewInlineKeyboardRow(getOneButton, getFewButton, getAllButton)
-
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	message := utils.SendInlineKeyboard(update, text, inlineKeyboard)
-	utils.SetRecentInlineMessage(update, message)
+	utils.CreateAndSendInlineKeyboard(update, text, 3, "/getOne", "/getFew", "/getAll")
 }
 
 func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
-	// Create buttons
-	withTagButton := tgbotapi.NewInlineKeyboardButtonData("/withTag", "/withTag")
-	withNameButton := tgbotapi.NewInlineKeyboardButtonData("/withName", "/withName")
-	// Create rows
-	row := tgbotapi.NewInlineKeyboardRow(withTagButton, withNameButton)
-
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	message := utils.SendInlineKeyboard(update, text, inlineKeyboard)
-	utils.SetRecentInlineMessage(update, message)
+	utils.CreateAndSendInlineKeyboard(update, text, 2, "/withTag", "/withName")
 }
 
 func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
-	// Create buttons
-	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
-	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
-	// Create rows
-	row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
-
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	message := utils.SendInlineKeyboard(update, text, inlineKeyboard)
-	utils.SetRecentInlineMessage(update, message)
+	utils.CreateAndSendInlineKeyboard(update, text, 2, "/yes", "/no")
 }
 
 /* Search from available tags to get */
@@ -98,23 +73,19 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 		return
 	}
 
-	/* Set each tag as its own inline row */
-	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, len(tagsMap)+1)
+	tags := make([]string, len(tagsMap)+1)
 	i := 0
 	for tag := range tagsMap {
-		tagButtons[i] = tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
-		)
+		tags[i] = tag
 		i++
 	}
-	tagButtons[len(tagsMap)] = doneRow
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	tags[len(tagsMap)] = "/done"
+	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
 }
 
 /* Search from name of places */
 func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
-	placeNames, err := utils.GetPlaceNames(update)
+	placeNamesMap, err := utils.GetPlaceNames(update)
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
@@ -122,16 +93,14 @@ func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
 	}
 
 	/* Set each name as its own inline row */
-	var nameButtons = make([][]tgbotapi.InlineKeyboardButton, len(placeNames))
+	placeNames := make([]string, len(placeNamesMap)+1)
 	i := 0
-	for name := range placeNames {
-		nameButtons[i] = tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(name, name),
-		)
+	for placeName := range placeNamesMap {
+		placeNames[i] = placeName
 		i++
 	}
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(nameButtons...)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	placeNames[len(placeNamesMap)] = "/done"
+	utils.CreateAndSendInlineKeyboard(update, text, 1, placeNames...)
 }
 
 func queryHandler(update *tgbotapi.Update, userState constants.State) {

@@ -57,12 +57,13 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 		return
 	}
 
-	tags := make([]string, len(tagsMap))
+	tags := make([]string, len(tagsMap)+1)
 	i := 0
 	for tag := range tagsMap {
 		tags[i] = tag
 		i++
 	}
+	tags[len(tagsMap)] = "/done"
 	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
 }
 
