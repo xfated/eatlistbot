@@ -260,7 +260,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 		case "/withName":
-			utils.RemoveMarkupKeyboard(update, "Searching for places")
+			msg := utils.RemoveMarkupKeyboard(update, "Searching for places")
+			utils.AddMessageToDelete(update, msg)
 			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
@@ -274,7 +275,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard (select name of place)
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			msg, err := utils.SendMessage(update, "Please select from the above options")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			return
 		}
 
@@ -301,6 +307,9 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 	/* Ask how many records to get */
 	case constants.QueryFewSetNum:
 		// Expect user to send a number (number of records to query)
+		if update.Message != nil {
+			utils.AddMessageToDelete(update, update.Message)
+		}
 		// Get queryNum
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
@@ -310,7 +319,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 		numQuery, err := strconv.Atoi(message)
 		if err != nil || numQuery < 0 {
-			utils.SendMessage(update, "comeon, send a proper number")
+			msg, err := utils.SendMessage(update, "comeon, send a proper number")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			return
 		}
 
@@ -323,14 +337,24 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 
 		if numQuery > len(placeNames) {
-			utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
+			msg, err := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			utils.SetQueryNum(update, len(placeNames))
 		} else {
 			utils.SetQueryNum(update, numQuery)
 		}
 
 		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
-		utils.SendMessage(update, "(Don't add any to consider all places)")
+		msg, err := utils.SendMessage(update, "(Don't add any to consider all places)")
+		if err != nil {
+			log.Printf("error SendMessage: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+		}
+		utils.AddMessageToDelete(update, msg)
 		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
@@ -342,7 +366,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline keyboard markup (tags to include)
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			msg, err := utils.SendMessage(update, "Please select from the above options")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			return
 		}
 
@@ -369,14 +398,19 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 	case constants.QueryRetrieve:
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			msg, err := utils.SendMessage(update, "Please select from the above options")
+			if err != nil {
+				log.Printf("error SendMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+			}
+			utils.AddMessageToDelete(update, msg)
 			return
 		}
 
 		// Expect user to select from inline keyboard markup (yes or no to image)
 		sendImage, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
-			log.Printf("error getting message from callback: %+v", err)
+			log.Printf("error GetCallbackQueryMessage: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
