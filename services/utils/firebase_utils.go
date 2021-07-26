@@ -445,35 +445,32 @@ func GetPlace(update *tgbotapi.Update, name string) (constants.PlaceDetails, err
 	return placeData, nil
 }
 
-func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails) error {
+func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails, chatID string) error {
 	ctx := context.Background()
-	// Get target chat, where addplace was initiated
-	chatID, err := GetChatTarget(update)
-	chatIDString := strconv.FormatInt(chatID, 10)
-	// chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return err
-	}
 
 	/* Add place to place collection */
-	chatRef := client.NewRef("places").Child(chatIDString)
+	chatRef := client.NewRef("places").Child(chatID)
 	if err := chatRef.Child(placeData.Name).Set(ctx, placeData); err != nil {
 		return err
 	}
-	err = SendMessageTargetChat(fmt.Sprintf("%s has been added here", placeData.Name), chatID)
+	chatIDInt, err := strconv.ParseInt(chatID, 10, 64)
+	if err != nil {
+		return err
+	}
+	err = SendMessageTargetChat(fmt.Sprintf("%s has been added here", placeData.Name), chatIDInt)
 	if err != nil {
 		log.Printf("error SendMessageTargetChat: %+v", err)
 	}
 
 	/* Add tags to tag collection */
 	for tag := range placeData.Tags {
-		if err := updateTags(update, chatIDString, tag); err != nil {
+		if err := updateTags(update, chatID, tag); err != nil {
 			return err
 		}
 	}
 
 	/* Add name to name collection */
-	nameRef := client.NewRef("placeNames").Child(chatIDString)
+	nameRef := client.NewRef("placeNames").Child(chatID)
 	if err := nameRef.Update(ctx, map[string]interface{}{
 		placeData.Name: true,
 	}); err != nil {
@@ -482,14 +479,14 @@ func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails) error {
 	return nil
 }
 
-func AddPlaceFromTemp(update *tgbotapi.Update) (string, error) {
+func AddPlaceFromTemp(update *tgbotapi.Update, chatID string) (string, error) {
 	// get from user details
 	placeData, err := GetTempPlace(update)
 	if err != nil {
 		return "", err
 	}
 	// Add data to place
-	if err := AddPlace(update, placeData); err != nil {
+	if err := AddPlace(update, placeData, chatID); err != nil {
 		return "", err
 	}
 	return placeData.Name, nil

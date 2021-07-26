@@ -321,8 +321,17 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		if confirm == "yes" {
+			// Get target chat, where addplace was initiated
+			chatID, err := utils.GetChatTarget(update)
+			chatIDString := strconv.FormatInt(chatID, 10)
+			if err != nil {
+				log.Printf("error getting message from callback: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+
 			// Submit
-			name, err := utils.AddPlaceFromTemp(update)
+			name, err := utils.AddPlaceFromTemp(update, chatIDString)
 			if err != nil {
 				log.Printf("error adding place from temp: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -334,7 +343,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s has been added!", name))
-			utils.SendMessage(update, "To add a new place to the chat, please initiate /addplace back in that chat")
+			utils.RedirectToChat(update, "To add a new place to the chat, please initiate /addplace back in that chat", chatIDString)
 			err = utils.SetChatTarget(update, 0)
 			if err != nil {
 				log.Printf("error SetChatTarget: %+v", err)
