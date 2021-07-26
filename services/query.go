@@ -297,19 +297,10 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-		// Delete messages
-		if err := utils.DeleteRecentMessages(update); err != nil {
-			log.Printf("error DeleteRecentMessages: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-			return
-		}
 
 	/* Ask how many records to get */
 	case constants.QueryFewSetNum:
 		// Expect user to send a number (number of records to query)
-		if update.Message != nil {
-			utils.AddMessageToDelete(update, update.Message)
-		}
 		// Get queryNum
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
@@ -325,6 +316,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			utils.AddMessageToDelete(update, msg)
+			return
+		}
+		// By here, proper number received
+		// Delete messages
+		if err := utils.DeleteRecentMessages(update); err != nil {
+			log.Printf("error DeleteRecentMessages: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
 
@@ -384,6 +382,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 		// done GoTo QueryRetrieve. Markup("yes, no"), ask with pic
 		if tag == "/done" {
+			// Delete messages
+			if err := utils.DeleteRecentMessages(update); err != nil {
+				log.Printf("error DeleteRecentMessages: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
 			sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
@@ -404,6 +408,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 			}
 			utils.AddMessageToDelete(update, msg)
+			return
+		}
+		// Delete messages
+		if err := utils.DeleteRecentMessages(update); err != nil {
+			log.Printf("error DeleteRecentMessages: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
 
