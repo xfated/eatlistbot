@@ -265,6 +265,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 					return
 				}
 				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+				return
 			}
 		} else {
 			// Then check if its a keyboard reply
