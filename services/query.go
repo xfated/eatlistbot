@@ -474,6 +474,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 
+			tagList := make([]string, len(queryTags))
+			i := 0
+			for tag := range queryTags {
+				tagList[i] = tag
+				i++
+			}
+			utils.SendMessage(update, fmt.Sprintf("Searching with tags: %+s", strings.Join(tagList, ", ")))
 			// Get matching places
 			// if len(tags) == 0, get all, randomly choose QueryNum
 			// if len(tags) > 0, get all, extract with matching tags. randomly select queryNum
@@ -485,7 +492,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 			// less than queryNum found
 			if len(places) < queryNum {
-				utils.SendMessage(update, fmt.Sprintf("Only %v results found with matching tags", len(places)))
+				utils.SendMessage(update, fmt.Sprintf("Only found %v results with matching tags", len(places)))
 				queryNum = len(places)
 			}
 			for _, placeData := range places[:queryNum] {
