@@ -18,12 +18,13 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	addURLButton := tgbotapi.NewKeyboardButton("/addURL")
 	addImageButton := tgbotapi.NewKeyboardButton("/addImage")
 	addTagButton := tgbotapi.NewKeyboardButton("/addTag")
+	removeTagButton := tgbotapi.NewKeyboardButton("/removeTag")
 	previewButton := tgbotapi.NewKeyboardButton("/preview")
 	submitButton := tgbotapi.NewKeyboardButton("/submit")
 	cancelButton := tgbotapi.NewKeyboardButton("/cancel")
 	// Create rows
-	row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton)
-	row2 := tgbotapi.NewKeyboardButtonRow(addNotesButton, addImageButton, addTagButton)
+	row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton, addNotesButton)
+	row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton, removeTagButton)
 	row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
 
 	replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
@@ -32,6 +33,7 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	replyKeyboard.Selective = true
 	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
 }
+
 func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	chatID, err := utils.GetChatTarget(update)
 	if err != nil {
@@ -69,20 +71,33 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func sendConfirmSubmitResponse(update *tgbotapi.Update, text string) {
-	// Create buttons
-	yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
-	noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
-	// Create rows
-	row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
+func sendDoneResponse(update *tgbotapi.Update, text string) {
+	utils.CreateAndSendInlineKeyboard(update, text, 1, "yes", "no")
+	// // Create buttons
+	// yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
+	// noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
+	// // Create rows
+	// row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
 
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	// inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	// utils.SendInlineKeyboard(update, text, inlineKeyboard)
+}
+
+func sendConfirmSubmitResponse(update *tgbotapi.Update, text string) {
+	utils.CreateAndSendInlineKeyboard(update, text, 2, "yes", "no")
+	// // Create buttons
+	// yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
+	// noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
+	// // Create rows
+	// row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
+
+	// inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
+	// utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
 func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 	switch userState {
-	case constants.SetName:
+	case constants.AddNewSetName:
 		// Expect user to send a text message (name of place)
 		// Check for slash (affect firebase query)
 		if err := utils.CheckForSlash(update); err != nil {
@@ -108,35 +123,35 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 		switch message {
 		case "/addAddress":
-			if err := utils.SetUserState(update, constants.SetAddress); err != nil {
+			if err := utils.SetUserState(update, constants.AddNewSetAddress); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send an address to be added")
 		case "/addNotes":
-			if err := utils.SetUserState(update, constants.SetNotes); err != nil {
+			if err := utils.SetUserState(update, constants.AddNewSetNotes); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Give some additional details as notes")
 		case "/addURL":
-			if err := utils.SetUserState(update, constants.SetURL); err != nil {
+			if err := utils.SetUserState(update, constants.AddNewSetURL); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send a URL to be added")
 		case "/addImage":
-			if err := utils.SetUserState(update, constants.SetImages); err != nil {
+			if err := utils.SetUserState(update, constants.AddNewSetImages); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send an image to be added")
 		case "/addTag":
-			if err := utils.SetUserState(update, constants.SetTags); err != nil {
+			if err := utils.SetUserState(update, constants.AddNewSetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
@@ -152,6 +167,23 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 
 			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of places)\n"+
 				"Type new or pick from existing\nPress done once done!")
+			sendExistingTagsResponse(update, "Existing tags:")
+		case "/removeTag":
+			if err := utils.SetUserState(update, constants.AddNewRemoveTags); err != nil {
+				log.Printf("error SetUserState: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				break
+			}
+			/* Get message ID for targeted reply afterward */
+			_, messageID, err := utils.GetMessage(update)
+			if err != nil {
+				log.Printf("error GetMessage: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				break
+			}
+			utils.SetMessageTarget(update, messageID)
+
+			utils.RemoveMarkupKeyboard(update, "Select a tag to remove\nPress done once done!")
 			sendExistingTagsResponse(update, "Existing tags:")
 		case "/preview":
 			placeData, err := utils.GetTempPlace(update)
@@ -187,7 +219,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			sendTemplateReplies(update, "Please select a response from the provided options")
 		}
 		return
-	case constants.SetAddress:
+	case constants.AddNewSetAddress:
 		// Expect user to send a text message (address of place)
 		if err := utils.SetTempPlaceAddress(update); err != nil {
 			log.Printf("Error adding address: %+v", err)
@@ -201,7 +233,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-	case constants.SetNotes:
+	case constants.AddNewSetNotes:
 		// Expect user to send a text message (notes for the place)
 		if err := utils.SetTempPlaceNotes(update); err != nil {
 			log.Printf("Error adding notes: %+v", err)
@@ -215,7 +247,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-	case constants.SetURL:
+	case constants.AddNewSetURL:
 		// Expect user to send a text message (URL for the place)
 		if err := utils.SetTempPlaceURL(update); err != nil {
 			log.Printf("Error adding url: %+v", err)
@@ -229,7 +261,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-	case constants.SetImages:
+	case constants.AddNewSetImages:
 		// Expect user to send a photo
 		// should be an image input
 		if err := utils.AddTempPlaceImage(update); err != nil {
@@ -244,7 +276,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-	case constants.SetTags:
+	case constants.AddNewSetTags:
 		// Expect user to send a text message or Select from inline keyboard markup (set as tag for the place)
 		// Check for slash (affect firebase query)
 		if err := utils.CheckForSlash(update); err != nil {
@@ -305,7 +337,39 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 				}
 			}
 		}
+	case constants.AddNewRemoveTags:
+		// Expect user to select from inline keyboard markup (set as tag for the place)
+		/* If user send a message instead */
+		if update.Message != nil {
+			utils.SendMessage(update, "Please select from the above options")
+			return
+		}
 
+		tag, err := utils.GetCallbackQueryMessage(update)
+		if err != nil {
+			log.Printf("error getting message from callback: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
+		}
+
+		switch tag {
+		case "/done":
+			if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
+				log.Printf("error SetUserState: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+		default:
+			// remove tag
+			if err := utils.AddTempPlaceTag(update, tag); err != nil {
+				log.Printf("Error adding tag: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" removed", tag))
+			// Don't continue to next action if removing tag through inline
+			return
+		}
 	case constants.ConfirmAddPlaceSubmit:
 		// Expect user to select from inline query (yes or no to submit)
 		/* If user send a message instead */

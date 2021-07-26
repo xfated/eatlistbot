@@ -8,12 +8,13 @@ const (
 
 	/* #### Adding Place #### */
 	ReadyForNextAction
-	SetName
-	SetAddress
-	SetNotes
-	SetURL
-	SetImages
-	SetTags
+	AddNewSetName
+	AddNewSetAddress
+	AddNewSetNotes
+	AddNewSetURL
+	AddNewSetImages
+	AddNewSetTags
+	AddNewRemoveTags
 	ConfirmAddPlaceSubmit
 	/* ######## */
 
@@ -57,12 +58,13 @@ func (placeData *PlaceDetails) GetImageIDs() []string {
 func IsAddingNewPlace(state State) bool {
 	switch state {
 	case ReadyForNextAction,
-		SetName,
-		SetAddress,
-		SetNotes,
-		SetURL,
-		SetImages,
-		SetTags,
+		AddNewSetName,
+		AddNewSetAddress,
+		AddNewSetNotes,
+		AddNewSetURL,
+		AddNewSetImages,
+		AddNewSetTags,
+		AddNewRemoveTags,
 		ConfirmAddPlaceSubmit:
 		return true
 	default:

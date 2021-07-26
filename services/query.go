@@ -295,7 +295,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 
-		// tag addTag, preview current, inline (show tags not yet added, /done)
+		// preview current, inline (show tags not yet added, /done)
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)

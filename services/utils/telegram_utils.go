@@ -172,6 +172,27 @@ func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbot
 	}
 }
 
+func CreateAndSendInlineKeyboard(update *tgbotapi.Update, text string, col int, buttons ...string) {
+	var buttonList []tgbotapi.InlineKeyboardButton
+
+	for _, button := range buttons {
+		buttonList = append(buttonList, tgbotapi.NewInlineKeyboardButtonData(button, button))
+	}
+
+	var rows [][]tgbotapi.InlineKeyboardButton
+	// create rows
+	for i := 0; i < len(buttonList); i += col {
+		end := i + col
+		if end > len(buttonList) {
+			end = len(buttonList)
+		}
+		rows = append(rows, buttonList[i:end])
+	}
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
+	SendInlineKeyboard(update, text, inlineKeyboard)
+}
+
 func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {

@@ -42,7 +42,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			utils.SendMessage(update, "Please enter the name of the place to begin")
-			if err := utils.SetUserState(update, constants.SetName); err != nil {
+			if err := utils.SetUserState(update, constants.AddNewSetName); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
@@ -62,7 +62,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			// Same == same chat
 			if chatID == int64(userID) {
 				utils.SendMessage(update, "Please enter the name of the place to begin")
-				if err := utils.SetUserState(update, constants.SetName); err != nil {
+				if err := utils.SetUserState(update, constants.AddNewSetName); err != nil {
 					log.Printf("error setting state: %+v", err)
 					utils.SendMessage(update, "Sorry an error occured!")
 					return
