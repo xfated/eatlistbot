@@ -57,30 +57,17 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 		return
 	}
 
-	/* Set each tag as its own inline row */
-	var tagButtons = make([][]tgbotapi.InlineKeyboardButton, len(tagsMap)+1)
+	tags := make([]string, len(tagsMap))
 	i := 0
 	for tag := range tagsMap {
-		tagButtons[i] = tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(tag, tag),
-		)
+		tags[i] = tag
 		i++
 	}
-	tagButtons[len(tagsMap)] = doneRow
-	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(tagButtons...)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
 }
 
 func sendDoneResponse(update *tgbotapi.Update, text string) {
-	utils.CreateAndSendInlineKeyboard(update, text, 1, "yes", "no")
-	// // Create buttons
-	// yesButton := tgbotapi.NewInlineKeyboardButtonData("yes", "yes")
-	// noButton := tgbotapi.NewInlineKeyboardButtonData("no", "no")
-	// // Create rows
-	// row := tgbotapi.NewInlineKeyboardRow(yesButton, noButton)
-
-	// inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	// utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	utils.CreateAndSendInlineKeyboard(update, text, 1, "/done", "/done")
 }
 
 func sendConfirmSubmitResponse(update *tgbotapi.Update, text string) {
