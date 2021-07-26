@@ -378,6 +378,11 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
+			// less than queryNum found
+			if len(places) < queryNum {
+				utils.SendMessage(update, fmt.Sprintf("Only %v results found with matching tags", len(places)))
+				queryNum = len(places)
+			}
 			for _, placeData := range places[:queryNum] {
 				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
 			}
