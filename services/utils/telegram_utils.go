@@ -90,6 +90,9 @@ func SendMessage(update *tgbotapi.Update, text string) (*tgbotapi.Message, error
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	message, err := bot.Send(msg)
+
+	// Debug
+	log.Printf("Sent message %s", text)
 	return &message, err
 }
 
