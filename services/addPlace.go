@@ -84,6 +84,11 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.SetName:
 		// Expect user to send a text message (name of place)
+		// Check for slash (affect firebase query)
+		if err := utils.CheckForSlash(update); err != nil {
+			return
+		}
+
 		if err := utils.InitPlace(update); err != nil {
 			log.Printf("Error creating new place: %+v", err)
 			utils.SendMessage(update, "Message should be a text")
@@ -241,6 +246,11 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 	case constants.SetTags:
 		// Expect user to send a text message or Select from inline keyboard markup (set as tag for the place)
+		// Check for slash (affect firebase query)
+		if err := utils.CheckForSlash(update); err != nil {
+			return
+		}
+
 		if update.Message != nil {
 			tag, _, err := utils.GetMessage(update)
 			if err != nil {

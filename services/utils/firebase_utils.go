@@ -97,6 +97,7 @@ func InitPlace(update *tgbotapi.Update) error {
 	if err != nil {
 		return err
 	}
+
 	userRef := client.NewRef("users").Child(userID)
 	if err := userRef.Child("placeToAdd").Set(ctx, map[string]string{
 		"name": name,

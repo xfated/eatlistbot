@@ -288,3 +288,32 @@ func GetPhotoIDs(update *tgbotapi.Update) ([]string, error) {
 	}
 	return photoIDs, nil
 }
+
+/* Check string */
+func CheckForSlash(update *tgbotapi.Update) error {
+	if update.Message != nil {
+		message, _, err := GetMessage(update)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(message, "/") {
+			SendMessage(update, "Don't use / here! I will get confused :(")
+			SendMessage(update, "Please resend with a proper message")
+			return errors.New("slash in message")
+		}
+		return nil
+	}
+	if update.CallbackQuery != nil {
+		message, err := GetCallbackQueryMessage(update)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(message, "/") {
+			SendMessage(update, "Please don't use / in your input! I will get confused :(")
+			SendMessage(update, "Please resend with a proper message")
+			return errors.New("slash in message")
+		}
+		return nil
+	}
+	return nil
+}
