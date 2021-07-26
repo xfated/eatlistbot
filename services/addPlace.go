@@ -49,7 +49,7 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 
 	/* No tags, just send done */
 	if len(tagsMap) == 0 {
-		utils.CreateAndSendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", 1, "/done")
+		utils.CreateAndSendInlineKeyboard(update, "No tags found. Just click this button when you're done!", 1, "/done")
 		return
 	}
 

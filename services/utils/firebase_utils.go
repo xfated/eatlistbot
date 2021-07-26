@@ -311,7 +311,7 @@ func GetTempPlaceTags(update *tgbotapi.Update) (map[string]bool, error) {
 
 	/* Set temp under userRef */
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Child("tags").Get(ctx, tagsMap); err != nil {
+	if err := userRef.Child("placeToAdd").Child("tags").Get(ctx, &tagsMap); err != nil {
 		return nil, err
 	}
 
