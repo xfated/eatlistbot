@@ -296,6 +296,7 @@ func CheckForSlash(update *tgbotapi.Update) error {
 		if err != nil {
 			return err
 		}
+		log.Printf(message)
 		if strings.Contains(message, "/") {
 			SendMessage(update, "Don't use / here! I will get confused :(")
 			SendMessage(update, "Please resend with a proper message")
