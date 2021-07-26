@@ -63,13 +63,9 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 		return
 	}
 
-	doneButton := tgbotapi.NewInlineKeyboardButtonData("/done", "/done")
-	doneRow := tgbotapi.NewInlineKeyboardRow(doneButton)
-
 	/* No tags, just send done */
 	if len(tagsMap) == 0 {
-		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(doneRow)
-		utils.SendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", inlineKeyboard)
+		utils.CreateAndSendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", 1, "/done")
 		return
 	}
 

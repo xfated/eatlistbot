@@ -300,6 +300,40 @@ func AddTempPlaceTag(update *tgbotapi.Update, tag string) error {
 	return nil
 }
 
+func GetTempPlaceTags(update *tgbotapi.Update) (map[string]bool, error) {
+	ctx := context.Background()
+	_, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return nil, err
+	}
+
+	var tagsMap map[string]bool
+
+	/* Set temp under userRef */
+	userRef := client.NewRef("users").Child(userID)
+	if err := userRef.Child("placeToAdd").Child("tags").Get(ctx, tagsMap); err != nil {
+		return nil, err
+	}
+
+	return tagsMap, nil
+}
+
+func DeleteTempPlaceTag(update *tgbotapi.Update, tag string) error {
+	ctx := context.Background()
+	_, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	/* Set temp under userRef */
+	userRef := client.NewRef("users").Child(userID)
+	if err := userRef.Child("placeToAdd").Child("tags").Child(tag).Delete(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func AddPlaceTag(update *tgbotapi.Update, placeName, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)

@@ -47,13 +47,9 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 		utils.SendMessage(update, "Sorry, an error occured!")
 	}
 
-	doneButton := tgbotapi.NewInlineKeyboardButtonData("/done", "/done")
-	doneRow := tgbotapi.NewInlineKeyboardRow(doneButton)
-
 	/* No tags, just send done */
 	if len(tagsMap) == 0 {
-		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(doneRow)
-		utils.SendInlineKeyboard(update, "No tags found. You can add by sending messages!", inlineKeyboard)
+		utils.CreateAndSendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", 1, "/done")
 		return
 	}
 
@@ -67,9 +63,32 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
 }
 
-func sendDoneResponse(update *tgbotapi.Update, text string) {
-	utils.CreateAndSendInlineKeyboard(update, text, 1, "/done", "/done")
+func sendAddedTagsResponse(update *tgbotapi.Update, text string) {
+	tagsMap, err := utils.GetTempPlaceTags(update)
+	if err != nil {
+		log.Printf("error GetTags: %+v", err)
+		utils.SendMessage(update, "Sorry, an error occured!")
+	}
+
+	/* No tags, just send done */
+	if len(tagsMap) == 0 {
+		utils.CreateAndSendInlineKeyboard(update, "No tags found. Just help me click that done button thanks", 1, "/done")
+		return
+	}
+
+	tags := make([]string, len(tagsMap)+1)
+	i := 0
+	for tag := range tagsMap {
+		tags[i] = tag
+		i++
+	}
+	tags[len(tagsMap)] = "/done"
+	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
 }
+
+// func sendDoneResponse(update *tgbotapi.Update, text string) {
+// 	utils.CreateAndSendInlineKeyboard(update, text, 1, "/done", "/done")
+// }
 
 func sendConfirmSubmitResponse(update *tgbotapi.Update, text string) {
 	utils.CreateAndSendInlineKeyboard(update, text, 2, "yes", "no")
@@ -349,12 +368,13 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 		default:
 			// remove tag
-			if err := utils.AddTempPlaceTag(update, tag); err != nil {
+			if err := utils.DeleteTempPlaceTag(update, tag); err != nil {
 				log.Printf("Error adding tag: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
 			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" removed", tag))
+			sendAddedTagsResponse(update, "Existing tags:")
 			// Don't continue to next action if removing tag through inline
 			return
 		}
