@@ -81,7 +81,23 @@ func SendMessage(update *tgbotapi.Update, text string) (*tgbotapi.Message, error
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	message, err := bot.Send(msg)
-	return &message, nil
+	return &message, err
+}
+
+func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) (*tgbotapi.Message, error) {
+	chatID, _, err := GetChatUserID(update)
+	if err != nil {
+		return nil, err
+	}
+
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ReplyToMessageID = messageID
+	msg.ReplyMarkup = tgbotapi.ForceReply{
+		ForceReply: true,
+		Selective:  true,
+	}
+	message, err := bot.Send(msg)
+	return &message, err
 }
 
 func SendMessageTargetChat(text string, chatID int64) error {

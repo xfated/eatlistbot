@@ -75,7 +75,15 @@ func HandleUserInput(update *tgbotapi.Update) {
 		case "/query",
 			"/query@toGoListBot":
 			utils.ResetQuery(update)
-			sendQuerySelectType(update, "How many places are you asking for?")
+			// Record id for selective force reply
+			_, messageID, err := utils.GetMessage(update)
+			if err != nil {
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+			utils.SetMessageTarget(update, messageID)
+
+			sendQuerySelectType(update, "What kind of query do you seek?")
 			if err := utils.SetUserState(update, constants.QuerySelectType); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")

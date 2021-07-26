@@ -138,7 +138,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 		case "/getFew":
 			// getFew GoTo QueryFewSetNum. Message how many they want?
-			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("How many places do you want? (you have %v recorded)", len(placeNames)))
+			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(placeNames)))
+			messageID, err := utils.GetMessageTarget(update)
+			if err != nil {
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+			utils.SendMessageForceReply(update, "How many places do you want?", messageID)
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
