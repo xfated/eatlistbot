@@ -391,9 +391,18 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 		for _, place := range places {
 			consider := false
 			if place.Tags != nil {
-				for tag := range place.Tags {
+				/* Search using place tags */
+				// for tag := range place.Tags {
+				// 	/* select if any tag match */
+				// 	if filterTags[tag] {
+				// 		consider = true
+				// 		break
+				// 	}
+				// }
+				/* Search using filter tags (should have lesser) */
+				for tag := range filterTags {
 					/* select if any tag match */
-					if filterTags[tag] {
+					if place.Tags[tag] {
 						consider = true
 						break
 					}

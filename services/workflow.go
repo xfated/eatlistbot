@@ -104,6 +104,9 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			return
+		case "/help",
+			"/help@toGoListBot":
+			helpHandler(update)
 		}
 	}
 
