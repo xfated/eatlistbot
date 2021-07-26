@@ -52,6 +52,10 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 		return
 	}
 
+	/* if already selected */
+	if queryTagsMap[tag] {
+		return
+	}
 	go utils.AddQueryTag(update, tag)
 
 	/* Send current tags */
