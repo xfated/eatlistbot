@@ -463,9 +463,10 @@ func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails) error {
 	if err != nil {
 		log.Printf("error SendMessageTargetChat: %+v", err)
 	}
+
 	/* Add tags to tag collection */
 	for tag := range placeData.Tags {
-		if err := updateTags(update, tag, chatIDString); err != nil {
+		if err := updateTags(update, chatIDString, tag); err != nil {
 			return err
 		}
 	}
@@ -565,6 +566,7 @@ func GetTags(update *tgbotapi.Update, chatID string) (map[string]bool, error) {
 }
 
 func DeleteTag(update *tgbotapi.Update, tag string) error {
+	/* Only can delete from within chat */
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
@@ -580,6 +582,7 @@ func DeleteTag(update *tgbotapi.Update, tag string) error {
 }
 
 func updateTags(update *tgbotapi.Update, chatID string, tag string) error {
+	/* Can update when adding place from bot privat chat */
 	/* If same tag won't update. Implicitly prevent double records */
 	ctx := context.Background()
 
