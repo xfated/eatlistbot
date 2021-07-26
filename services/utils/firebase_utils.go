@@ -808,6 +808,7 @@ func DeleteRecentMessages(update *tgbotapi.Update) error {
 		if err != nil {
 			return err
 		}
+		log.Printf("Delete details chatID: %v, messageID: %v", chatID, messageID)
 		if err := DeleteMessage(chatID, messageID); err != nil {
 			return err
 		}

@@ -149,7 +149,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
-			log.Printf("error GetCallbackQueryMessage: %+v", err)
+			log.Printf("error DeleteRecentMessages: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
@@ -226,6 +226,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
+		// Delete messages
+		if err := utils.DeleteRecentMessages(update); err != nil {
+			log.Printf("error DeleteRecentMessages: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
+		}
+
 		message, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
@@ -281,6 +288,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 			log.Printf("error SetUserState: %+v", err)
+			utils.SendMessage(update, "Sorry an error occured!")
+			return
+		}
+		// Delete messages
+		if err := utils.DeleteRecentMessages(update); err != nil {
+			log.Printf("error DeleteRecentMessages: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
