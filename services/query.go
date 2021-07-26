@@ -62,7 +62,7 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 			queryTags[i] = tag
 			i++
 		}
-		queryTags[len(queryTagsMap)+1] = tag
+		queryTags[len(queryTagsMap)] = tag
 		curTags := strings.Join(queryTags, ", ")
 		msg, err := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
 		if err != nil {
@@ -387,7 +387,8 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		// done GoTo QueryRetrieve. Markup("yes, no"), ask with pic
-		if tag == "/done" {
+		switch tag {
+		case "/done":
 			// Delete messages
 			if err := utils.DeleteRecentMessages(update); err != nil {
 				log.Printf("error DeleteRecentMessages: %+v", err)
@@ -400,10 +401,9 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-		} else {
+		default:
 			addAndSendSelectedTags(update, tag)
 		}
-
 	/* Ask whether want pics, and retrieve */
 	case constants.QueryRetrieve:
 		/* If user send a message instead */
