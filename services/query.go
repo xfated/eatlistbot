@@ -284,6 +284,11 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 
+		if err := utils.DeleteRecentMessages(update); err != nil {
+			log.Printf("error DeleteRecentMessages: %+v", err)
+			// utils.SendMessage(update, "Sorry an error occured!")
+			// return
+		}
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
