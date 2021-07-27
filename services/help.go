@@ -22,7 +22,7 @@ func helpHandler(update *tgbotapi.Update) {
 		"        /withName: Returns your selection \n" +
 		"    /getFew: Returns a few (your choice) at random \n" +
 		"        /withTag: Same as above \n" +
-		"    /getAll: Returns all" +
+		"    /getAll: Returns all\n" +
 		"\n" +
 		"/feedback: To send my creator any suggestions/queries/problems!"
 
