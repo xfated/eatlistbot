@@ -203,7 +203,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 		case "/getAll":
-			// getAll GoTo QueryAllRetrieve
+			// getAll GoTo QuerySetTags
 			chatID, _, err := utils.GetChatUserIDString(update)
 			if err != nil {
 				log.Printf("error GetChatUserIDString: %+v", err)
@@ -217,13 +217,22 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 			utils.SetQueryNum(update, len(itemNames))
 			// Store to delete
-			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall fetch your %v items", len(itemNames)), false)
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see.", len(itemNames)), false)
 			utils.AddMessageToDelete(update, msg)
-			sendQueryGetImagesResponse(update, "Do you want the images as well?")
-			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+
+			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
+			msg := utils.SendMessage(update, "(Don't add any to consider all items)", false)
+			utils.AddMessageToDelete(update, msg)
+			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
+			}
+			// sendQueryGetImagesResponse(update, "Do you want the images as well?")
+			// if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+			// 	log.Printf("error SetUserState: %+v", err)
+			// 	utils.SendMessage(update, "Sorry, an error occured!", false)
+			// 	return
 			}
 		}
 	/* Ask to get one using tag or name */
