@@ -113,12 +113,14 @@ func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) 
 		ForceReply: true,
 		Selective:  true,
 	}
-	message, err := bot.Send(msg)
+	msg.ParseMode = "MarkdownV2"
+	message, _ := bot.Send(msg)
 	return &message
 }
 
 func SendMessageTargetChat(text string, chatID int64) error {
 	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "MarkdownV2"
 	_, err := bot.Send(msg)
 	return err
 }
@@ -202,6 +204,7 @@ func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbot
 		}
 		msg.ReplyToMessageID = messageTarget
 	}
+	msg.ParseMode = "MarkdownV2"
 	_, err = bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
@@ -237,6 +240,7 @@ func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.
 	}
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
+	msg.ParseMode = "MarkdownV2"
 	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
@@ -266,6 +270,7 @@ func RemoveMarkupKeyboard(update *tgbotapi.Update, text string) *tgbotapi.Messag
 		}
 	}
 	msg.ReplyToMessageID = messageTarget
+	msg.ParseMode = "MarkdownV2"
 	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error removing markup keyboard: %+v", err)
