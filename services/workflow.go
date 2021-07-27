@@ -116,6 +116,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
+			return
 		case "/editplace",
 			"/editplace@toGoListBot":
 			// Check if is already private.
@@ -139,6 +140,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			}
 			// If not private, redirect
 			utils.RedirectToBotChat(update, "Click the button to start editing", "https://t.me/toGoListBot?start=editPlace")
+			return
 		case "/help",
 			"/help@toGoListBot":
 			helpHandler(update)
