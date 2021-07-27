@@ -150,7 +150,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			utils.RedirectToBotChat(update, "Click the button to start editing", "Edit item", "https://t.me/toGoListBot?start=editItem")
 			return
 		case "/feedback",
-			"feedback@toGoListBot":
+			"/feedback@toGoListBot":
 			utils.SendMessage(update, "What would you like to feedback?", false)
 			if err := utils.SetUserState(update, constants.Feedback); err != nil {
 				log.Printf("error setting state: %+v", err)
