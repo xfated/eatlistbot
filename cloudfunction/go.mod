@@ -1,6 +1,6 @@
 module github.com/xfated/golistbot
 
-// +heroku goVersion go1.13
+// +heroku goVersion go1.16
 go 1.13
 
 require (
