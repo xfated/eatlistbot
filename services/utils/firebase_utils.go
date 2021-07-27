@@ -28,7 +28,7 @@ func InitFirebase() {
 	var err error
 	ctx := context.Background()
 	// Initialize the app with a custom auth variable, limiting the server's access
-	ao := map[string]interface{}{"uid": "my-service-worker"}
+	ao := map[string]interface{}{"uid": "togolistbot"}
 	conf := &firebase.Config{
 		DatabaseURL:  os.Getenv("DATABASE_URL"),
 		AuthOverride: &ao,
