@@ -12,9 +12,9 @@ func helpHandler(update *tgbotapi.Update) {
 		"    /setXX: Adds (or overwrites) the field \n" +
 		"    /addXX: Tag or Image. You can add multiple \n" +
 		"\n" +
-		"/deleteitem: To delete a item. Forever. \n" +
+		"/deleteitem: To delete an item. Forever. \n" +
 		"\n" +
-		"/edititem: To edit a item. Similar process to /additem \n" +
+		"/edititem: To edit an item. Similar process to /additem \n" +
 		"\n" +
 		"/query: To fetch an item from this chat's list.\n" +
 		"    /getOne: Returns one at random \n" +
