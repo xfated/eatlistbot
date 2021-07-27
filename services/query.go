@@ -217,11 +217,11 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 			utils.SetQueryNum(update, len(itemNames))
 			// Store to delete
-			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see.", len(itemNames)), false)
+			msg := utils.RemoveMarkupKeyboard(update, "All in I see.", false)
 			utils.AddMessageToDelete(update, msg)
 
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
-			msg := utils.SendMessage(update, "(Don't add any to consider all items)", false)
+			msg = utils.SendMessage(update, "(Don't add any to consider all items)", false)
 			utils.AddMessageToDelete(update, msg)
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
@@ -233,7 +233,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			// 	log.Printf("error SetUserState: %+v", err)
 			// 	utils.SendMessage(update, "Sorry, an error occured!", false)
 			// 	return
-			}
+			// }
 		}
 	/* Ask to get one using tag or name */
 	case constants.QueryOneTagOrName:
