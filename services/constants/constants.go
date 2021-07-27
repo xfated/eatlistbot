@@ -6,7 +6,7 @@ type State int
 const (
 	Idle State = iota
 
-	/* #### Adding Place #### */
+	/* #### Adding Item #### */
 	ReadyForNextAction
 	AddNewSetName
 	AddNewSetAddress
@@ -15,7 +15,7 @@ const (
 	AddNewSetImages
 	AddNewSetTags
 	AddNewRemoveTags
-	ConfirmAddPlaceSubmit
+	ConfirmAddItemSubmit
 	/* ######## */
 
 	/* #### Query #### */
@@ -29,17 +29,17 @@ const (
 	QueryRetrieve
 	/* ######## */
 
-	/* #### Delete Place #### */
+	/* #### Delete Item #### */
 	DeleteSelect
 	DeleteConfirm
 	/* ######## */
 
-	/* #### EditPlace #### */
-	GetPlaceToEdit
+	/* #### EditItem #### */
+	GetItemToEdit
 	/* ######## */
 )
 
-type PlaceDetails struct {
+type ItemDetails struct {
 	Name    string          `json:"name"`
 	Address string          `json:"address"`
 	Notes   string          `json:"notes"`
@@ -48,18 +48,18 @@ type PlaceDetails struct {
 	Tags    map[string]bool `json:"tags"`
 }
 
-func (placeData *PlaceDetails) GetImageIDs() []string {
-	if placeData.Images == nil {
+func (itemData *ItemDetails) GetImageIDs() []string {
+	if itemData.Images == nil {
 		return []string{}
 	}
 	imageIDs := make([]string, 0)
-	for id := range placeData.Images {
+	for id := range itemData.Images {
 		imageIDs = append(imageIDs, id)
 	}
 	return imageIDs
 }
 
-func IsAddingNewPlace(state State) bool {
+func IsAddingNewItem(state State) bool {
 	switch state {
 	case ReadyForNextAction,
 		AddNewSetName,
@@ -69,7 +69,7 @@ func IsAddingNewPlace(state State) bool {
 		AddNewSetImages,
 		AddNewSetTags,
 		AddNewRemoveTags,
-		ConfirmAddPlaceSubmit:
+		ConfirmAddItemSubmit:
 		return true
 	default:
 		return false
@@ -93,7 +93,7 @@ func IsQuery(state State) bool {
 	}
 }
 
-func IsDeletePlace(state State) bool {
+func IsDeleteItem(state State) bool {
 	switch state {
 	case DeleteSelect,
 		DeleteConfirm:
@@ -103,9 +103,9 @@ func IsDeletePlace(state State) bool {
 	}
 }
 
-func IsEditPlace(state State) bool {
+func IsEditItem(state State) bool {
 	switch state {
-	case GetPlaceToEdit:
+	case GetItemToEdit:
 		return true
 	default:
 		return false

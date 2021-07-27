@@ -137,44 +137,44 @@ func SendPhoto(update *tgbotapi.Update, photoID string) error {
 	return nil
 }
 
-func SendPlaceDetails(update *tgbotapi.Update, placeData constants.PlaceDetails, sendImage bool) {
-	placeText := ""
+func SendItemDetails(update *tgbotapi.Update, itemData constants.ItemDetails, sendImage bool) {
+	itemText := ""
 
-	if placeData.Name != "" {
-		placeText = placeText + fmt.Sprintf("Name: %s\n", placeData.Name)
+	if itemData.Name != "" {
+		itemText = itemText + fmt.Sprintf("Name: %s\n", itemData.Name)
 	}
-	if placeData.Address != "" {
-		placeText = placeText + fmt.Sprintf("Address: %s\n", placeData.Address)
+	if itemData.Address != "" {
+		itemText = itemText + fmt.Sprintf("Address: %s\n", itemData.Address)
 	}
-	if placeData.Images != nil {
-		placeText = placeText + fmt.Sprintf("Images: %v\n", len(placeData.Images))
+	if itemData.Images != nil {
+		itemText = itemText + fmt.Sprintf("Images: %v\n", len(itemData.Images))
 	}
-	if placeData.Tags != nil {
-		tags := make([]string, len(placeData.Tags))
+	if itemData.Tags != nil {
+		tags := make([]string, len(itemData.Tags))
 		i := 0
-		for tag := range placeData.Tags {
+		for tag := range itemData.Tags {
 			tags[i] = tag
 			i++
 		}
 		tagText := strings.Join(tags, ", ")
-		placeText = placeText + fmt.Sprintf("Tags: %s\n", tagText)
+		itemText = itemText + fmt.Sprintf("Tags: %s\n", tagText)
 	}
-	if placeData.Notes != "" {
-		placeText = placeText + fmt.Sprintf("Notes: %s", placeData.Notes)
+	if itemData.Notes != "" {
+		itemText = itemText + fmt.Sprintf("Notes: %s", itemData.Notes)
 	}
-	if placeData.URL != "" {
-		// placeText = placeText + fmt.Sprintf("URL: %s\n", placeData.URL)
+	if itemData.URL != "" {
+		// itemText = itemText + fmt.Sprintf("URL: %s\n", itemData.URL)
 
 		/* To send as inline keyboard */
-		redirectButton := tgbotapi.NewInlineKeyboardButtonURL(placeData.URL, placeData.URL)
+		redirectButton := tgbotapi.NewInlineKeyboardButtonURL(itemData.URL, itemData.URL)
 		row := tgbotapi.NewInlineKeyboardRow(redirectButton)
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-		SendInlineKeyboard(update, placeText, inlineKeyboard)
+		SendInlineKeyboard(update, itemText, inlineKeyboard)
 	} else {
-		SendMessage(update, placeText)
+		SendMessage(update, itemText)
 	}
-	if sendImage && placeData.Images != nil {
-		for imageID := range placeData.Images {
+	if sendImage && itemData.Images != nil {
+		for imageID := range itemData.Images {
 			SendPhoto(update, imageID)
 		}
 	}

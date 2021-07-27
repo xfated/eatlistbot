@@ -9,22 +9,22 @@ import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-func sendPlacesToDeleteResponse(update *tgbotapi.Update, text string) {
+func sendItemsToDeleteResponse(update *tgbotapi.Update, text string) {
 	chatID, _, err := utils.GetChatUserIDString(update)
 	if err != nil {
 		log.Printf("error GetChatUserIDString: %+v", err)
 	}
 
-	placeNames, err := utils.GetPlaceNames(update, chatID)
+	itemNames, err := utils.GetItemNames(update, chatID)
 	if err != nil {
-		log.Printf("error GetPlaceNames: %+v", err)
+		log.Printf("error GetItemNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
 	}
 
 	/* Set each name as its own inline row */
-	var nameButtons = make([][]tgbotapi.InlineKeyboardButton, len(placeNames))
+	var nameButtons = make([][]tgbotapi.InlineKeyboardButton, len(itemNames))
 	i := 0
-	for name := range placeNames {
+	for name := range itemNames {
 		nameButtons[i] = tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(name, name),
 		)
@@ -46,10 +46,10 @@ func sendConfirmDeleteResponse(update *tgbotapi.Update, text string) {
 	utils.SendInlineKeyboard(update, text, inlineKeyboard)
 }
 
-func deletePlaceHandler(update *tgbotapi.Update, userState constants.State) {
+func deleteItemHandler(update *tgbotapi.Update, userState constants.State) {
 	switch userState {
 	case constants.DeleteSelect:
-		// Expect user to select from inline keyboard markup. (name of places to delete)
+		// Expect user to select from inline keyboard markup. (name of items to delete)
 		/* If user send a message instead */
 		if update.Message != nil {
 			utils.SendMessage(update, "Please select from the above options")
@@ -62,7 +62,7 @@ func deletePlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-		utils.SetPlaceTarget(update, name)
+		utils.SetItemTarget(update, name)
 		sendConfirmDeleteResponse(update, "Are you sure?")
 		if err := utils.SetUserState(update, constants.DeleteConfirm); err != nil {
 			log.Printf("error SetUserState: %+v", err)
@@ -83,13 +83,13 @@ func deletePlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		if confirm == "yes" {
-			target, err := utils.GetPlaceTarget(update)
+			target, err := utils.GetItemTarget(update)
 			if err != nil {
-				log.Printf("error GetPlaceTarget: %+v", err)
+				log.Printf("error GetItemTarget: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured")
 				return
 			}
-			utils.DeletePlace(update, target)
+			utils.DeleteItem(update, target)
 			utils.SendMessage(update, fmt.Sprintf("%s has been deleted", target))
 		} else if confirm == "no" {
 			utils.SendMessage(update, "Deletion process cancelled")

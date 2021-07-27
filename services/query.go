@@ -27,22 +27,22 @@ func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
 	utils.AddMessageToDelete(update, msg)
 }
 
-func checkAnyPlace(update *tgbotapi.Update) error {
-	/* Check if there are any places registed */
+func checkAnyItem(update *tgbotapi.Update) error {
+	/* Check if there are any items registed */
 	chatID, _, err := utils.GetChatUserIDString(update)
 	if err != nil {
 		log.Printf("error GetChatUserIDString: %+v", err)
 	}
 
-	placeNames, err := utils.GetPlaceNames(update, chatID)
+	itemNames, err := utils.GetItemNames(update, chatID)
 	if err != nil {
-		log.Printf("error GetPlaceNames: %+v", err)
+		log.Printf("error GetItemNames: %+v", err)
 		utils.SendMessage(update, "Sorry an error occured")
 		return err
 	}
-	if len(placeNames) == 0 {
-		utils.SendMessage(update, "No places registered :( add some")
-		return errors.New("no place registered")
+	if len(itemNames) == 0 {
+		utils.SendMessage(update, "No items registered :( add some")
+		return errors.New("no item registered")
 	}
 	return nil
 }
@@ -108,28 +108,28 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 	utils.AddMessageToDelete(update, msg)
 }
 
-/* Search from name of places */
-func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
+/* Search from name of items */
+func sendAvailableItemNamesResponse(update *tgbotapi.Update, text string) {
 	chatID, _, err := utils.GetChatUserIDString(update)
 	if err != nil {
 		log.Printf("error GetChatUserIDString: %+v", err)
 	}
 
-	placeNamesMap, err := utils.GetPlaceNames(update, chatID)
+	itemNamesMap, err := utils.GetItemNames(update, chatID)
 	if err != nil {
-		log.Printf("error GetPlaceNames: %+v", err)
+		log.Printf("error GetItemNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
 		return
 	}
 
 	/* Set each name as its own inline row */
-	placeNames := make([]string, len(placeNamesMap))
+	itemNames := make([]string, len(itemNamesMap))
 	i := 0
-	for placeName := range placeNamesMap {
-		placeNames[i] = placeName
+	for itemName := range itemNamesMap {
+		itemNames[i] = itemName
 		i++
 	}
-	msg := utils.CreateAndSendInlineKeyboard(update, text, 1, placeNames...)
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 1, itemNames...)
 	utils.AddMessageToDelete(update, msg)
 }
 
@@ -173,15 +173,15 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				log.Printf("error GetChatUserIDString: %+v", err)
 			}
 
-			placeNames, err := utils.GetPlaceNames(update, chatID)
+			itemNames, err := utils.GetItemNames(update, chatID)
 			if err != nil {
-				log.Printf("error GetPlaceNames: %+v", err)
+				log.Printf("error GetItemNames: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured")
 				return
 			}
 
 			// Store to delete
-			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(placeNames)))
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(itemNames)))
 			utils.AddMessageToDelete(update, msg)
 			// Get message
 			messageID, err := utils.GetMessageTarget(update)
@@ -190,7 +190,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 			// Store to delete
-			utils.SendMessageForceReply(update, "How many placeFs do you want?", messageID)
+			utils.SendMessageForceReply(update, "How many itemFs do you want?", messageID)
 			// if err != nil {
 			// 	log.Printf("error SetMessageForceReply: %+v", err)
 			// 	utils.SendMessage(update, "Sorry an error occured!")
@@ -209,15 +209,15 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				log.Printf("error GetChatUserIDString: %+v", err)
 			}
 
-			placeNames, err := utils.GetPlaceNames(update, chatID)
+			itemNames, err := utils.GetItemNames(update, chatID)
 			if err != nil {
-				log.Printf("error GetPlaceNames: %+v", err)
+				log.Printf("error GetItemNames: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
-			utils.SetQueryNum(update, len(placeNames))
+			utils.SetQueryNum(update, len(itemNames))
 			// Store to delete
-			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall fetch your %v places", len(placeNames)))
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall fetch your %v items", len(itemNames)))
 			utils.AddMessageToDelete(update, msg)
 			sendQueryGetImagesResponse(update, "Do you want the images as well?")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
@@ -256,7 +256,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
 
-			msg = utils.SendMessage(update, "(Don't add any to consider all places)")
+			msg = utils.SendMessage(update, "(Don't add any to consider all items)")
 			utils.AddMessageToDelete(update, msg)
 
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
@@ -265,9 +265,9 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 		case "/withName":
-			msg := utils.RemoveMarkupKeyboard(update, "Searching for places")
+			msg := utils.RemoveMarkupKeyboard(update, "Searching for items")
 			utils.AddMessageToDelete(update, msg)
-			sendAvailablePlaceNamesResponse(update, "Which place do you want?")
+			sendAvailableItemNamesResponse(update, "Which item do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -277,7 +277,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 
 	/* Ask for name to search with */
 	case constants.QueryOneSetName:
-		// Expect user to select from inline markup keyboard (select name of place)
+		// Expect user to select from inline markup keyboard (select name of item)
 		/* If user send a message instead */
 		if update.Message != nil {
 			msg := utils.SendMessage(update, "Please select from the above options")
@@ -334,23 +334,23 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			log.Printf("error GetChatUserIDString: %+v", err)
 		}
 
-		placeNames, err := utils.GetPlaceNames(update, chatID)
+		itemNames, err := utils.GetItemNames(update, chatID)
 		if err != nil {
-			log.Printf("error GetPlaceNames: %+v", err)
+			log.Printf("error GetItemNames: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured")
 			return
 		}
 
-		if numQuery > len(placeNames) {
-			msg := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
+		if numQuery > len(itemNames) {
+			msg := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(itemNames)))
 			utils.AddMessageToDelete(update, msg)
-			utils.SetQueryNum(update, len(placeNames))
+			utils.SetQueryNum(update, len(itemNames))
 		} else {
 			utils.SetQueryNum(update, numQuery)
 		}
 
 		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
-		msg := utils.SendMessage(update, "(Don't add any to consider all places)")
+		msg := utils.SendMessage(update, "(Don't add any to consider all items)")
 		utils.AddMessageToDelete(update, msg)
 		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 			log.Printf("error SetUserState: %+v", err)
@@ -418,7 +418,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		if len(sendImage) > 0 {
 			queryName, _ := utils.GetQueryName(update)
 
-			// if name != "", get and show place data. (one result)
+			// if name != "", get and show item data. (one result)
 			if len(queryName) > 0 {
 				chatID, _, err := utils.GetChatUserIDString(update)
 				if err != nil {
@@ -426,18 +426,18 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 					utils.SendMessage(update, "Sorry an error occured!")
 					return
 				}
-				placeData, err := utils.GetPlace(update, queryName, chatID)
+				itemData, err := utils.GetItem(update, queryName, chatID)
 				if err != nil {
-					log.Printf("error GetPlace: %+v", err)
+					log.Printf("error GetItem: %+v", err)
 					if err := utils.SetUserState(update, constants.Idle); err != nil {
 						log.Printf("error SetUserState: %+v", err)
 						utils.SendMessage(update, "Sorry an error occured!")
 						return
 					}
-					utils.SendMessage(update, "Sorry, error with getting data on the place.")
+					utils.SendMessage(update, "Sorry, error with getting data on the item.")
 					return
 				}
-				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
+				utils.SendItemDetails(update, itemData, sendImage == "yes")
 				if err := utils.SetUserState(update, constants.Idle); err != nil {
 					log.Printf("error SetUserState: %+v", err)
 					utils.SendMessage(update, "Sorry an error occured!")
@@ -468,22 +468,22 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				i++
 			}
 			utils.SendMessage(update, fmt.Sprintf("Searching with tag(s): %+s", strings.Join(tagList, ", ")))
-			// Get matching places
+			// Get matching items
 			// if len(tags) == 0, get all, randomly choose QueryNum
 			// if len(tags) > 0, get all, extract with matching tags. randomly select queryNum
-			places, err := utils.GetPlaces(update, queryTags)
+			items, err := utils.GetItems(update, queryTags)
 			if err != nil {
-				log.Printf("error GetPlaces: %+v", err)
+				log.Printf("error GetItems: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				return
 			}
 			// less than queryNum found
-			if len(places) < queryNum {
-				utils.SendMessage(update, fmt.Sprintf("Only found %v result(s) with matching tags", len(places)))
-				queryNum = len(places)
+			if len(items) < queryNum {
+				utils.SendMessage(update, fmt.Sprintf("Only found %v result(s) with matching tags", len(items)))
+				queryNum = len(items)
 			}
-			for _, placeData := range places[:queryNum] {
-				utils.SendPlaceDetails(update, placeData, sendImage == "yes")
+			for _, itemData := range items[:queryNum] {
+				utils.SendItemDetails(update, itemData, sendImage == "yes")
 			}
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)

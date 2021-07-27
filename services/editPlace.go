@@ -10,7 +10,7 @@ import (
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
 
-func sendPlacesToEditResponse(update *tgbotapi.Update, text string) {
+func sendItemsToEditResponse(update *tgbotapi.Update, text string) {
 	// Get target chat
 	chatID, err := utils.GetChatTarget(update)
 	if err != nil {
@@ -20,17 +20,17 @@ func sendPlacesToEditResponse(update *tgbotapi.Update, text string) {
 	}
 	chatIDString := strconv.FormatInt(chatID, 10)
 
-	// Extract place names
-	placeNames, err := utils.GetPlaceNames(update, chatIDString)
+	// Extract item names
+	itemNames, err := utils.GetItemNames(update, chatIDString)
 	if err != nil {
-		log.Printf("error GetPlaceNames: %+v", err)
+		log.Printf("error GetItemNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
 	}
 
 	/* Set each name as its own inline row */
-	var nameButtons = make([][]tgbotapi.InlineKeyboardButton, len(placeNames))
+	var nameButtons = make([][]tgbotapi.InlineKeyboardButton, len(itemNames))
 	i := 0
-	for name := range placeNames {
+	for name := range itemNames {
 		nameButtons[i] = tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(name, name),
 		)
@@ -41,10 +41,10 @@ func sendPlacesToEditResponse(update *tgbotapi.Update, text string) {
 	utils.AddMessageToDelete(update, msg)
 }
 
-func editPlaceHandler(update *tgbotapi.Update, userState constants.State) {
+func editItemHandler(update *tgbotapi.Update, userState constants.State) {
 	switch userState {
-	case constants.GetPlaceToEdit:
-		// Expect user to select from inline keyboard markup. (name of place to edit)
+	case constants.GetItemToEdit:
+		// Expect user to select from inline keyboard markup. (name of item to edit)
 		/* If user send a message instead */
 		if update.Message != nil {
 			utils.SendMessage(update, "Please select from the above options")
@@ -66,12 +66,12 @@ func editPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		chatIDString := strconv.FormatInt(chatID, 10)
-		if err := utils.CopyPlaceToTempPlace(update, name, chatIDString); err != nil {
-			log.Printf("error CopyPlaceToTempPlace: %+v", err)
+		if err := utils.CopyItemToTempItem(update, name, chatIDString); err != nil {
+			log.Printf("error CopyItemToTempItem: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")
 			return
 		}
-		// Use addplace logic to update
+		// Use additem logic to update
 		sendTemplateReplies(update, fmt.Sprintf("You may start editing %s", name))
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)

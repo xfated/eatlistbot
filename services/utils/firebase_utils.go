@@ -85,8 +85,8 @@ func GetUserState(update *tgbotapi.Update) (constants.State, error) {
 	return constants.State(stateInt), err
 }
 
-/* ########## Name (Init place) ##########*/
-func InitPlace(update *tgbotapi.Update) error {
+/* ########## Name (Init item) ##########*/
+func InitItem(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -100,7 +100,7 @@ func InitPlace(update *tgbotapi.Update) error {
 	}
 
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Set(ctx, map[string]string{
+	if err := userRef.Child("itemToAdd").Set(ctx, map[string]string{
 		"name": name,
 	}); err != nil {
 		return err
@@ -109,7 +109,7 @@ func InitPlace(update *tgbotapi.Update) error {
 }
 
 /* ########## Address ##########*/
-func SetTempPlaceAddress(update *tgbotapi.Update) error {
+func SetTempItemAddress(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -122,7 +122,7 @@ func SetTempPlaceAddress(update *tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("itemToAdd").Update(ctx, map[string]interface{}{
 		"address": address,
 	}); err != nil {
 		return err
@@ -131,15 +131,15 @@ func SetTempPlaceAddress(update *tgbotapi.Update) error {
 	return nil
 }
 
-func UpdatePlaceAddress(update *tgbotapi.Update, placeName, address string) error {
+func UpdateItemAddress(update *tgbotapi.Update, itemName, address string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Update(ctx, map[string]interface{}{
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Update(ctx, map[string]interface{}{
 		"address": address,
 	}); err != nil {
 		return err
@@ -148,7 +148,7 @@ func UpdatePlaceAddress(update *tgbotapi.Update, placeName, address string) erro
 }
 
 /* ########## Notes ##########*/
-func SetTempPlaceNotes(update *tgbotapi.Update) error {
+func SetTempItemNotes(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -161,7 +161,7 @@ func SetTempPlaceNotes(update *tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("itemToAdd").Update(ctx, map[string]interface{}{
 		"notes": notes,
 	}); err != nil {
 		return err
@@ -170,15 +170,15 @@ func SetTempPlaceNotes(update *tgbotapi.Update) error {
 	return nil
 }
 
-func UpdatePlaceNotes(update *tgbotapi.Update, placeName, notes string) error {
+func UpdateItemNotes(update *tgbotapi.Update, itemName, notes string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Update(ctx, map[string]interface{}{
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Update(ctx, map[string]interface{}{
 		"notes": notes,
 	}); err != nil {
 		return err
@@ -187,7 +187,7 @@ func UpdatePlaceNotes(update *tgbotapi.Update, placeName, notes string) error {
 }
 
 /* ########## URL ##########*/
-func SetTempPlaceURL(update *tgbotapi.Update) error {
+func SetTempItemURL(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -200,7 +200,7 @@ func SetTempPlaceURL(update *tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("itemToAdd").Update(ctx, map[string]interface{}{
 		"url": url,
 	}); err != nil {
 		return err
@@ -209,15 +209,15 @@ func SetTempPlaceURL(update *tgbotapi.Update) error {
 	return nil
 }
 
-func UpdatePlaceURL(update *tgbotapi.Update, placeName, url string) error {
+func UpdateItemURL(update *tgbotapi.Update, itemName, url string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Update(ctx, map[string]interface{}{
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Update(ctx, map[string]interface{}{
 		"url": url,
 	}); err != nil {
 		return err
@@ -226,7 +226,7 @@ func UpdatePlaceURL(update *tgbotapi.Update, placeName, url string) error {
 }
 
 /* ########## Images ##########*/
-func AddTempPlaceImage(update *tgbotapi.Update) error {
+func AddTempItemImage(update *tgbotapi.Update) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -243,7 +243,7 @@ func AddTempPlaceImage(update *tgbotapi.Update) error {
 		return err
 	}
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Child("images").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("itemToAdd").Child("images").Update(ctx, map[string]interface{}{
 		imageID: true,
 	}); err != nil {
 		return err
@@ -252,15 +252,15 @@ func AddTempPlaceImage(update *tgbotapi.Update) error {
 	return nil
 }
 
-func AddPlaceImage(update *tgbotapi.Update, placeName, imageID string) error {
+func AddItemImage(update *tgbotapi.Update, itemName, imageID string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Child("tags").Update(ctx, map[string]interface{}{
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Child("tags").Update(ctx, map[string]interface{}{
 		imageID: true,
 	}); err != nil {
 		return err
@@ -268,22 +268,22 @@ func AddPlaceImage(update *tgbotapi.Update, placeName, imageID string) error {
 	return nil
 }
 
-func DeletePlaceImage(update *tgbotapi.Update, placeName, imageID string) error {
+func DeleteItemImage(update *tgbotapi.Update, itemName, imageID string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Child("tags").Child(imageID).Delete(ctx); err != nil {
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Child("tags").Child(imageID).Delete(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
 /* ########## Tags ##########*/
-func AddTempPlaceTag(update *tgbotapi.Update, tag string) error {
+func AddTempItemTag(update *tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -292,7 +292,7 @@ func AddTempPlaceTag(update *tgbotapi.Update, tag string) error {
 
 	/* Set temp under userRef */
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Child("tags").Update(ctx, map[string]interface{}{
+	if err := userRef.Child("itemToAdd").Child("tags").Update(ctx, map[string]interface{}{
 		tag: true,
 	}); err != nil {
 		return err
@@ -301,7 +301,7 @@ func AddTempPlaceTag(update *tgbotapi.Update, tag string) error {
 	return nil
 }
 
-func GetTempPlaceTags(update *tgbotapi.Update) (map[string]bool, error) {
+func GetTempItemTags(update *tgbotapi.Update) (map[string]bool, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -312,14 +312,14 @@ func GetTempPlaceTags(update *tgbotapi.Update) (map[string]bool, error) {
 
 	/* Set temp under userRef */
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Child("tags").Get(ctx, &tagsMap); err != nil {
+	if err := userRef.Child("itemToAdd").Child("tags").Get(ctx, &tagsMap); err != nil {
 		return nil, err
 	}
 
 	return tagsMap, nil
 }
 
-func DeleteTempPlaceTag(update *tgbotapi.Update, tag string) error {
+func DeleteTempItemTag(update *tgbotapi.Update, tag string) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -328,22 +328,22 @@ func DeleteTempPlaceTag(update *tgbotapi.Update, tag string) error {
 
 	/* Set temp under userRef */
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Child("tags").Child(tag).Delete(ctx); err != nil {
+	if err := userRef.Child("itemToAdd").Child("tags").Child(tag).Delete(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func AddPlaceTag(update *tgbotapi.Update, placeName, tag string) error {
+func AddItemTag(update *tgbotapi.Update, itemName, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Child("tags").Update(ctx, map[string]interface{}{
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Child("tags").Update(ctx, map[string]interface{}{
 		tag: true,
 	}); err != nil {
 		return err
@@ -351,38 +351,38 @@ func AddPlaceTag(update *tgbotapi.Update, placeName, tag string) error {
 	return nil
 }
 
-func DeletePlaceTag(update *tgbotapi.Update, placeName, tag string) error {
+func DeleteItemTag(update *tgbotapi.Update, itemName, tag string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
 
-	placeRef := client.NewRef("places").Child(chatID)
-	if err := placeRef.Child(placeName).Child("tags").Child(tag).Delete(ctx); err != nil {
+	itemRef := client.NewRef("items").Child(chatID)
+	if err := itemRef.Child(itemName).Child("tags").Child(tag).Delete(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-/* get list of places */
-func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants.PlaceDetails, error) {
+/* get list of items */
+func GetItems(update *tgbotapi.Update, filterTags map[string]bool) ([]constants.ItemDetails, error) {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
-		return []constants.PlaceDetails{}, err
+		return []constants.ItemDetails{}, err
 	}
 
-	/* get places */
-	var places map[string]constants.PlaceDetails
-	userRef := client.NewRef("places").Child(chatID)
-	if err := userRef.Get(ctx, &places); err != nil {
-		return []constants.PlaceDetails{}, err
+	/* get items */
+	var items map[string]constants.ItemDetails
+	userRef := client.NewRef("items").Child(chatID)
+	if err := userRef.Get(ctx, &items); err != nil {
+		return []constants.ItemDetails{}, err
 	}
-	placesList := make([]constants.PlaceDetails, len(places))
+	itemsList := make([]constants.ItemDetails, len(items))
 	i := 0
-	for _, placeDetails := range places {
-		placesList[i] = placeDetails
+	for _, itemDetails := range items {
+		itemsList[i] = itemDetails
 		i++
 	}
 
@@ -398,16 +398,16 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 
 	/* filter if tags are present */
 	if len(filterTags) > 0 {
-		filteredPlaces := make([]constants.PlaceDetails, 0)
-		// For each place
-		for _, place := range places {
+		filteredItems := make([]constants.ItemDetails, 0)
+		// For each item
+		for _, item := range items {
 			consider := false
 			// If have tags
-			if place.Tags != nil {
+			if item.Tags != nil {
 				// Check if match any filter
 				for idx, tag := range tagsList {
 					/* select if any tag match */
-					if place.Tags[tag] {
+					if item.Tags[tag] {
 						consider = true
 						tagUsed[idx] = true
 						break
@@ -415,10 +415,10 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 				}
 			}
 			if consider {
-				filteredPlaces = append(filteredPlaces, place)
+				filteredItems = append(filteredItems, item)
 			}
 		}
-		placesList = filteredPlaces
+		itemsList = filteredItems
 	}
 
 	unusedTags := make([]string, 0)
@@ -429,23 +429,23 @@ func GetPlaces(update *tgbotapi.Update, filterTags map[string]bool) ([]constants
 	}
 	if len(unusedTags) > 0 {
 		tagsString := strings.Join(unusedTags, ", ")
-		SendMessage(update, fmt.Sprintf("There is no place with these tags: %s.\nSo imma delete them", tagsString))
+		SendMessage(update, fmt.Sprintf("There is no item with these tags: %s.\nSo imma delete them", tagsString))
 		for _, tag := range unusedTags {
 			DeleteTag(update, tag)
 		}
 	}
 
 	/* Shuffle for random */
-	rand.Shuffle(len(placesList), func(i, j int) { placesList[i], placesList[j] = placesList[j], placesList[i] })
+	rand.Shuffle(len(itemsList), func(i, j int) { itemsList[i], itemsList[j] = itemsList[j], itemsList[i] })
 
 	// DEBUG
 	// log.Printf("filterTags: %+v", filterTags)
-	// log.Printf("placesList: %+v", placesList)
+	// log.Printf("itemsList: %+v", itemsList)
 
-	return placesList, nil
+	return itemsList, nil
 }
 
-/* ########## Add Place ##########*/
+/* ########## Add Item ##########*/
 func SetChatTarget(update *tgbotapi.Update, chatID int64) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
@@ -477,40 +477,40 @@ func GetChatTarget(update *tgbotapi.Update) (int64, error) {
 	return target, nil
 }
 
-func GetTempPlace(update *tgbotapi.Update) (constants.PlaceDetails, error) {
+func GetTempItem(update *tgbotapi.Update) (constants.ItemDetails, error) {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
-		return constants.PlaceDetails{}, err
+		return constants.ItemDetails{}, err
 	}
 
-	var PlaceData constants.PlaceDetails
+	var ItemData constants.ItemDetails
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Get(ctx, &PlaceData); err != nil {
-		return constants.PlaceDetails{}, err
+	if err := userRef.Child("itemToAdd").Get(ctx, &ItemData); err != nil {
+		return constants.ItemDetails{}, err
 	}
-	return PlaceData, nil
+	return ItemData, nil
 }
 
-func GetPlace(update *tgbotapi.Update, name string, chatID string) (constants.PlaceDetails, error) {
+func GetItem(update *tgbotapi.Update, name string, chatID string) (constants.ItemDetails, error) {
 	ctx := context.Background()
 
-	/* Get place */
-	var placeData constants.PlaceDetails
-	chatRef := client.NewRef("places").Child(chatID)
-	if err := chatRef.Child(name).Get(ctx, &placeData); err != nil {
-		return constants.PlaceDetails{}, err
+	/* Get item */
+	var itemData constants.ItemDetails
+	chatRef := client.NewRef("items").Child(chatID)
+	if err := chatRef.Child(name).Get(ctx, &itemData); err != nil {
+		return constants.ItemDetails{}, err
 	}
 
-	return placeData, nil
+	return itemData, nil
 }
 
-func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails, chatID string) error {
+func AddItem(update *tgbotapi.Update, itemData constants.ItemDetails, chatID string) error {
 	ctx := context.Background()
 
-	/* Add place to place collection */
-	chatRef := client.NewRef("places").Child(chatID)
-	if err := chatRef.Child(placeData.Name).Set(ctx, placeData); err != nil {
+	/* Add item to item collection */
+	chatRef := client.NewRef("items").Child(chatID)
+	if err := chatRef.Child(itemData.Name).Set(ctx, itemData); err != nil {
 		return err
 	}
 	chatIDInt, err := strconv.ParseInt(chatID, 10, 64)
@@ -518,42 +518,42 @@ func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails, chatID 
 		return err
 	}
 
-	err = SendMessageTargetChat(fmt.Sprintf("%s has been added/edited", placeData.Name), chatIDInt)
+	err = SendMessageTargetChat(fmt.Sprintf("%s has been added/edited", itemData.Name), chatIDInt)
 	if err != nil {
 		log.Printf("error SendMessageTargetChat: %+v", err)
 	}
 
 	/* Add tags to tag collection */
-	for tag := range placeData.Tags {
+	for tag := range itemData.Tags {
 		if err := updateTags(update, chatID, tag); err != nil {
 			return err
 		}
 	}
 
 	/* Add name to name collection */
-	nameRef := client.NewRef("placeNames").Child(chatID)
+	nameRef := client.NewRef("itemNames").Child(chatID)
 	if err := nameRef.Update(ctx, map[string]interface{}{
-		placeData.Name: true,
+		itemData.Name: true,
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func AddPlaceFromTemp(update *tgbotapi.Update, chatID string) (string, error) {
+func AddItemFromTemp(update *tgbotapi.Update, chatID string) (string, error) {
 	// get from user details
-	placeData, err := GetTempPlace(update)
+	itemData, err := GetTempItem(update)
 	if err != nil {
 		return "", err
 	}
-	// Add data to place
-	if err := AddPlace(update, placeData, chatID); err != nil {
+	// Add data to item
+	if err := AddItem(update, itemData, chatID); err != nil {
 		return "", err
 	}
-	return placeData.Name, nil
+	return itemData.Name, nil
 }
 
-/* ########## Delete Place ##########*/
+/* ########## Delete Item ##########*/
 func SetMessageTarget(update *tgbotapi.Update, messageID int) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
@@ -587,16 +587,16 @@ func GetMessageTarget(update *tgbotapi.Update) (int, error) {
 	return target, nil
 }
 
-func GetPlaceNames(update *tgbotapi.Update, chatID string) (map[string]bool, error) {
+func GetItemNames(update *tgbotapi.Update, chatID string) (map[string]bool, error) {
 	ctx := context.Background()
 
-	var placeNames map[string]bool
-	nameRef := client.NewRef("placeNames").Child(chatID)
-	if err := nameRef.Get(ctx, &placeNames); err != nil {
+	var itemNames map[string]bool
+	nameRef := client.NewRef("itemNames").Child(chatID)
+	if err := nameRef.Get(ctx, &itemNames); err != nil {
 		return map[string]bool{}, err
 	}
 
-	return placeNames, nil
+	return itemNames, nil
 }
 
 /* Read / Delete / Update tags */
@@ -637,7 +637,7 @@ func DeleteTag(update *tgbotapi.Update, tag string) error {
 }
 
 func updateTags(update *tgbotapi.Update, chatID string, tag string) error {
-	/* Can update when adding place from bot privat chat */
+	/* Can update when adding item from bot privat chat */
 	/* If same tag won't update. Implicitly prevent double records */
 	ctx := context.Background()
 
@@ -843,8 +843,8 @@ func DeleteRecentMessages(update *tgbotapi.Update) error {
 	return nil
 }
 
-/* ########## Delete Place ##########*/
-func SetPlaceTarget(update *tgbotapi.Update, name string) error {
+/* ########## Delete Item ##########*/
+func SetItemTarget(update *tgbotapi.Update, name string) error {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -852,8 +852,8 @@ func SetPlaceTarget(update *tgbotapi.Update, name string) error {
 	}
 
 	/* Set target */
-	placeTargetRef := client.NewRef("users").Child(userID).Child("target").Child("place")
-	if err := placeTargetRef.Update(ctx, map[string]interface{}{
+	itemTargetRef := client.NewRef("users").Child(userID).Child("target").Child("item")
+	if err := itemTargetRef.Update(ctx, map[string]interface{}{
 		chatID: name,
 	}); err != nil {
 		return err
@@ -861,7 +861,7 @@ func SetPlaceTarget(update *tgbotapi.Update, name string) error {
 	return nil
 }
 
-func GetPlaceTarget(update *tgbotapi.Update) (string, error) {
+func GetItemTarget(update *tgbotapi.Update) (string, error) {
 	ctx := context.Background()
 	chatID, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -870,32 +870,32 @@ func GetPlaceTarget(update *tgbotapi.Update) (string, error) {
 
 	/* Get target */
 	var target string
-	placeTargetRef := client.NewRef("users").Child(userID).Child("target").Child("place")
-	if err := placeTargetRef.Child(chatID).Get(ctx, &target); err != nil {
+	itemTargetRef := client.NewRef("users").Child(userID).Child("target").Child("item")
+	if err := itemTargetRef.Child(chatID).Get(ctx, &target); err != nil {
 		return "", err
 	}
 	return target, nil
 }
 
-func DeletePlace(update *tgbotapi.Update, placeName string) error {
+func DeleteItem(update *tgbotapi.Update, itemName string) error {
 	ctx := context.Background()
 	chatID, _, err := GetChatUserIDString(update)
 	if err != nil {
 		return err
 	}
-	chatRef := client.NewRef("places").Child(chatID)
-	if err := chatRef.Child(placeName).Delete(ctx); err != nil {
+	chatRef := client.NewRef("items").Child(chatID)
+	if err := chatRef.Child(itemName).Delete(ctx); err != nil {
 		return err
 	}
-	nameRef := client.NewRef("placeNames").Child(chatID)
-	if err := nameRef.Child(placeName).Delete(ctx); err != nil {
+	nameRef := client.NewRef("itemNames").Child(chatID)
+	if err := nameRef.Child(itemName).Delete(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-/* ########## Edit Place ##########*/
-func AddPlaceToTemp(update *tgbotapi.Update, placeData constants.PlaceDetails) error {
+/* ########## Edit Item ##########*/
+func AddItemToTemp(update *tgbotapi.Update, itemData constants.ItemDetails) error {
 	ctx := context.Background()
 	_, userID, err := GetChatUserIDString(update)
 	if err != nil {
@@ -903,18 +903,18 @@ func AddPlaceToTemp(update *tgbotapi.Update, placeData constants.PlaceDetails) e
 	}
 
 	userRef := client.NewRef("users").Child(userID)
-	if err := userRef.Child("placeToAdd").Set(ctx, placeData); err != nil {
+	if err := userRef.Child("itemToAdd").Set(ctx, itemData); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CopyPlaceToTempPlace(update *tgbotapi.Update, placeName string, chatID string) error {
-	placeData, err := GetPlace(update, placeName, chatID)
+func CopyItemToTempItem(update *tgbotapi.Update, itemName string, chatID string) error {
+	itemData, err := GetItem(update, itemName, chatID)
 	if err != nil {
 		return err
 	}
-	if err := AddPlaceToTemp(update, placeData); err != nil {
+	if err := AddItemToTemp(update, itemData); err != nil {
 		return err
 	}
 	return nil
