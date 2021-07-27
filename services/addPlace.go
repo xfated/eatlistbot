@@ -38,6 +38,8 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	chatID, err := utils.GetChatTarget(update)
 	if err != nil {
 		log.Printf("Error GetChatTarget: %+v", err)
+		utils.SendMessage(update, "Sorry, an error occured!")
+		return
 	}
 	chatIDString := strconv.FormatInt(chatID, 10)
 
@@ -45,6 +47,7 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
+		return
 	}
 
 	/* No tags, just send done */
@@ -53,13 +56,24 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 		return
 	}
 
-	tags := make([]string, len(tagsMap)+1)
+	/* Get already added tags */
+	curTempTags, err := utils.GetTempPlaceTags(update)
+	if err != nil {
+		log.Printf("error GetTags: %+v", err)
+		utils.SendMessage(update, "Sorry, an error occured!")
+		return
+	}
+	tags := make([]string, 0)
 	i := 0
 	for tag := range tagsMap {
-		tags[i] = tag
-		i++
+		// if not inside current temp tags
+		if !curTempTags[tag] {
+			tags = append(tags, tag)
+			i++
+		}
 	}
-	tags[len(tagsMap)] = "/done"
+
+	tags = append(tags, "/done")
 	utils.CreateAndSendInlineKeyboard(update, text, 1, tags...)
 }
 
