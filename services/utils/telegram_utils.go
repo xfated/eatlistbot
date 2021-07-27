@@ -31,10 +31,10 @@ func InitTelegram() {
 	}
 
 	// Set webhook
-	_, err = bot.SetWebhook(tgbotapi.NewWebhook(baseURL + bot.Token))
-	if err != nil {
-		log.Println("Problem setting Webhook", err.Error())
-	}
+	// _, err = bot.SetWebhook(tgbotapi.NewWebhook(baseURL + bot.Token))
+	// if err != nil {
+	// 	log.Println("Problem setting Webhook", err.Error())
+	// }
 
 	log.Println("Loaded telegram bot")
 }
