@@ -123,13 +123,12 @@ func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
 	}
 
 	/* Set each name as its own inline row */
-	placeNames := make([]string, len(placeNamesMap)+1)
+	placeNames := make([]string, len(placeNamesMap))
 	i := 0
 	for placeName := range placeNamesMap {
 		placeNames[i] = placeName
 		i++
 	}
-	placeNames[len(placeNamesMap)] = "/done"
 	msg := utils.CreateAndSendInlineKeyboard(update, text, 1, placeNames...)
 	utils.AddMessageToDelete(update, msg)
 }
