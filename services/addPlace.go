@@ -173,7 +173,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SetMessageTarget(update, messageID)
 
 			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of places)\n"+
-				"Type new or pick from existing\nPress done once done!")
+				"Type new or pick from existing\n\nPress \"/done\" once done!")
 			sendExistingTagsResponse(update, "Existing tags:")
 		case "/removeTag":
 			if err := utils.SetUserState(update, constants.AddNewRemoveTags); err != nil {
@@ -190,7 +190,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 			utils.SetMessageTarget(update, messageID)
 
-			utils.RemoveMarkupKeyboard(update, "Select a tag to remove\nPress done once done!")
+			utils.RemoveMarkupKeyboard(update, "Select a tag to remove\n\nPress \"/done\" once done!")
 			sendAddedTagsResponse(update, "Existing tags:")
 		case "/preview":
 			placeData, err := utils.GetTempPlace(update)
