@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/xfated/golistbot/services/constants"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
@@ -14,6 +15,7 @@ import (
 
 var (
 	TELEGRAM_BOT_TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
+	FEEDBACK_CHATID    = os.Getenv("FEEDBACK_CHAT")
 	baseURL            = "https://togolist-bot.herokuapp.com/"
 	bot                *tgbotapi.BotAPI
 )
@@ -394,4 +396,43 @@ func CheckForSlash(update *tgbotapi.Update) error {
 	// 	return nil
 	// }
 	return nil
+}
+
+func SendToFeedbackChat(update *tgbotapi.Update) {
+	if update.Message == nil {
+		log.Printf("Message nil")
+		return
+	}
+
+	chatID, err := strconv.ParseInt(FEEDBACK_CHATID, 10, 64)
+	if err != nil {
+		log.Printf("error getting FeedbackChatID int64: %+v", err)
+		return
+	}
+
+	currentTime := time.Now()
+	feedback := update.Message.Text
+	user := update.Message.From
+	username := user.UserName
+	userid := user.ID
+	chatid := update.Message.Chat.ID
+
+	feedbackMessage := fmt.Sprintf(
+		"User: %s\n"+
+			"UserID: %v\n"+
+			"ChatID: %v\n"+
+			"Date: %s\n"+
+			"Feedback: %s", username, userid,
+		chatid, currentTime.Format("2006-01-02 15:04:05 Monday"),
+		feedback,
+	)
+	msg := tgbotapi.NewMessage(chatID, feedbackMessage)
+	_, err = bot.Send(msg)
+	if err != nil {
+		log.Printf("Error bot.Send: %+v", err)
+	}
+
+	// Debug
+	// log.Printf("Sent message %s", text)
+	return
 }

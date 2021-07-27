@@ -149,6 +149,15 @@ func HandleUserInput(update *tgbotapi.Update) {
 			// If not private, redirect
 			utils.RedirectToBotChat(update, "Click the button to start editing", "Edit item", "https://t.me/toGoListBot?start=editItem")
 			return
+		case "/feedback",
+			"feedback@toGoListBot":
+			utils.SendMessage(update, "What would you like to feedback?", false)
+			if err := utils.SetUserState(update, constants.Feedback); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry, an error occured!", false)
+				return
+			}
+			return
 		case "/help",
 			"/help@toGoListBot":
 			helpHandler(update)
@@ -189,6 +198,12 @@ func HandleUserInput(update *tgbotapi.Update) {
 	/* Edit item */
 	if constants.IsEditItem(userState) {
 		editItemHandler(update, userState)
+		return
+	}
+
+	/* Feedback */
+	if constants.IsFeedback(userState) {
+		feedbackHandler(update, userState)
 		return
 	}
 }

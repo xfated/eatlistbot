@@ -37,6 +37,10 @@ const (
 	/* #### EditItem #### */
 	GetItemToEdit
 	/* ######## */
+
+	/* #### Feedback #### */
+	Feedback
+	/* ######## */
 )
 
 type ItemDetails struct {
@@ -106,6 +110,15 @@ func IsDeleteItem(state State) bool {
 func IsEditItem(state State) bool {
 	switch state {
 	case GetItemToEdit:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsFeedback(state State) bool {
+	switch state {
+	case Feedback:
 		return true
 	default:
 		return false

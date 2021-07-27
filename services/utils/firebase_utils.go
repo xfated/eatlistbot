@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/db"
@@ -918,4 +919,27 @@ func CopyItemToTempItem(update *tgbotapi.Update, itemName string, chatID string)
 		return err
 	}
 	return nil
+}
+
+/* ########## Feedback ##########*/
+func AddFeedback(update *tgbotapi.Update) {
+	ctx := context.Background()
+
+	currentTime := time.Now()
+	date := currentTime.Format("01-02-2006")
+	feedback := update.Message.Text
+	user := update.Message.From
+	username := user.UserName
+	userid := user.ID
+	chatid := update.Message.Chat.ID
+
+	feedbackRef := client.NewRef("feedback").Child(date)
+	if _, err := feedbackRef.Push(ctx, map[string]interface{}{
+		"username": username,
+		"userid":   userid,
+		"chatid":   chatid,
+		"feedback": feedback,
+	}); err != nil {
+		log.Printf("error push feedback: %+v", err)
+	}
 }
