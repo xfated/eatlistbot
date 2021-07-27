@@ -517,7 +517,8 @@ func AddPlace(update *tgbotapi.Update, placeData constants.PlaceDetails, chatID 
 	if err != nil {
 		return err
 	}
-	err = SendMessageTargetChat(fmt.Sprintf("%s has been added here", placeData.Name), chatIDInt)
+
+	err = SendMessageTargetChat(fmt.Sprintf("%s has been added/edited", placeData.Name), chatIDInt)
 	if err != nil {
 		log.Printf("error SendMessageTargetChat: %+v", err)
 	}

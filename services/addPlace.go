@@ -432,6 +432,6 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 	}
 
-	/* Create and send keyboard for tarutils.Geted response */
+	/* Create and send keyboard for targeted response */
 	sendTemplateReplies(update, "What do you want to do next?")
 }

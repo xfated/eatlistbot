@@ -12,12 +12,14 @@ func helpHandler(update *tgbotapi.Update) {
 		"\n" +
 		"/deleteplace: To delete a place duh \n" +
 		"\n" +
+		"/editplace: To edit a place. Similar process to /addplace \n" +
+		"\n" +
 		"/query: To fetch an item from this chat's list.\n" +
 		"    /getOne: Returns one at random \n" +
-		"      /withTag: Select multiple tags (or none). Filters for items with at least one matching tag \n" +
-		"      /withName: Returns your selection \n" +
+		"        /withTag: Select multiple tags (or none). Filters for items with at least one matching tag \n" +
+		"        /withName: Returns your selection \n" +
 		"    /getFew: Returns a few (your choice) at random \n" +
-		"      /withTag: Same as above \n" +
+		"        /withTag: Same as above \n" +
 		"    /getAll: Returns all"
 
 	utils.SendMessage(update, helpText)
