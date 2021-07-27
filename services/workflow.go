@@ -117,7 +117,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 		case "/editplace",
-			"/editpalce@toGoListBot":
+			"/editplace@toGoListBot":
 			// Check if is already private.
 			chatID, userID, err := utils.GetChatUserID(update)
 			utils.SetChatTarget(update, chatID)
