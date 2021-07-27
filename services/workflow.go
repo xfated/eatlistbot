@@ -30,6 +30,10 @@ func HandleUserInput(update *tgbotapi.Update) {
 			}
 			return
 		case "/start addItem":
+			if update.Message == nil {
+				utils.SendMessage(update, "Please press start", false)
+				return
+			}
 			// Add item in pm after redirect
 			targetChat, err := utils.GetChatTarget(update)
 			if err != nil {
@@ -105,6 +109,10 @@ func HandleUserInput(update *tgbotapi.Update) {
 			}
 			return
 		case "/start editItem":
+			if update.Message == nil {
+				utils.SendMessage(update, "Please press start", false)
+				return
+			}
 			sendItemsToEditResponse(update, "Which item would you like to edit?")
 			if err := utils.SetUserState(update, constants.GetItemToEdit); err != nil {
 				log.Printf("error setting state: %+v", err)
