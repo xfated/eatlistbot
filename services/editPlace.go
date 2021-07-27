@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -71,7 +72,7 @@ func editPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		// Use addplace logic to update
-		sendTemplateReplies(update, "You may start editing")
+		sendTemplateReplies(update, fmt.Sprintf("You may start editing %s", name))
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")

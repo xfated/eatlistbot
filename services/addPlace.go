@@ -30,7 +30,7 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
 	replyKeyboard.ResizeKeyboard = true
 	replyKeyboard.OneTimeKeyboard = true
-	replyKeyboard.Selective = true
+	replyKeyboard.Selective = false
 	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
 }
 

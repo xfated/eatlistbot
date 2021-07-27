@@ -188,16 +188,19 @@ func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbot
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
 
-	messageTarget := 0
-	if update.Message != nil {
-		messageTarget = update.Message.MessageID
-	} else {
-		messageTarget, err = GetMessageTarget(update)
-		if err != nil {
-			log.Printf("Error GetMessageTarget: %+v", err)
+	// For selective
+	if keyboard.Selective {
+		messageTarget := 0
+		if update.Message != nil {
+			messageTarget = update.Message.MessageID
+		} else {
+			messageTarget, err = GetMessageTarget(update)
+			if err != nil {
+				log.Printf("Error GetMessageTarget: %+v", err)
+			}
 		}
+		msg.ReplyToMessageID = messageTarget
 	}
-	msg.ReplyToMessageID = messageTarget
 	_, err = bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
