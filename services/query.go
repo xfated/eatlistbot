@@ -23,7 +23,7 @@ func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
 }
 
 func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
-	msg := utils.CreateAndSendInlineKeyboard(update, text, 2, "/yes", "/no")
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 2, "yes", "no")
 	utils.AddMessageToDelete(update, msg)
 }
 

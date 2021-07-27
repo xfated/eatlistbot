@@ -22,7 +22,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			"/start@toGoListBot",
 			"/reset",
 			"/reset@toGoListBot":
-			utils.RemoveMarkupKeyboard(update, "I am ready!", false)
+			utils.RemoveMarkupKeyboard(update, "I am ready! Use /help to see the list of available commands", false)
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry, an error occured!", false)
