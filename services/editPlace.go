@@ -72,7 +72,7 @@ func editItemHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		// Use additem logic to update
-		sendTemplateReplies(update, fmt.Sprintf("You may start editing %s", name))
+		sendTemplateReplies(update, fmt.Sprintf("You may start editing *%s*", name))
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured!")

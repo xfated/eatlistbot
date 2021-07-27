@@ -90,6 +90,7 @@ func SendMessage(update *tgbotapi.Update, text string) *tgbotapi.Message {
 	}
 
 	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "markdown"
 	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error bot.Send: %+v", err)
