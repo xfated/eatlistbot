@@ -151,7 +151,13 @@ func HandleUserInput(update *tgbotapi.Update) {
 			return
 		case "/feedback",
 			"/feedback@toGoListBot":
-			utils.SendMessage(update, "What would you like to feedback?", false)
+			_, messageID, err := utils.GetMessage(update)
+			if err != nil {
+				log.Printf("error GetMessage: %+v", err)
+				utils.SendMessage(update, "Sorry, an error occured!", false)
+				return
+			}
+			utils.SendMessageForceReply(update, "What would you like to feedback?", messageID, false)
 			if err := utils.SetUserState(update, constants.Feedback); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry, an error occured!", false)
