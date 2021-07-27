@@ -16,7 +16,7 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	setAddressButton := tgbotapi.NewKeyboardButton("/setAddress")
 	setNotesButton := tgbotapi.NewKeyboardButton("/setNotes")
 	setURLButton := tgbotapi.NewKeyboardButton("/setURL")
-	setImageButton := tgbotapi.NewKeyboardButton("/setImage")
+	addImageButton := tgbotapi.NewKeyboardButton("/addImage")
 	addTagButton := tgbotapi.NewKeyboardButton("/addTag")
 	removeTagButton := tgbotapi.NewKeyboardButton("/removeTag")
 	previewButton := tgbotapi.NewKeyboardButton("/preview")
@@ -24,7 +24,7 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	cancelButton := tgbotapi.NewKeyboardButton("/cancel")
 	// Create rows
 	row1 := tgbotapi.NewKeyboardButtonRow(setAddressButton, setURLButton, setNotesButton)
-	row2 := tgbotapi.NewKeyboardButtonRow(setImageButton, addTagButton, removeTagButton)
+	row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton, removeTagButton)
 	row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
 
 	replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
@@ -164,7 +164,7 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send a URL to be added")
-		case "/setImage":
+		case "/addImage":
 			if err := utils.SetUserState(update, constants.AddNewSetImages); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
