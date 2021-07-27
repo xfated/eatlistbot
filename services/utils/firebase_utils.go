@@ -429,7 +429,7 @@ func GetItems(update *tgbotapi.Update, filterTags map[string]bool) ([]constants.
 	}
 	if len(unusedTags) > 0 {
 		tagsString := strings.Join(unusedTags, ", ")
-		SendMessage(update, fmt.Sprintf("There is no item with these tags: %s.\nSo imma delete them", tagsString))
+		SendMessage(update, fmt.Sprintf("There is no item with these tags: %s.\nSo imma delete them", tagsString), false)
 		for _, tag := range unusedTags {
 			DeleteTag(update, tag)
 		}
@@ -518,7 +518,7 @@ func AddItem(update *tgbotapi.Update, itemData constants.ItemDetails, chatID str
 		return err
 	}
 
-	err = SendMessageTargetChat(fmt.Sprintf("%s has been added/edited", itemData.Name), chatIDInt)
+	err = SendMessageTargetChat(fmt.Sprintf("%s has been added/edited", itemData.Name), chatIDInt, false)
 	if err != nil {
 		log.Printf("error SendMessageTargetChat: %+v", err)
 	}

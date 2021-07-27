@@ -43,7 +43,7 @@ func RedirectToBotChat(update *tgbotapi.Update, text, urltext, url string) {
 	row := tgbotapi.NewInlineKeyboardRow(redirectButton)
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-	SendInlineKeyboard(update, text, inlineKeyboard)
+	SendInlineKeyboard(update, text, inlineKeyboard, false)
 }
 
 // func RedirectToChat(update *tgbotapi.Update, text string) {
@@ -82,7 +82,7 @@ func DeleteMessage(chatID int64, messageID int) error {
 }
 
 /* Sending */
-func SendMessage(update *tgbotapi.Update, text string) *tgbotapi.Message {
+func SendMessage(update *tgbotapi.Update, text string, markdown bool) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		log.Printf("Error GetChatUserID: %+v", err)
@@ -90,7 +90,9 @@ func SendMessage(update *tgbotapi.Update, text string) *tgbotapi.Message {
 	}
 
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "MarkdownV2"
+	if markdown {
+		msg.ParseMode = "MarkdownV2"
+	}
 	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error bot.Send: %+v", err)
@@ -101,7 +103,7 @@ func SendMessage(update *tgbotapi.Update, text string) *tgbotapi.Message {
 	return &message
 }
 
-func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) *tgbotapi.Message {
+func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int, markdown bool) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		return nil
@@ -113,14 +115,18 @@ func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) 
 		ForceReply: true,
 		Selective:  true,
 	}
-	msg.ParseMode = "MarkdownV2"
+	if markdown {
+		msg.ParseMode = "MarkdownV2"
+	}
 	message, _ := bot.Send(msg)
 	return &message
 }
 
-func SendMessageTargetChat(text string, chatID int64) error {
+func SendMessageTargetChat(text string, chatID int64, markdown bool) error {
 	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "MarkdownV2"
+	if markdown {
+		msg.ParseMode = "MarkdownV2"
+	}
 	_, err := bot.Send(msg)
 	return err
 }
@@ -172,9 +178,9 @@ func SendItemDetails(update *tgbotapi.Update, itemData constants.ItemDetails, se
 		redirectButton := tgbotapi.NewInlineKeyboardButtonURL(itemData.URL, itemData.URL)
 		row := tgbotapi.NewInlineKeyboardRow(redirectButton)
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(row)
-		SendInlineKeyboard(update, itemText, inlineKeyboard)
+		SendInlineKeyboard(update, itemText, inlineKeyboard, false)
 	} else {
-		SendMessage(update, itemText)
+		SendMessage(update, itemText, false)
 	}
 	if sendImage && itemData.Images != nil {
 		for imageID := range itemData.Images {
@@ -183,7 +189,7 @@ func SendItemDetails(update *tgbotapi.Update, itemData constants.ItemDetails, se
 	}
 }
 
-func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup) {
+func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.ReplyKeyboardMarkup, markdown bool) {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		log.Printf("Error GetChatUserID: %+v", err)
@@ -204,7 +210,9 @@ func SetReplyMarkupKeyboard(update *tgbotapi.Update, text string, keyboard tgbot
 		}
 		msg.ReplyToMessageID = messageTarget
 	}
-	msg.ParseMode = "MarkdownV2"
+	if markdown {
+		msg.ParseMode = "MarkdownV2"
+	}
 	_, err = bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
@@ -229,10 +237,10 @@ func CreateAndSendInlineKeyboard(update *tgbotapi.Update, text string, col int, 
 	}
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(rows...)
-	return SendInlineKeyboard(update, text, inlineKeyboard)
+	return SendInlineKeyboard(update, text, inlineKeyboard, false)
 }
 
-func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.InlineKeyboardMarkup) *tgbotapi.Message {
+func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.InlineKeyboardMarkup, markdown bool) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		log.Printf("Error getting chat user ID: %+v", err)
@@ -240,7 +248,9 @@ func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.
 	}
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.BaseChat.ReplyMarkup = keyboard
-	msg.ParseMode = "MarkdownV2"
+	if markdown {
+		msg.ParseMode = "MarkdownV2"
+	}
 	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error setting markup keyboard: %+v", err)
@@ -250,7 +260,7 @@ func SendInlineKeyboard(update *tgbotapi.Update, text string, keyboard tgbotapi.
 
 }
 
-func RemoveMarkupKeyboard(update *tgbotapi.Update, text string) *tgbotapi.Message {
+func RemoveMarkupKeyboard(update *tgbotapi.Update, text string, markdown bool) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
 		log.Printf("Error GetChatUserID: %+v", err)
@@ -270,7 +280,9 @@ func RemoveMarkupKeyboard(update *tgbotapi.Update, text string) *tgbotapi.Messag
 		}
 	}
 	msg.ReplyToMessageID = messageTarget
-	msg.ParseMode = "MarkdownV2"
+	if markdown {
+		msg.ParseMode = "MarkdownV2"
+	}
 	message, err := bot.Send(msg)
 	if err != nil {
 		log.Printf("Error removing markup keyboard: %+v", err)
@@ -363,8 +375,8 @@ func CheckForSlash(update *tgbotapi.Update) error {
 			return err
 		}
 		if strings.Contains(message, "/") {
-			SendMessage(update, "Don't use / here! I will get confused :(")
-			SendMessage(update, "Please resend with a proper message")
+			SendMessage(update, "Don't use / here! I will get confused :(", false)
+			SendMessage(update, "Please resend with a proper message", false)
 			return errors.New("slash in message")
 		}
 		return nil

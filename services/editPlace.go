@@ -15,7 +15,7 @@ func sendItemsToEditResponse(update *tgbotapi.Update, text string) {
 	chatID, err := utils.GetChatTarget(update)
 	if err != nil {
 		log.Printf("error GetChatTarget: %+v", err)
-		utils.SendMessage(update, "Sorry an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 	chatIDString := strconv.FormatInt(chatID, 10)
@@ -24,7 +24,7 @@ func sendItemsToEditResponse(update *tgbotapi.Update, text string) {
 	itemNames, err := utils.GetItemNames(update, chatIDString)
 	if err != nil {
 		log.Printf("error GetItemNames: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 	}
 
 	/* Set each name as its own inline row */
@@ -37,7 +37,7 @@ func sendItemsToEditResponse(update *tgbotapi.Update, text string) {
 		i++
 	}
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(nameButtons...)
-	msg := utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	msg := utils.SendInlineKeyboard(update, text, inlineKeyboard, false)
 	utils.AddMessageToDelete(update, msg)
 }
 
@@ -47,14 +47,14 @@ func editItemHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline keyboard markup. (name of item to edit)
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			utils.SendMessage(update, "Please select from the above options", false)
 			return
 		}
 
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 
@@ -62,20 +62,20 @@ func editItemHandler(update *tgbotapi.Update, userState constants.State) {
 		chatID, err := utils.GetChatTarget(update)
 		if err != nil {
 			log.Printf("error GetChatTarget: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		chatIDString := strconv.FormatInt(chatID, 10)
 		if err := utils.CopyItemToTempItem(update, name, chatIDString); err != nil {
 			log.Printf("error CopyItemToTempItem: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		// Use additem logic to update
-		sendTemplateReplies(update, fmt.Sprintf(`You may start editing *bold \*%s*`, name))
+		sendTemplateReplies(update, fmt.Sprintf(`You may start editing *%s*`, name))
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 	}

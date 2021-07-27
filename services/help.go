@@ -24,5 +24,5 @@ func helpHandler(update *tgbotapi.Update) {
 		"        /withTag: Same as above \n" +
 		"    /getAll: Returns all"
 
-	utils.SendMessage(update, helpText)
+	utils.SendMessage(update, helpText, false)
 }

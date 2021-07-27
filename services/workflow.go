@@ -22,10 +22,10 @@ func HandleUserInput(update *tgbotapi.Update) {
 			"/start@toGoListBot",
 			"/reset",
 			"/reset@toGoListBot":
-			utils.RemoveMarkupKeyboard(update, "I am ready!")
+			utils.RemoveMarkupKeyboard(update, "I am ready!", false)
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			return
@@ -34,17 +34,17 @@ func HandleUserInput(update *tgbotapi.Update) {
 			targetChat, err := utils.GetChatTarget(update)
 			if err != nil {
 				log.Printf("error GetChatTarget: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			if targetChat == 0 {
-				utils.SendMessage(update, "Please send /additem back in the chat if you'd like to add a item")
+				utils.SendMessage(update, "Please send /additem back in the chat if you'd like to add a item", false)
 				return
 			}
-			utils.SendMessage(update, "Please enter the name of the item to begin")
+			utils.SendMessage(update, "Please enter the name of the item to begin", false)
 			if err := utils.SetUserState(update, constants.AddNewSetName); err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			return
@@ -56,15 +56,15 @@ func HandleUserInput(update *tgbotapi.Update) {
 
 			if err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			// Same == same chat
 			if chatID == int64(userID) {
-				utils.SendMessage(update, "Please enter the name of the item to begin")
+				utils.SendMessage(update, "Please enter the name of the item to begin", false)
 				if err := utils.SetUserState(update, constants.AddNewSetName); err != nil {
 					log.Printf("error setting state: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
+					utils.SendMessage(update, "Sorry, an error occured!", false)
 					return
 				}
 				return
@@ -83,7 +83,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			// Record id for selective force reply
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			utils.SetMessageTarget(update, messageID)
@@ -91,7 +91,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			sendQuerySelectType(update, "What kind of query do you seek?")
 			if err := utils.SetUserState(update, constants.QuerySelectType); err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			return
@@ -100,7 +100,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			sendItemsToDeleteResponse(update, "Just select item do you want to delete?")
 			if err := utils.SetUserState(update, constants.DeleteSelect); err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			return
@@ -108,12 +108,12 @@ func HandleUserInput(update *tgbotapi.Update) {
 			sendItemsToEditResponse(update, "Which item would you like to edit?")
 			if err := utils.SetUserState(update, constants.GetItemToEdit); err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			if err := utils.SetUserState(update, constants.GetItemToEdit); err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			return
@@ -125,7 +125,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 
 			if err != nil {
 				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			// Same == same chat
@@ -133,7 +133,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				sendItemsToEditResponse(update, "Which item would you like to edit?")
 				if err := utils.SetUserState(update, constants.GetItemToEdit); err != nil {
 					log.Printf("error setting state: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
+					utils.SendMessage(update, "Sorry, an error occured!", false)
 					return
 				}
 				return

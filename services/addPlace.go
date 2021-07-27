@@ -31,14 +31,14 @@ func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	replyKeyboard.ResizeKeyboard = true
 	replyKeyboard.OneTimeKeyboard = true
 	replyKeyboard.Selective = false
-	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard)
+	utils.SetReplyMarkupKeyboard(update, text, replyKeyboard, true)
 }
 
 func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	chatID, err := utils.GetChatTarget(update)
 	if err != nil {
 		log.Printf("Error GetChatTarget: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 	chatIDString := strconv.FormatInt(chatID, 10)
@@ -46,7 +46,7 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	tagsMap, err := utils.GetTags(update, chatIDString)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 
@@ -60,7 +60,7 @@ func sendExistingTagsResponse(update *tgbotapi.Update, text string) {
 	curTempTags, err := utils.GetTempItemTags(update)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 	tags := make([]string, 0)
@@ -81,7 +81,7 @@ func sendAddedTagsResponse(update *tgbotapi.Update, text string) {
 	tagsMap, err := utils.GetTempItemTags(update)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 	}
 
 	/* No tags, just send done */
@@ -127,15 +127,15 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 
 		if err := utils.InitItem(update); err != nil {
 			log.Printf("Error creating new item: %+v", err)
-			utils.SendMessage(update, "Message should be a text")
+			utils.SendMessage(update, "Message should be a text", false)
 			break
 		}
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			break
 		}
-		utils.SendMessage(update, "You may start adding the details for the item")
+		utils.SendMessage(update, "You may start adding the details for the item", false)
 	case constants.ReadyForNextAction:
 		// Expect user to select reply markup (pick next action)
 		message, _, err := utils.GetMessage(update)
@@ -146,71 +146,71 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		case "/setAddress":
 			if err := utils.SetUserState(update, constants.AddNewSetAddress); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
-			utils.RemoveMarkupKeyboard(update, "Send an address to be added")
+			utils.RemoveMarkupKeyboard(update, "Send an address to be added", false)
 		case "/setNotes":
 			if err := utils.SetUserState(update, constants.AddNewSetNotes); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
-			utils.RemoveMarkupKeyboard(update, "Give some additional details as notes")
+			utils.RemoveMarkupKeyboard(update, "Give some additional details as notes", false)
 		case "/setURL":
 			if err := utils.SetUserState(update, constants.AddNewSetURL); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
-			utils.RemoveMarkupKeyboard(update, "Send a URL to be added")
+			utils.RemoveMarkupKeyboard(update, "Send a URL to be added", false)
 		case "/addImage":
 			if err := utils.SetUserState(update, constants.AddNewSetImages); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
-			utils.RemoveMarkupKeyboard(update, "Send an image to be added")
+			utils.RemoveMarkupKeyboard(update, "Send an image to be added", false)
 		case "/addTag":
 			if err := utils.SetUserState(update, constants.AddNewSetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			/* Get message ID for targeted reply afterward */
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			utils.SetMessageTarget(update, messageID)
 
 			utils.RemoveMarkupKeyboard(update, "Send a tag to be added. (Can be used to query your record of items)\n"+
-				"Type new or pick from existing\n\nPress \"/done\" once done!")
+				"Type new or pick from existing\n\nPress \"/done\" once done!", false)
 			sendExistingTagsResponse(update, "Existing tags:")
 		case "/removeTag":
 			if err := utils.SetUserState(update, constants.AddNewRemoveTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			/* Get message ID for targeted reply afterward */
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			utils.SetMessageTarget(update, messageID)
 
-			utils.RemoveMarkupKeyboard(update, "Select a tag to remove\n\nPress \"/done\" once done!")
+			utils.RemoveMarkupKeyboard(update, "Select a tag to remove\n\nPress \"/done\" once done!", false)
 			sendAddedTagsResponse(update, "Existing tags:")
 		case "/preview":
 			itemData, err := utils.GetTempItem(update)
 			if err != nil {
 				log.Printf("error getting temp item: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			utils.SendItemDetails(update, itemData, true)
@@ -219,12 +219,12 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 			_, messageID, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			if err := utils.SetUserState(update, constants.ConfirmAddItemSubmit); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
 			utils.SetMessageTarget(update, messageID)
@@ -232,10 +232,10 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		case "/cancel":
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				break
 			}
-			utils.RemoveMarkupKeyboard(update, "/additem process cancelled")
+			utils.RemoveMarkupKeyboard(update, "/additem process cancelled", false)
 		default:
 			sendTemplateReplies(update, "Please select a response from the provided options")
 		}
@@ -244,42 +244,42 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to send a text message (address of item)
 		if err := utils.SetTempItemAddress(update); err != nil {
 			log.Printf("Error adding address: %+v", err)
-			utils.SendMessage(update, "Address should be a text")
+			utils.SendMessage(update, "Address should be a text", false)
 			return
 		}
-		utils.SendMessage(update, fmt.Sprintf("Address set to: %s", update.Message.Text))
+		utils.SendMessage(update, fmt.Sprintf("Address set to: %s", update.Message.Text), false)
 
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 	case constants.AddNewSetNotes:
 		// Expect user to send a text message (notes for the item)
 		if err := utils.SetTempItemNotes(update); err != nil {
 			log.Printf("Error adding notes: %+v", err)
-			utils.SendMessage(update, "Notes should be a text")
+			utils.SendMessage(update, "Notes should be a text", false)
 			return
 		}
-		utils.SendMessage(update, fmt.Sprintf("Notes set to: %s", update.Message.Text))
+		utils.SendMessage(update, fmt.Sprintf("Notes set to: %s", update.Message.Text), false)
 
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 	case constants.AddNewSetURL:
 		// Expect user to send a text message (URL for the item)
 		if err := utils.SetTempItemURL(update); err != nil {
 			log.Printf("Error adding url: %+v", err)
-			utils.SendMessage(update, "URL should be a text")
+			utils.SendMessage(update, "URL should be a text", false)
 			return
 		}
-		utils.SendMessage(update, fmt.Sprintf("URL set to: %s", update.Message.Text))
+		utils.SendMessage(update, fmt.Sprintf("URL set to: %s", update.Message.Text), false)
 
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 	case constants.AddNewSetImages:
@@ -287,14 +287,14 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		// should be an image input
 		if err := utils.AddTempItemImage(update); err != nil {
 			log.Printf("Error adding image: %+v", err)
-			utils.SendMessage(update, "Error occured. Did you send an image? Try it again")
+			utils.SendMessage(update, "Error occured. Did you send an image? Try it again", false)
 			return
 		}
-		utils.SendMessage(update, "Image added")
+		utils.SendMessage(update, "Image added", false)
 
 		if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 	case constants.AddNewSetTags:
@@ -308,7 +308,7 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 			tag, _, err := utils.GetMessage(update)
 			if err != nil {
 				log.Printf("error GetMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			switch tag {
@@ -317,17 +317,17 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 				"Done":
 				if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 					log.Printf("error SetUserState: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
+					utils.SendMessage(update, "Sorry, an error occured!", false)
 					return
 				}
 				// Only continue if /done is pressed
 			default:
 				if err := utils.AddTempItemTag(update, tag); err != nil {
 					log.Printf("Error adding tag: %+v", err)
-					utils.SendMessage(update, "Tag should be a text")
+					utils.SendMessage(update, "Tag should be a text", false)
 					return
 				}
-				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+				utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag), false)
 				return
 			}
 		} else {
@@ -335,7 +335,7 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 			tag, err := utils.GetCallbackQueryMessage(update)
 			if err != nil {
 				log.Printf("error GetCallbackQueryMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			if len(tag) > 0 {
@@ -343,16 +343,16 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 				case "/done":
 					if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 						log.Printf("error SetUserState: %+v", err)
-						utils.SendMessage(update, "Sorry an error occured!")
+						utils.SendMessage(update, "Sorry, an error occured!", false)
 						return
 					}
 				default:
 					if err := utils.AddTempItemTag(update, tag); err != nil {
 						log.Printf("Error adding tag: %+v", err)
-						utils.SendMessage(update, "Sorry an error occured!")
+						utils.SendMessage(update, "Sorry, an error occured!", false)
 						return
 					}
-					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag))
+					utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" added", tag), false)
 					// Don't continue to next action if adding tag through inline
 					return
 				}
@@ -362,14 +362,14 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline keyboard markup (set as tag for the item)
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			utils.SendMessage(update, "Please select from the above options", false)
 			return
 		}
 
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 
@@ -377,17 +377,17 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		case "/done":
 			if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		default:
 			// remove tag
 			if err := utils.DeleteTempItemTag(update, tag); err != nil {
 				log.Printf("Error adding tag: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
-			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" removed", tag))
+			utils.SendMessage(update, fmt.Sprintf("Tag \"%s\" removed", tag), false)
 			sendAddedTagsResponse(update, "Existing tags:")
 			// Don't continue to next action if removing tag through inline
 			return
@@ -396,14 +396,14 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline query (yes or no to submit)
 		/* If user send a message instead */
 		if update.Message != nil {
-			utils.SendMessage(update, "Please select from the above options")
+			utils.SendMessage(update, "Please select from the above options", false)
 			return
 		}
 
 		confirm, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		if confirm == "yes" {
@@ -412,7 +412,7 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 			chatIDString := strconv.FormatInt(chatID, 10)
 			if err != nil {
 				log.Printf("error getting message from callback: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 
@@ -420,27 +420,27 @@ func addItemHandler(update *tgbotapi.Update, userState constants.State) {
 			name, err := utils.AddItemFromTemp(update, chatIDString)
 			if err != nil {
 				log.Printf("error adding item from temp: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
-			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s has been added/edited!", name))
-			utils.SendMessage(update, "To add/edit a new item to any chat, please initiate /additem or /edititem in that chat")
+			utils.RemoveMarkupKeyboard(update, fmt.Sprintf("%s has been added/edited!", name), false)
+			utils.SendMessage(update, "To add/edit a new item to any chat, please initiate /additem or /edititem in that chat", false)
 			err = utils.SetChatTarget(update, 0)
 			if err != nil {
 				log.Printf("error SetChatTarget: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			return
 		} else if confirm == "no" {
 			if err := utils.SetUserState(update, constants.ReadyForNextAction); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		}

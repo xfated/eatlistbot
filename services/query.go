@@ -37,11 +37,11 @@ func checkAnyItem(update *tgbotapi.Update) error {
 	itemNames, err := utils.GetItemNames(update, chatID)
 	if err != nil {
 		log.Printf("error GetItemNames: %+v", err)
-		utils.SendMessage(update, "Sorry an error occured")
+		utils.SendMessage(update, "Sorry an error occured", false)
 		return err
 	}
 	if len(itemNames) == 0 {
-		utils.SendMessage(update, "No items registered :( add some")
+		utils.SendMessage(update, "No items registered :( add some", false)
 		return errors.New("no item registered")
 	}
 	return nil
@@ -53,7 +53,7 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 	queryTagsMap, err := utils.GetQueryTags(update)
 	if err != nil {
 		log.Printf("error getting query tags: %+v", err)
-		utils.SendMessage(update, "Sorry an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 
@@ -72,7 +72,7 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 	}
 	queryTags[len(queryTagsMap)] = tag
 	curTags := strings.Join(queryTags, ", ")
-	msg := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
+	msg := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags), false)
 	utils.AddMessageToDelete(update, msg)
 }
 
@@ -80,14 +80,14 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 	chatID, _, err := utils.GetChatUserIDString(update)
 	if err != nil {
 		log.Printf("error GetChatUserID: %+v", chatID)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 
 	tagsMap, err := utils.GetTags(update, chatID)
 	if err != nil {
 		log.Printf("error GetTags: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 
@@ -118,7 +118,7 @@ func sendAvailableItemNamesResponse(update *tgbotapi.Update, text string) {
 	itemNamesMap, err := utils.GetItemNames(update, chatID)
 	if err != nil {
 		log.Printf("error GetItemNames: %+v", err)
-		utils.SendMessage(update, "Sorry, an error occured!")
+		utils.SendMessage(update, "Sorry, an error occured!", false)
 		return
 	}
 
@@ -139,7 +139,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg := utils.SendMessage(update, "Please select from the above options")
+			msg := utils.SendMessage(update, "Please select from the above options", false)
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -147,13 +147,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		message, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			// utils.SendMessage(update, "Sorry an error occured!")
+			// utils.SendMessage(update, "Sorry, an error occured!", false)
 			// return
 		}
 		switch message {
@@ -163,7 +163,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SetQueryNum(update, 1)
 			if err := utils.SetUserState(update, constants.QueryOneTagOrName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		case "/getFew":
@@ -176,30 +176,30 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			itemNames, err := utils.GetItemNames(update, chatID)
 			if err != nil {
 				log.Printf("error GetItemNames: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured")
+				utils.SendMessage(update, "Sorry an error occured", false)
 				return
 			}
 
 			// Store to delete
-			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(itemNames)))
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("You have %v recorded", len(itemNames)), false)
 			utils.AddMessageToDelete(update, msg)
 			// Get message
 			messageID, err := utils.GetMessageTarget(update)
 			if err != nil {
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			// Store to delete
-			utils.SendMessageForceReply(update, "How many itemFs do you want?", messageID)
+			utils.SendMessageForceReply(update, "How many items do you want?", messageID, false)
 			// if err != nil {
 			// 	log.Printf("error SetMessageForceReply: %+v", err)
-			// 	utils.SendMessage(update, "Sorry an error occured!")
+			// 	utils.SendMessage(update, "Sorry, an error occured!", false)
 			// }
 			// utils.AddMessageToDelete(update, msg)
 			// Set state
 			if err := utils.SetUserState(update, constants.QueryFewSetNum); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		case "/getAll":
@@ -212,17 +212,17 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			itemNames, err := utils.GetItemNames(update, chatID)
 			if err != nil {
 				log.Printf("error GetItemNames: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			utils.SetQueryNum(update, len(itemNames))
 			// Store to delete
-			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall fetch your %v items", len(itemNames)))
+			msg := utils.RemoveMarkupKeyboard(update, fmt.Sprintf("All in I see. Shall fetch your %v items", len(itemNames)), false)
 			utils.AddMessageToDelete(update, msg)
 			sendQueryGetImagesResponse(update, "Do you want the images as well?")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		}
@@ -231,46 +231,46 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard (use tag or name to search)
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg := utils.SendMessage(update, "Please select from the above options")
+			msg := utils.SendMessage(update, "Please select from the above options", false)
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			// utils.SendMessage(update, "Sorry an error occured!")
+			// utils.SendMessage(update, "Sorry, an error occured!", false)
 			// return
 		}
 
 		message, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		switch message {
 		case "/withTag":
 			// Send responses
-			msg := utils.RemoveMarkupKeyboard(update, "Searching for tags")
+			msg := utils.RemoveMarkupKeyboard(update, "Searching for tags", false)
 			utils.AddMessageToDelete(update, msg)
 
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
 
-			msg = utils.SendMessage(update, "(Don't add any to consider all items)")
+			msg = utils.SendMessage(update, "(Don't add any to consider all items)", false)
 			utils.AddMessageToDelete(update, msg)
 
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		case "/withName":
-			msg := utils.RemoveMarkupKeyboard(update, "Searching for items")
+			msg := utils.RemoveMarkupKeyboard(update, "Searching for items", false)
 			utils.AddMessageToDelete(update, msg)
 			sendAvailableItemNamesResponse(update, "Which item do you want?")
 			if err := utils.SetUserState(update, constants.QueryOneSetName); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		}
@@ -280,27 +280,27 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard (select name of item)
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg := utils.SendMessage(update, "Please select from the above options")
+			msg := utils.SendMessage(update, "Please select from the above options", false)
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
 
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			// utils.SendMessage(update, "Sorry an error occured!")
+			// utils.SendMessage(update, "Sorry, an error occured!", false)
 			// return
 		}
 		name, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		utils.SetQueryName(update, name)
 		sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 		if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 
@@ -311,12 +311,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		message, _, err := utils.GetMessage(update)
 		if err != nil {
 			log.Printf("error GetMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		numQuery, err := strconv.Atoi(message)
 		if err != nil || numQuery < 0 {
-			msg := utils.SendMessage(update, "comeon, send a proper number")
+			msg := utils.SendMessage(update, "comeon, send a proper number", false)
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -324,7 +324,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			// utils.SendMessage(update, "Sorry an error occured!")
+			// utils.SendMessage(update, "Sorry, an error occured!", false)
 			// return
 		}
 
@@ -337,12 +337,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		itemNames, err := utils.GetItemNames(update, chatID)
 		if err != nil {
 			log.Printf("error GetItemNames: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured")
+			utils.SendMessage(update, "Sorry an error occured", false)
 			return
 		}
 
 		if numQuery > len(itemNames) {
-			msg := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(itemNames)))
+			msg := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(itemNames)), false)
 			utils.AddMessageToDelete(update, msg)
 			utils.SetQueryNum(update, len(itemNames))
 		} else {
@@ -350,11 +350,11 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 
 		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
-		msg := utils.SendMessage(update, "(Don't add any to consider all items)")
+		msg := utils.SendMessage(update, "(Don't add any to consider all items)", false)
 		utils.AddMessageToDelete(update, msg)
 		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 			log.Printf("error SetUserState: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 
@@ -363,7 +363,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline keyboard markup (tags to include)
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg := utils.SendMessage(update, "Please select from the above options")
+			msg := utils.SendMessage(update, "Please select from the above options", false)
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -372,7 +372,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		tag, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error getting message from callback: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		// done GoTo QueryRetrieve. Markup("yes, no"), ask with pic
@@ -381,13 +381,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			// Delete messages
 			if err := utils.DeleteRecentMessages(update); err != nil {
 				log.Printf("error DeleteRecentMessages: %+v", err)
-				// utils.SendMessage(update, "Sorry an error occured!")
+				// utils.SendMessage(update, "Sorry, an error occured!", false)
 				// return
 			}
 			sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
 			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		default:
@@ -397,14 +397,14 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 	case constants.QueryRetrieve:
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg := utils.SendMessage(update, "Please select from the above options")
+			msg := utils.SendMessage(update, "Please select from the above options", false)
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
 		// Delete messages
 		if err := utils.DeleteRecentMessages(update); err != nil {
 			log.Printf("error DeleteRecentMessages: %+v", err)
-			// utils.SendMessage(update, "Sorry an error occured!")
+			// utils.SendMessage(update, "Sorry, an error occured!", false)
 			// return
 		}
 
@@ -412,7 +412,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		sendImage, err := utils.GetCallbackQueryMessage(update)
 		if err != nil {
 			log.Printf("error GetCallbackQueryMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
+			utils.SendMessage(update, "Sorry, an error occured!", false)
 			return
 		}
 		if len(sendImage) > 0 {
@@ -423,7 +423,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				chatID, _, err := utils.GetChatUserIDString(update)
 				if err != nil {
 					log.Printf("error GetChatUserID: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
+					utils.SendMessage(update, "Sorry, an error occured!", false)
 					return
 				}
 				itemData, err := utils.GetItem(update, queryName, chatID)
@@ -431,16 +431,16 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 					log.Printf("error GetItem: %+v", err)
 					if err := utils.SetUserState(update, constants.Idle); err != nil {
 						log.Printf("error SetUserState: %+v", err)
-						utils.SendMessage(update, "Sorry an error occured!")
+						utils.SendMessage(update, "Sorry, an error occured!", false)
 						return
 					}
-					utils.SendMessage(update, "Sorry, error with getting data on the item.")
+					utils.SendMessage(update, "Sorry, error with getting data on the item.", false)
 					return
 				}
 				utils.SendItemDetails(update, itemData, sendImage == "yes")
 				if err := utils.SetUserState(update, constants.Idle); err != nil {
 					log.Printf("error SetUserState: %+v", err)
-					utils.SendMessage(update, "Sorry an error occured!")
+					utils.SendMessage(update, "Sorry, an error occured!", false)
 					return
 				}
 				return
@@ -450,14 +450,14 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			queryNum, err := utils.GetQueryNum(update)
 			if err != nil {
 				log.Printf("error GetQueryNum: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			// Get tags for filter
 			queryTags, err := utils.GetQueryTags(update)
 			if err != nil {
 				log.Printf("error GetQueryTags: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 
@@ -467,19 +467,19 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				tagList[i] = tag
 				i++
 			}
-			utils.SendMessage(update, fmt.Sprintf("Searching with tag(s): %+s", strings.Join(tagList, ", ")))
+			utils.SendMessage(update, fmt.Sprintf("Searching with tag(s): %+s", strings.Join(tagList, ", ")), false)
 			// Get matching items
 			// if len(tags) == 0, get all, randomly choose QueryNum
 			// if len(tags) > 0, get all, extract with matching tags. randomly select queryNum
 			items, err := utils.GetItems(update, queryTags)
 			if err != nil {
 				log.Printf("error GetItems: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 			// less than queryNum found
 			if len(items) < queryNum {
-				utils.SendMessage(update, fmt.Sprintf("Only found %v result(s) with matching tags", len(items)))
+				utils.SendMessage(update, fmt.Sprintf("Only found %v result(s) with matching tags", len(items)), false)
 				queryNum = len(items)
 			}
 			for _, itemData := range items[:queryNum] {
@@ -487,7 +487,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 			if err := utils.SetUserState(update, constants.Idle); err != nil {
 				log.Printf("error SetUserState: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
+				utils.SendMessage(update, "Sorry, an error occured!", false)
 				return
 			}
 		}
