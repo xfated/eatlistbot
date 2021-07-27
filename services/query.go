@@ -255,7 +255,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			msg := utils.RemoveMarkupKeyboard(update, "Searching for tags")
 			utils.AddMessageToDelete(update, msg)
 
-			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
+			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
 
 			msg = utils.SendMessage(update, "(Don't add any to consider all places)")
 			utils.AddMessageToDelete(update, msg)
@@ -350,7 +350,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			utils.SetQueryNum(update, numQuery)
 		}
 
-		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
+		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! \n\nPress \"/done\" once finished")
 		msg := utils.SendMessage(update, "(Don't add any to consider all places)")
 		utils.AddMessageToDelete(update, msg)
 		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
