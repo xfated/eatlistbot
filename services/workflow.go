@@ -10,9 +10,9 @@ import (
 
 func HandleUserInput(update *tgbotapi.Update) {
 	/* Debugging */
-	utils.LogMessage(update)
-	utils.LogUpdate(update)
-	utils.LogCallbackQuery(update)
+	// utils.LogMessage(update)
+	// utils.LogUpdate(update)
+	// utils.LogCallbackQuery(update)
 
 	/* Check for main commands */
 	message, _, err := utils.GetMessage(update)

@@ -1,5 +1,4 @@
-// Package p contains an HTTP Cloud Function.
-package p
+package function
 
 import (
 	"encoding/json"
@@ -7,8 +6,15 @@ import (
 	"net/http"
 
 	"github.com/xfated/golistbot/services"
+	"github.com/xfated/golistbot/services/utils"
+
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
+
+func init() {
+	utils.InitTelegram()
+	utils.InitFirebase()
+}
 
 func TelegramHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -17,7 +23,6 @@ func TelegramHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("could not decode incoming update %s", err.Error())
 		return
 	}
-	return
 
 	go services.HandleUserInput(&update)
 }
