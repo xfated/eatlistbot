@@ -82,24 +82,28 @@ func DeleteMessage(chatID int64, messageID int) error {
 }
 
 /* Sending */
-func SendMessage(update *tgbotapi.Update, text string) (*tgbotapi.Message, error) {
+func SendMessage(update *tgbotapi.Update, text string) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
-		return nil, err
+		log.Printf("Error GetChatUserID: %+v", err)
+		return nil
 	}
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	message, err := bot.Send(msg)
+	if err != nil {
+		log.Printf("Error bot.Send: %+v", err)
+	}
 
 	// Debug
-	log.Printf("Sent message %s", text)
-	return &message, err
+	// log.Printf("Sent message %s", text)
+	return &message
 }
 
-func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) (*tgbotapi.Message, error) {
+func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) *tgbotapi.Message {
 	chatID, _, err := GetChatUserID(update)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	msg := tgbotapi.NewMessage(chatID, text)
@@ -109,7 +113,7 @@ func SendMessageForceReply(update *tgbotapi.Update, text string, messageID int) 
 		Selective:  true,
 	}
 	message, err := bot.Send(msg)
-	return &message, err
+	return &message
 }
 
 func SendMessageTargetChat(text string, chatID int64) error {

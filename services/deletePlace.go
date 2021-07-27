@@ -10,7 +10,12 @@ import (
 )
 
 func sendPlacesToDeleteResponse(update *tgbotapi.Update, text string) {
-	placeNames, err := utils.GetPlaceNames(update)
+	chatID, _, err := utils.GetChatUserIDString(update)
+	if err != nil {
+		log.Printf("error GetChatUserIDString: %+v", err)
+	}
+
+	placeNames, err := utils.GetPlaceNames(update, chatID)
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
@@ -26,7 +31,8 @@ func sendPlacesToDeleteResponse(update *tgbotapi.Update, text string) {
 		i++
 	}
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(nameButtons...)
-	utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	msg := utils.SendInlineKeyboard(update, text, inlineKeyboard)
+	utils.AddMessageToDelete(update, msg)
 }
 
 func sendConfirmDeleteResponse(update *tgbotapi.Update, text string) {

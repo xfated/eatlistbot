@@ -29,7 +29,12 @@ func sendQueryGetImagesResponse(update *tgbotapi.Update, text string) {
 
 func checkAnyPlace(update *tgbotapi.Update) error {
 	/* Check if there are any places registed */
-	placeNames, err := utils.GetPlaceNames(update)
+	chatID, _, err := utils.GetChatUserIDString(update)
+	if err != nil {
+		log.Printf("error GetChatUserIDString: %+v", err)
+	}
+
+	placeNames, err := utils.GetPlaceNames(update, chatID)
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
 		utils.SendMessage(update, "Sorry an error occured")
@@ -67,12 +72,7 @@ func addAndSendSelectedTags(update *tgbotapi.Update, tag string) {
 	}
 	queryTags[len(queryTagsMap)] = tag
 	curTags := strings.Join(queryTags, ", ")
-	msg, err := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
-	if err != nil {
-		log.Printf("error getting query tags: %+v", err)
-		utils.SendMessage(update, "Sorry an error occured!")
-		return
-	}
+	msg := utils.SendMessage(update, fmt.Sprintf("Selected tags: %s", curTags))
 	utils.AddMessageToDelete(update, msg)
 }
 
@@ -110,7 +110,12 @@ func sendAvailableTagsResponse(update *tgbotapi.Update, text string) {
 
 /* Search from name of places */
 func sendAvailablePlaceNamesResponse(update *tgbotapi.Update, text string) {
-	placeNamesMap, err := utils.GetPlaceNames(update)
+	chatID, _, err := utils.GetChatUserIDString(update)
+	if err != nil {
+		log.Printf("error GetChatUserIDString: %+v", err)
+	}
+
+	placeNamesMap, err := utils.GetPlaceNames(update, chatID)
 	if err != nil {
 		log.Printf("error GetPlaceNames: %+v", err)
 		utils.SendMessage(update, "Sorry, an error occured!")
@@ -135,11 +140,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg, err := utils.SendMessage(update, "Please select from the above options")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, "Please select from the above options")
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -168,7 +169,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 		case "/getFew":
 			// getFew GoTo QueryFewSetNum. Message how many they want?
-			placeNames, err := utils.GetPlaceNames(update)
+			chatID, _, err := utils.GetChatUserIDString(update)
+			if err != nil {
+				log.Printf("error GetChatUserIDString: %+v", err)
+			}
+
+			placeNames, err := utils.GetPlaceNames(update, chatID)
 			if err != nil {
 				log.Printf("error GetPlaceNames: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured")
@@ -199,7 +205,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 		case "/getAll":
 			// getAll GoTo QueryAllRetrieve
-			placeNames, err := utils.GetPlaceNames(update)
+			chatID, _, err := utils.GetChatUserIDString(update)
+			if err != nil {
+				log.Printf("error GetChatUserIDString: %+v", err)
+			}
+
+			placeNames, err := utils.GetPlaceNames(update, chatID)
 			if err != nil {
 				log.Printf("error GetPlaceNames: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
@@ -221,11 +232,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard (use tag or name to search)
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg, err := utils.SendMessage(update, "Please select from the above options")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, "Please select from the above options")
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -250,11 +257,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 
 			sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
 
-			msg, err = utils.SendMessage(update, "(Don't add any to consider all places)")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg = utils.SendMessage(update, "(Don't add any to consider all places)")
 			utils.AddMessageToDelete(update, msg)
 
 			if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
@@ -278,11 +281,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline markup keyboard (select name of place)
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg, err := utils.SendMessage(update, "Please select from the above options")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, "Please select from the above options")
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -318,11 +317,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 		numQuery, err := strconv.Atoi(message)
 		if err != nil || numQuery < 0 {
-			msg, err := utils.SendMessage(update, "comeon, send a proper number")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, "comeon, send a proper number")
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -335,7 +330,12 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 
 		// Add queryNum
-		placeNames, err := utils.GetPlaceNames(update)
+		chatID, _, err := utils.GetChatUserIDString(update)
+		if err != nil {
+			log.Printf("error GetChatUserIDString: %+v", err)
+		}
+
+		placeNames, err := utils.GetPlaceNames(update, chatID)
 		if err != nil {
 			log.Printf("error GetPlaceNames: %+v", err)
 			utils.SendMessage(update, "Sorry an error occured")
@@ -343,11 +343,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 
 		if numQuery > len(placeNames) {
-			msg, err := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, fmt.Sprintf("thats too many. I'll just assume you want %v", len(placeNames)))
 			utils.AddMessageToDelete(update, msg)
 			utils.SetQueryNum(update, len(placeNames))
 		} else {
@@ -355,11 +351,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		}
 
 		sendAvailableTagsResponse(update, "Add the tags you'd like to search with! Press \"done\" once finished")
-		msg, err := utils.SendMessage(update, "(Don't add any to consider all places)")
-		if err != nil {
-			log.Printf("error SendMessage: %+v", err)
-			utils.SendMessage(update, "Sorry an error occured!")
-		}
+		msg := utils.SendMessage(update, "(Don't add any to consider all places)")
 		utils.AddMessageToDelete(update, msg)
 		if err := utils.SetUserState(update, constants.QuerySetTags); err != nil {
 			log.Printf("error SetUserState: %+v", err)
@@ -372,11 +364,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 		// Expect user to select from inline keyboard markup (tags to include)
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg, err := utils.SendMessage(update, "Please select from the above options")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, "Please select from the above options")
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -410,11 +398,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 	case constants.QueryRetrieve:
 		/* If user send a message instead */
 		if update.Message != nil {
-			msg, err := utils.SendMessage(update, "Please select from the above options")
-			if err != nil {
-				log.Printf("error SendMessage: %+v", err)
-				utils.SendMessage(update, "Sorry an error occured!")
-			}
+			msg := utils.SendMessage(update, "Please select from the above options")
 			utils.AddMessageToDelete(update, msg)
 			return
 		}
@@ -437,7 +421,13 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 
 			// if name != "", get and show place data. (one result)
 			if len(queryName) > 0 {
-				placeData, err := utils.GetPlace(update, queryName)
+				chatID, _, err := utils.GetChatUserIDString(update)
+				if err != nil {
+					log.Printf("error GetChatUserID: %+v", err)
+					utils.SendMessage(update, "Sorry an error occured!")
+					return
+				}
+				placeData, err := utils.GetPlace(update, queryName, chatID)
 				if err != nil {
 					log.Printf("error GetPlace: %+v", err)
 					if err := utils.SetUserState(update, constants.Idle); err != nil {

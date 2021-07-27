@@ -104,6 +104,41 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			return
+		case "/start editPlace":
+			sendPlacesToEditResponse(update, "Which place would you like to edit?")
+			if err := utils.SetUserState(update, constants.GetPlaceToEdit); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+			if err := utils.SetUserState(update, constants.GetPlaceToEdit); err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+		case "/editplace",
+			"/editpalce@toGoListBot":
+			// Check if is already private.
+			chatID, userID, err := utils.GetChatUserID(update)
+			utils.SetChatTarget(update, chatID)
+
+			if err != nil {
+				log.Printf("error setting state: %+v", err)
+				utils.SendMessage(update, "Sorry an error occured!")
+				return
+			}
+			// Same == same chat
+			if chatID == int64(userID) {
+				sendPlacesToEditResponse(update, "Which place would you like to edit?")
+				if err := utils.SetUserState(update, constants.GetPlaceToEdit); err != nil {
+					log.Printf("error setting state: %+v", err)
+					utils.SendMessage(update, "Sorry an error occured!")
+					return
+				}
+				return
+			}
+			// If not private, redirect
+			utils.RedirectToBotChat(update, "Click the button to start editing", "https://t.me/toGoListBot?start=editPlace")
 		case "/help",
 			"/help@toGoListBot":
 			helpHandler(update)
@@ -138,6 +173,12 @@ func HandleUserInput(update *tgbotapi.Update) {
 	/* Delete place */
 	if constants.IsDeletePlace(userState) {
 		deletePlaceHandler(update, userState)
+		return
+	}
+
+	/* Edit place */
+	if constants.IsEditPlace(userState) {
+		editPlaceHandler(update, userState)
 		return
 	}
 }

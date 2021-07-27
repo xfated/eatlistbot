@@ -33,6 +33,10 @@ const (
 	DeleteSelect
 	DeleteConfirm
 	/* ######## */
+
+	/* #### EditPlace #### */
+	GetPlaceToEdit
+	/* ######## */
 )
 
 type PlaceDetails struct {
@@ -93,6 +97,15 @@ func IsDeletePlace(state State) bool {
 	switch state {
 	case DeleteSelect,
 		DeleteConfirm:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsEditPlace(state State) bool {
+	switch state {
+	case GetPlaceToEdit:
 		return true
 	default:
 		return false

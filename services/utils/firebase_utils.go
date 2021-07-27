@@ -492,12 +492,8 @@ func GetTempPlace(update *tgbotapi.Update) (constants.PlaceDetails, error) {
 	return PlaceData, nil
 }
 
-func GetPlace(update *tgbotapi.Update, name string) (constants.PlaceDetails, error) {
+func GetPlace(update *tgbotapi.Update, name string, chatID string) (constants.PlaceDetails, error) {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return constants.PlaceDetails{}, err
-	}
 
 	/* Get place */
 	var placeData constants.PlaceDetails
@@ -590,12 +586,8 @@ func GetMessageTarget(update *tgbotapi.Update) (int, error) {
 	return target, nil
 }
 
-func GetPlaceNames(update *tgbotapi.Update) (map[string]bool, error) {
+func GetPlaceNames(update *tgbotapi.Update, chatID string) (map[string]bool, error) {
 	ctx := context.Background()
-	chatID, _, err := GetChatUserIDString(update)
-	if err != nil {
-		return map[string]bool{}, err
-	}
 
 	var placeNames map[string]bool
 	nameRef := client.NewRef("placeNames").Child(chatID)
@@ -896,6 +888,32 @@ func DeletePlace(update *tgbotapi.Update, placeName string) error {
 	}
 	nameRef := client.NewRef("placeNames").Child(chatID)
 	if err := nameRef.Child(placeName).Delete(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
+/* ########## Edit Place ##########*/
+func AddPlaceToTemp(update *tgbotapi.Update, placeData constants.PlaceDetails) error {
+	ctx := context.Background()
+	_, userID, err := GetChatUserIDString(update)
+	if err != nil {
+		return err
+	}
+
+	userRef := client.NewRef("users").Child(userID)
+	if err := userRef.Child("placeToAdd").Set(ctx, placeData); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CopyPlaceToTempPlace(update *tgbotapi.Update, placeName string, chatID string) error {
+	placeData, err := GetPlace(update, placeName, chatID)
+	if err != nil {
+		return err
+	}
+	if err := AddPlaceToTemp(update, placeData); err != nil {
 		return err
 	}
 	return nil
