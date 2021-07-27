@@ -13,18 +13,18 @@ import (
 /* Create and send template reply keyboard */
 func sendTemplateReplies(update *tgbotapi.Update, text string) {
 	// Create buttons
-	addAddressButton := tgbotapi.NewKeyboardButton("/addAddress")
-	addNotesButton := tgbotapi.NewKeyboardButton("/addNotes")
-	addURLButton := tgbotapi.NewKeyboardButton("/addURL")
-	addImageButton := tgbotapi.NewKeyboardButton("/addImage")
+	setAddressButton := tgbotapi.NewKeyboardButton("/setAddress")
+	setNotesButton := tgbotapi.NewKeyboardButton("/setNotes")
+	setURLButton := tgbotapi.NewKeyboardButton("/setURL")
+	setImageButton := tgbotapi.NewKeyboardButton("/setImage")
 	addTagButton := tgbotapi.NewKeyboardButton("/addTag")
 	removeTagButton := tgbotapi.NewKeyboardButton("/removeTag")
 	previewButton := tgbotapi.NewKeyboardButton("/preview")
 	submitButton := tgbotapi.NewKeyboardButton("/submit")
 	cancelButton := tgbotapi.NewKeyboardButton("/cancel")
 	// Create rows
-	row1 := tgbotapi.NewKeyboardButtonRow(addAddressButton, addURLButton, addNotesButton)
-	row2 := tgbotapi.NewKeyboardButtonRow(addImageButton, addTagButton, removeTagButton)
+	row1 := tgbotapi.NewKeyboardButtonRow(setAddressButton, setURLButton, setNotesButton)
+	row2 := tgbotapi.NewKeyboardButtonRow(setImageButton, addTagButton, removeTagButton)
 	row3 := tgbotapi.NewKeyboardButtonRow(cancelButton, previewButton, submitButton)
 
 	replyKeyboard := tgbotapi.NewReplyKeyboard(row1, row2, row3)
@@ -143,28 +143,28 @@ func addPlaceHandler(update *tgbotapi.Update, userState constants.State) {
 			log.Printf("error setting message: %+v", err)
 		}
 		switch message {
-		case "/addAddress":
+		case "/setAddress":
 			if err := utils.SetUserState(update, constants.AddNewSetAddress); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send an address to be added")
-		case "/addNotes":
+		case "/setNotes":
 			if err := utils.SetUserState(update, constants.AddNewSetNotes); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Give some additional details as notes")
-		case "/addURL":
+		case "/setURL":
 			if err := utils.SetUserState(update, constants.AddNewSetURL); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
 				break
 			}
 			utils.RemoveMarkupKeyboard(update, "Send a URL to be added")
-		case "/addImage":
+		case "/setImage":
 			if err := utils.SetUserState(update, constants.AddNewSetImages); err != nil {
 				log.Printf("error SetUserState: %+v", err)
 				utils.SendMessage(update, "Sorry an error occured!")
