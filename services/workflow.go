@@ -70,7 +70,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			// If not private, redirect
-			utils.RedirectToBotChat(update, "Click the button to start adding", "https://t.me/toGoListBot?start=addPlace")
+			utils.RedirectToBotChat(update, "Click the button to start adding", "Add place", "https://t.me/toGoListBot?start=addPlace")
 			return
 		case "/query",
 			"/query@toGoListBot":
@@ -139,7 +139,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			// If not private, redirect
-			utils.RedirectToBotChat(update, "Click the button to start editing", "https://t.me/toGoListBot?start=editPlace")
+			utils.RedirectToBotChat(update, "Click the button to start editing", "Edit place", "https://t.me/toGoListBot?start=editPlace")
 			return
 		case "/help",
 			"/help@toGoListBot":
