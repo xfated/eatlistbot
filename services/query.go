@@ -488,7 +488,7 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			}
 			// less than queryNum found
 			if len(items) < queryNum {
-				utils.SendMessage(update, fmt.Sprintf("Only found %v result(s) with matching tags", len(items)), false)
+				utils.SendMessage(update, fmt.Sprintf("Found %v result(s) with matching tags", len(items)), false)
 				queryNum = len(items)
 			}
 			for _, itemData := range items[:queryNum] {
