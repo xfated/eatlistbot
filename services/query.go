@@ -18,7 +18,7 @@ func sendQuerySelectType(update *tgbotapi.Update, text string) {
 }
 
 func sendQueryOneTagOrNameResponse(update *tgbotapi.Update, text string) {
-	msg := utils.CreateAndSendInlineKeyboard(update, text, 2, "/withTag", "/withName")
+	msg := utils.CreateAndSendInlineKeyboard(update, text, 2, "/withTag", "/withName", "/random")
 	utils.AddMessageToDelete(update, msg)
 }
 
@@ -258,6 +258,18 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 			return
 		}
 		switch message {
+		case "/random":
+			if err := utils.DeleteRecentMessages(update); err != nil {
+				log.Printf("error DeleteRecentMessages: %+v", err)
+				// utils.SendMessage(update, "Sorry, an error occured!", false)
+				// return
+			}
+			sendQueryGetImagesResponse(update, "Do you want the images too? (if there is)")
+			if err := utils.SetUserState(update, constants.QueryRetrieve); err != nil {
+				log.Printf("error SetUserState: %+v", err)
+				utils.SendMessage(update, "Sorry, an error occured!", false)
+				return
+			}
 		case "/withTag":
 			// Send responses
 			msg := utils.RemoveMarkupKeyboard(update, "Searching for tags", false)
@@ -470,13 +482,15 @@ func queryHandler(update *tgbotapi.Update, userState constants.State) {
 				return
 			}
 
-			tagList := make([]string, len(queryTags))
-			i := 0
-			for tag := range queryTags {
-				tagList[i] = tag
-				i++
+			if len(queryTags) > 0 {
+				tagList := make([]string, len(queryTags))
+				i := 0
+				for tag := range queryTags {
+					tagList[i] = tag
+					i++
+				}
+				utils.SendMessage(update, fmt.Sprintf("Searching with tag(s): %+s", strings.Join(tagList, ", ")), false)
 			}
-			utils.SendMessage(update, fmt.Sprintf("Searching with tag(s): %+s", strings.Join(tagList, ", ")), false)
 			// Get matching items
 			// if len(tags) == 0, get all, randomly choose QueryNum
 			// if len(tags) > 0, get all, extract with matching tags. randomly select queryNum

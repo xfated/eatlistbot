@@ -1,6 +1,9 @@
 package services
 
 import (
+	"log"
+
+	"github.com/xfated/golistbot/services/constants"
 	"github.com/xfated/golistbot/services/utils"
 	tgbotapi "gopkg.in/telegram-bot-api.v4"
 )
@@ -25,6 +28,10 @@ func helpHandler(update *tgbotapi.Update) {
 		"    /getAll: Returns all\n" +
 		"\n" +
 		"/feedback: To send my creator any suggestions/queries/problems!"
-
+	if err := utils.SetUserState(update, constants.Idle); err != nil {
+		log.Printf("error setting state: %+v", err)
+		utils.SendMessage(update, "Sorry, an error occured!", false)
+		return
+	}
 	utils.SendMessage(update, helpText, false)
 }

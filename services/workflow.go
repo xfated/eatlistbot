@@ -101,7 +101,7 @@ func HandleUserInput(update *tgbotapi.Update) {
 			return
 		case "/deleteitem",
 			"/deleteitem@toGoListBot":
-			sendItemsToDeleteResponse(update, "Just select item do you want to delete?")
+			sendItemsToDeleteResponse(update, "Which item do you want to delete?")
 			if err := utils.SetUserState(update, constants.DeleteSelect); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry, an error occured!", false)
@@ -114,11 +114,6 @@ func HandleUserInput(update *tgbotapi.Update) {
 				return
 			}
 			sendItemsToEditResponse(update, "Which item would you like to edit?")
-			if err := utils.SetUserState(update, constants.GetItemToEdit); err != nil {
-				log.Printf("error setting state: %+v", err)
-				utils.SendMessage(update, "Sorry, an error occured!", false)
-				return
-			}
 			if err := utils.SetUserState(update, constants.GetItemToEdit); err != nil {
 				log.Printf("error setting state: %+v", err)
 				utils.SendMessage(update, "Sorry, an error occured!", false)
